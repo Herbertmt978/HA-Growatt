@@ -1,0 +1,7004 @@
+{
+  "classic-6": {
+    "protocol": 6,
+    "family": "default",
+    "observed_payload_length": 255,
+    "text_fields": [
+      "datalogserial",
+      "pvserial"
+    ],
+    "numeric_fields": {
+      "recortype1": [
+        67,
+        2,
+        false
+      ],
+      "recortype2": [
+        69,
+        2,
+        false
+      ],
+      "pvstatus": [
+        71,
+        2,
+        false
+      ],
+      "pvpowerin": [
+        73,
+        4,
+        false
+      ],
+      "pv1voltage": [
+        77,
+        2,
+        false
+      ],
+      "pv1current": [
+        79,
+        2,
+        false
+      ],
+      "pv1watt": [
+        81,
+        4,
+        false
+      ],
+      "pv2voltage": [
+        85,
+        2,
+        false
+      ],
+      "pv2current": [
+        87,
+        2,
+        false
+      ],
+      "pv2watt": [
+        89,
+        4,
+        false
+      ],
+      "pvpowerout": [
+        93,
+        4,
+        true
+      ],
+      "pvfrequentie": [
+        97,
+        2,
+        false
+      ],
+      "pvgridvoltage": [
+        99,
+        2,
+        false
+      ],
+      "pvgridcurrent": [
+        101,
+        2,
+        false
+      ],
+      "pvgridpower": [
+        103,
+        4,
+        false
+      ],
+      "pvgridvoltage2": [
+        107,
+        2,
+        false
+      ],
+      "pvgridcurrent2": [
+        109,
+        2,
+        false
+      ],
+      "pvgridpower2": [
+        111,
+        4,
+        false
+      ],
+      "pvgridvoltage3": [
+        115,
+        2,
+        false
+      ],
+      "pvgridcurrent3": [
+        117,
+        2,
+        false
+      ],
+      "pvgridpower3": [
+        119,
+        4,
+        false
+      ],
+      "pvenergytoday": [
+        123,
+        4,
+        false
+      ],
+      "pvenergytotal": [
+        127,
+        4,
+        false
+      ],
+      "totworktime": [
+        131,
+        4,
+        false
+      ],
+      "pvtemperature": [
+        135,
+        2,
+        false
+      ],
+      "isof": [
+        137,
+        2,
+        false
+      ],
+      "gfcif": [
+        139,
+        2,
+        false
+      ],
+      "dcif": [
+        141,
+        2,
+        false
+      ],
+      "vpvfault": [
+        143,
+        2,
+        false
+      ],
+      "vacfault": [
+        145,
+        2,
+        false
+      ],
+      "facfault": [
+        147,
+        2,
+        false
+      ],
+      "tmpfault": [
+        149,
+        2,
+        false
+      ],
+      "faultcode": [
+        151,
+        2,
+        false
+      ],
+      "pvipmtemperature": [
+        153,
+        2,
+        false
+      ],
+      "pbusvolt": [
+        155,
+        2,
+        false
+      ],
+      "nbusvolt": [
+        157,
+        2,
+        false
+      ],
+      "epv1today": [
+        171,
+        4,
+        false
+      ],
+      "epv1total": [
+        175,
+        4,
+        false
+      ],
+      "epv2today": [
+        179,
+        4,
+        false
+      ],
+      "epv2total": [
+        183,
+        4,
+        false
+      ],
+      "epvtotal": [
+        187,
+        4,
+        false
+      ]
+    },
+    "excluded_fields": [
+      "dcif",
+      "facfault",
+      "faultcode",
+      "gfcif",
+      "isof",
+      "nbusvolt",
+      "pbusvolt",
+      "recortype1",
+      "recortype2",
+      "tmpfault",
+      "vacfault",
+      "vpvfault"
+    ],
+    "sensors": {
+      "datalogserial": {
+        "divisor": 1,
+        "source": "datalogserial"
+      },
+      "pvserial": {
+        "divisor": 1,
+        "source": "pvserial"
+      },
+      "recortype1": {
+        "divisor": 1,
+        "source": "recortype1"
+      },
+      "recortype2": {
+        "divisor": 1,
+        "source": "recortype2"
+      },
+      "pvstatus": {
+        "divisor": 1,
+        "source": "pvstatus"
+      },
+      "pvpowerin": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerin"
+      },
+      "pv1voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1voltage"
+      },
+      "pv1current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1current"
+      },
+      "pv1watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1watt"
+      },
+      "pv2voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2voltage"
+      },
+      "pv2current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2current"
+      },
+      "pv2watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2watt"
+      },
+      "pvpowerout": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerout"
+      },
+      "pvfrequentie": {
+        "unit": "Hz",
+        "device_class": "frequency",
+        "state_class": "measurement",
+        "divisor": 100,
+        "source": "pvfrequentie"
+      },
+      "pvgridvoltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage"
+      },
+      "pvgridcurrent": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent"
+      },
+      "pvgridpower": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower"
+      },
+      "pvgridvoltage2": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage2"
+      },
+      "pvgridcurrent2": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent2"
+      },
+      "pvgridpower2": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower2"
+      },
+      "pvgridvoltage3": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage3"
+      },
+      "pvgridcurrent3": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent3"
+      },
+      "pvgridpower3": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower3"
+      },
+      "pvenergytoday": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "pvenergytoday"
+      },
+      "pvenergytotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total_increasing",
+        "divisor": 10,
+        "source": "pvenergytotal"
+      },
+      "totworktime": {
+        "unit": "h",
+        "device_class": "duration",
+        "divisor": 7200,
+        "source": "totworktime"
+      },
+      "pvtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvtemperature"
+      },
+      "isof": {
+        "divisor": 1,
+        "source": "isof"
+      },
+      "gfcif": {
+        "divisor": 1,
+        "source": "gfcif"
+      },
+      "dcif": {
+        "divisor": 1,
+        "source": "dcif"
+      },
+      "vpvfault": {
+        "divisor": 1,
+        "source": "vpvfault"
+      },
+      "vacfault": {
+        "divisor": 1,
+        "source": "vacfault"
+      },
+      "facfault": {
+        "divisor": 1,
+        "source": "facfault"
+      },
+      "tmpfault": {
+        "divisor": 1,
+        "source": "tmpfault"
+      },
+      "faultcode": {
+        "divisor": 1,
+        "source": "faultcode"
+      },
+      "pvipmtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvipmtemperature"
+      },
+      "pbusvolt": {
+        "divisor": 10,
+        "source": "pbusvolt"
+      },
+      "nbusvolt": {
+        "divisor": 10,
+        "source": "nbusvolt"
+      },
+      "epv1today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1today"
+      },
+      "epv1total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1total"
+      },
+      "epv2today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2today"
+      },
+      "epv2total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2total"
+      },
+      "epvtotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epvtotal"
+      }
+    },
+    "verified_payload_lengths": [
+      255
+    ]
+  },
+  "classic-5": {
+    "protocol": 5,
+    "family": "default",
+    "observed_payload_length": 215,
+    "text_fields": [
+      "datalogserial",
+      "pvserial"
+    ],
+    "numeric_fields": {
+      "recortype1": [
+        27,
+        2,
+        false
+      ],
+      "recortype2": [
+        29,
+        2,
+        false
+      ],
+      "pvstatus": [
+        31,
+        2,
+        false
+      ],
+      "pvpowerin": [
+        33,
+        4,
+        false
+      ],
+      "pv1voltage": [
+        37,
+        2,
+        false
+      ],
+      "pv1current": [
+        39,
+        2,
+        false
+      ],
+      "pv1watt": [
+        41,
+        4,
+        false
+      ],
+      "pv2voltage": [
+        45,
+        2,
+        false
+      ],
+      "pv2current": [
+        47,
+        2,
+        false
+      ],
+      "pv2watt": [
+        49,
+        4,
+        false
+      ],
+      "pvpowerout": [
+        53,
+        4,
+        true
+      ],
+      "pvfrequentie": [
+        57,
+        2,
+        false
+      ],
+      "pvgridvoltage": [
+        59,
+        2,
+        false
+      ],
+      "pvgridcurrent": [
+        61,
+        2,
+        false
+      ],
+      "pvgridpower": [
+        63,
+        4,
+        false
+      ],
+      "pvgridvoltage2": [
+        67,
+        2,
+        false
+      ],
+      "pvgridcurrent2": [
+        69,
+        2,
+        false
+      ],
+      "pvgridpower2": [
+        71,
+        4,
+        false
+      ],
+      "pvgridvoltage3": [
+        75,
+        2,
+        false
+      ],
+      "pvgridcurrent3": [
+        77,
+        2,
+        false
+      ],
+      "pvgridpower3": [
+        79,
+        4,
+        false
+      ],
+      "pvenergytoday": [
+        83,
+        4,
+        false
+      ],
+      "pvenergytotal": [
+        87,
+        4,
+        false
+      ],
+      "totworktime": [
+        91,
+        4,
+        false
+      ],
+      "pvtemperature": [
+        95,
+        2,
+        false
+      ],
+      "isof": [
+        97,
+        2,
+        false
+      ],
+      "gfcif": [
+        99,
+        2,
+        false
+      ],
+      "dcif": [
+        101,
+        2,
+        false
+      ],
+      "vpvfault": [
+        103,
+        2,
+        false
+      ],
+      "vacfault": [
+        105,
+        2,
+        false
+      ],
+      "facfault": [
+        107,
+        2,
+        false
+      ],
+      "tmpfault": [
+        109,
+        2,
+        false
+      ],
+      "faultcode": [
+        111,
+        2,
+        false
+      ],
+      "pvipmtemperature": [
+        113,
+        2,
+        false
+      ],
+      "pbusvolt": [
+        115,
+        2,
+        false
+      ],
+      "nbusvolt": [
+        117,
+        2,
+        false
+      ],
+      "epv1today": [
+        131,
+        4,
+        false
+      ],
+      "epv1total": [
+        135,
+        4,
+        false
+      ],
+      "epv2today": [
+        139,
+        4,
+        false
+      ],
+      "epv2total": [
+        143,
+        4,
+        false
+      ],
+      "epvtotal": [
+        147,
+        4,
+        false
+      ],
+      "rac": [
+        151,
+        4,
+        false
+      ],
+      "eractoday": [
+        155,
+        4,
+        false
+      ],
+      "eractotal": [
+        159,
+        4,
+        false
+      ]
+    },
+    "excluded_fields": [
+      "dcif",
+      "eractoday",
+      "eractotal",
+      "facfault",
+      "faultcode",
+      "gfcif",
+      "isof",
+      "nbusvolt",
+      "pbusvolt",
+      "rac",
+      "recortype1",
+      "recortype2",
+      "tmpfault",
+      "vacfault",
+      "vpvfault"
+    ],
+    "sensors": {
+      "datalogserial": {
+        "divisor": 1,
+        "source": "datalogserial"
+      },
+      "pvserial": {
+        "divisor": 1,
+        "source": "pvserial"
+      },
+      "recortype1": {
+        "divisor": 1,
+        "source": "recortype1"
+      },
+      "recortype2": {
+        "divisor": 1,
+        "source": "recortype2"
+      },
+      "pvstatus": {
+        "divisor": 1,
+        "source": "pvstatus"
+      },
+      "pvpowerin": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerin"
+      },
+      "pv1voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1voltage"
+      },
+      "pv1current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1current"
+      },
+      "pv1watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1watt"
+      },
+      "pv2voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2voltage"
+      },
+      "pv2current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2current"
+      },
+      "pv2watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2watt"
+      },
+      "pvpowerout": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerout"
+      },
+      "pvfrequentie": {
+        "unit": "Hz",
+        "device_class": "frequency",
+        "state_class": "measurement",
+        "divisor": 100,
+        "source": "pvfrequentie"
+      },
+      "pvgridvoltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage"
+      },
+      "pvgridcurrent": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent"
+      },
+      "pvgridpower": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower"
+      },
+      "pvgridvoltage2": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage2"
+      },
+      "pvgridcurrent2": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent2"
+      },
+      "pvgridpower2": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower2"
+      },
+      "pvgridvoltage3": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage3"
+      },
+      "pvgridcurrent3": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent3"
+      },
+      "pvgridpower3": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower3"
+      },
+      "pvenergytoday": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "pvenergytoday"
+      },
+      "pvenergytotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total_increasing",
+        "divisor": 10,
+        "source": "pvenergytotal"
+      },
+      "totworktime": {
+        "unit": "h",
+        "device_class": "duration",
+        "divisor": 7200,
+        "source": "totworktime"
+      },
+      "pvtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvtemperature"
+      },
+      "isof": {
+        "divisor": 1,
+        "source": "isof"
+      },
+      "gfcif": {
+        "divisor": 1,
+        "source": "gfcif"
+      },
+      "dcif": {
+        "divisor": 1,
+        "source": "dcif"
+      },
+      "vpvfault": {
+        "divisor": 1,
+        "source": "vpvfault"
+      },
+      "vacfault": {
+        "divisor": 1,
+        "source": "vacfault"
+      },
+      "facfault": {
+        "divisor": 1,
+        "source": "facfault"
+      },
+      "tmpfault": {
+        "divisor": 1,
+        "source": "tmpfault"
+      },
+      "faultcode": {
+        "divisor": 1,
+        "source": "faultcode"
+      },
+      "pvipmtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvipmtemperature"
+      },
+      "pbusvolt": {
+        "divisor": 10,
+        "source": "pbusvolt"
+      },
+      "nbusvolt": {
+        "divisor": 10,
+        "source": "nbusvolt"
+      },
+      "epv1today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1today"
+      },
+      "epv1total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1total"
+      },
+      "epv2today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2today"
+      },
+      "epv2total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2total"
+      },
+      "epvtotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epvtotal"
+      },
+      "rac": {
+        "divisor": 1,
+        "source": "rac"
+      },
+      "eractoday": {
+        "divisor": 1,
+        "source": "eractoday"
+      },
+      "eractotal": {
+        "divisor": 1,
+        "source": "eractotal"
+      }
+    },
+    "verified_payload_lengths": [
+      215
+    ]
+  },
+  "classic-2": {
+    "protocol": 2,
+    "family": "default",
+    "observed_payload_length": 215,
+    "text_fields": [
+      "datalogserial",
+      "pvserial"
+    ],
+    "numeric_fields": {
+      "recortype1": [
+        27,
+        2,
+        false
+      ],
+      "recortype2": [
+        29,
+        2,
+        false
+      ],
+      "pvstatus": [
+        31,
+        2,
+        false
+      ],
+      "pvpowerin": [
+        33,
+        4,
+        false
+      ],
+      "pv1voltage": [
+        37,
+        2,
+        false
+      ],
+      "pv1current": [
+        39,
+        2,
+        false
+      ],
+      "pv1watt": [
+        41,
+        4,
+        false
+      ],
+      "pv2voltage": [
+        45,
+        2,
+        false
+      ],
+      "pv2current": [
+        47,
+        2,
+        false
+      ],
+      "pv2watt": [
+        49,
+        4,
+        false
+      ],
+      "pvpowerout": [
+        53,
+        4,
+        false
+      ],
+      "pvfrequentie": [
+        57,
+        2,
+        false
+      ],
+      "pvgridvoltage": [
+        59,
+        2,
+        false
+      ],
+      "pvgridcurrent": [
+        61,
+        2,
+        false
+      ],
+      "pvgridpower": [
+        63,
+        4,
+        false
+      ],
+      "pvgridvoltage2": [
+        67,
+        2,
+        false
+      ],
+      "pvgridcurrent2": [
+        69,
+        2,
+        false
+      ],
+      "pvgridpower2": [
+        71,
+        4,
+        false
+      ],
+      "pvgridvoltage3": [
+        75,
+        2,
+        false
+      ],
+      "pvgridcurrent3": [
+        77,
+        2,
+        false
+      ],
+      "pvgridpower3": [
+        79,
+        4,
+        false
+      ],
+      "pvenergytoday": [
+        83,
+        4,
+        false
+      ],
+      "pvenergytotal": [
+        87,
+        4,
+        false
+      ],
+      "totworktime": [
+        91,
+        4,
+        false
+      ],
+      "pvtemperature": [
+        95,
+        2,
+        false
+      ],
+      "isof": [
+        97,
+        2,
+        false
+      ],
+      "gfcif": [
+        99,
+        2,
+        false
+      ],
+      "dcif": [
+        101,
+        2,
+        false
+      ],
+      "vpvfault": [
+        103,
+        2,
+        false
+      ],
+      "vacfault": [
+        105,
+        2,
+        false
+      ],
+      "facfault": [
+        107,
+        2,
+        false
+      ],
+      "tmpfault": [
+        109,
+        2,
+        false
+      ],
+      "faultcode": [
+        111,
+        2,
+        false
+      ],
+      "pvipmtemperature": [
+        113,
+        2,
+        false
+      ],
+      "pbusvolt": [
+        115,
+        2,
+        false
+      ],
+      "nbusvolt": [
+        117,
+        2,
+        false
+      ],
+      "epv1today": [
+        131,
+        4,
+        false
+      ],
+      "epv1total": [
+        135,
+        4,
+        false
+      ],
+      "epv2today": [
+        139,
+        4,
+        false
+      ],
+      "epv2total": [
+        143,
+        4,
+        false
+      ],
+      "epvtotal": [
+        147,
+        4,
+        false
+      ],
+      "rac": [
+        151,
+        4,
+        false
+      ],
+      "eractoday": [
+        155,
+        4,
+        false
+      ],
+      "eractotal": [
+        159,
+        4,
+        false
+      ]
+    },
+    "excluded_fields": [
+      "dcif",
+      "eractoday",
+      "eractotal",
+      "facfault",
+      "faultcode",
+      "gfcif",
+      "isof",
+      "nbusvolt",
+      "pbusvolt",
+      "rac",
+      "recortype1",
+      "recortype2",
+      "tmpfault",
+      "vacfault",
+      "vpvfault"
+    ],
+    "sensors": {
+      "datalogserial": {
+        "divisor": 1,
+        "source": "datalogserial"
+      },
+      "pvserial": {
+        "divisor": 1,
+        "source": "pvserial"
+      },
+      "recortype1": {
+        "divisor": 1,
+        "source": "recortype1"
+      },
+      "recortype2": {
+        "divisor": 1,
+        "source": "recortype2"
+      },
+      "pvstatus": {
+        "divisor": 1,
+        "source": "pvstatus"
+      },
+      "pvpowerin": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerin"
+      },
+      "pv1voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1voltage"
+      },
+      "pv1current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1current"
+      },
+      "pv1watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1watt"
+      },
+      "pv2voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2voltage"
+      },
+      "pv2current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2current"
+      },
+      "pv2watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2watt"
+      },
+      "pvpowerout": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerout"
+      },
+      "pvfrequentie": {
+        "unit": "Hz",
+        "device_class": "frequency",
+        "state_class": "measurement",
+        "divisor": 100,
+        "source": "pvfrequentie"
+      },
+      "pvgridvoltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage"
+      },
+      "pvgridcurrent": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent"
+      },
+      "pvgridpower": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower"
+      },
+      "pvgridvoltage2": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage2"
+      },
+      "pvgridcurrent2": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent2"
+      },
+      "pvgridpower2": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower2"
+      },
+      "pvgridvoltage3": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage3"
+      },
+      "pvgridcurrent3": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent3"
+      },
+      "pvgridpower3": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower3"
+      },
+      "pvenergytoday": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "pvenergytoday"
+      },
+      "pvenergytotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total_increasing",
+        "divisor": 10,
+        "source": "pvenergytotal"
+      },
+      "totworktime": {
+        "unit": "h",
+        "device_class": "duration",
+        "divisor": 7200,
+        "source": "totworktime"
+      },
+      "pvtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvtemperature"
+      },
+      "isof": {
+        "divisor": 1,
+        "source": "isof"
+      },
+      "gfcif": {
+        "divisor": 1,
+        "source": "gfcif"
+      },
+      "dcif": {
+        "divisor": 1,
+        "source": "dcif"
+      },
+      "vpvfault": {
+        "divisor": 1,
+        "source": "vpvfault"
+      },
+      "vacfault": {
+        "divisor": 1,
+        "source": "vacfault"
+      },
+      "facfault": {
+        "divisor": 1,
+        "source": "facfault"
+      },
+      "tmpfault": {
+        "divisor": 1,
+        "source": "tmpfault"
+      },
+      "faultcode": {
+        "divisor": 1,
+        "source": "faultcode"
+      },
+      "pvipmtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvipmtemperature"
+      },
+      "pbusvolt": {
+        "divisor": 10,
+        "source": "pbusvolt"
+      },
+      "nbusvolt": {
+        "divisor": 10,
+        "source": "nbusvolt"
+      },
+      "epv1today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1today"
+      },
+      "epv1total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1total"
+      },
+      "epv2today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2today"
+      },
+      "epv2total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2total"
+      },
+      "epvtotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epvtotal"
+      },
+      "rac": {
+        "divisor": 1,
+        "source": "rac"
+      },
+      "eractoday": {
+        "divisor": 1,
+        "source": "eractoday"
+      },
+      "eractotal": {
+        "divisor": 1,
+        "source": "eractotal"
+      }
+    },
+    "verified_payload_lengths": [
+      215
+    ]
+  },
+  "extended-6": {
+    "protocol": 6,
+    "family": "default",
+    "observed_payload_length": 575,
+    "text_fields": [
+      "datalogserial",
+      "pvserial"
+    ],
+    "numeric_fields": {
+      "recortype1": [
+        67,
+        2,
+        false
+      ],
+      "recortype2": [
+        69,
+        2,
+        false
+      ],
+      "pvstatus": [
+        71,
+        2,
+        false
+      ],
+      "pvpowerin": [
+        73,
+        4,
+        false
+      ],
+      "pv1voltage": [
+        77,
+        2,
+        false
+      ],
+      "pv1current": [
+        79,
+        2,
+        false
+      ],
+      "pv1watt": [
+        81,
+        4,
+        false
+      ],
+      "pv2voltage": [
+        85,
+        2,
+        false
+      ],
+      "pv2current": [
+        87,
+        2,
+        false
+      ],
+      "pv2watt": [
+        89,
+        4,
+        false
+      ],
+      "pvpowerout": [
+        117,
+        4,
+        true
+      ],
+      "pvfrequentie": [
+        121,
+        2,
+        false
+      ],
+      "pvgridvoltage": [
+        123,
+        2,
+        false
+      ],
+      "pvgridcurrent": [
+        125,
+        2,
+        false
+      ],
+      "pvgridpower": [
+        127,
+        4,
+        false
+      ],
+      "pvgridvoltage2": [
+        131,
+        2,
+        false
+      ],
+      "pvgridcurrent2": [
+        133,
+        2,
+        false
+      ],
+      "pvgridpower2": [
+        135,
+        4,
+        false
+      ],
+      "pvgridvoltage3": [
+        139,
+        2,
+        false
+      ],
+      "pvgridcurrent3": [
+        141,
+        2,
+        false
+      ],
+      "pvgridpower3": [
+        143,
+        4,
+        false
+      ],
+      "totworktime": [
+        165,
+        4,
+        false
+      ],
+      "pvenergytoday": [
+        169,
+        4,
+        false
+      ],
+      "pvenergytotal": [
+        173,
+        4,
+        false
+      ],
+      "epvtotal": [
+        177,
+        4,
+        false
+      ],
+      "epv1today": [
+        181,
+        4,
+        false
+      ],
+      "epv1total": [
+        185,
+        4,
+        false
+      ],
+      "epv2today": [
+        189,
+        4,
+        false
+      ],
+      "epv2total": [
+        193,
+        4,
+        false
+      ],
+      "pvtemperature": [
+        257,
+        2,
+        false
+      ],
+      "pvipmtemperature": [
+        265,
+        2,
+        false
+      ],
+      "pbusvolt": [
+        267,
+        2,
+        false
+      ],
+      "nbusvolt": [
+        269,
+        2,
+        false
+      ]
+    },
+    "excluded_fields": [
+      "nbusvolt",
+      "pbusvolt",
+      "recortype1",
+      "recortype2"
+    ],
+    "sensors": {
+      "datalogserial": {
+        "divisor": 1,
+        "source": "datalogserial"
+      },
+      "pvserial": {
+        "divisor": 1,
+        "source": "pvserial"
+      },
+      "pvstatus": {
+        "divisor": 1,
+        "source": "pvstatus"
+      },
+      "pvpowerin": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerin"
+      },
+      "pv1voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1voltage"
+      },
+      "pv1current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1current"
+      },
+      "pv1watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1watt"
+      },
+      "pv2voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2voltage"
+      },
+      "pv2current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2current"
+      },
+      "pv2watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2watt"
+      },
+      "pvpowerout": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerout"
+      },
+      "pvfrequentie": {
+        "unit": "Hz",
+        "device_class": "frequency",
+        "state_class": "measurement",
+        "divisor": 100,
+        "source": "pvfrequentie"
+      },
+      "pvgridvoltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage"
+      },
+      "pvgridcurrent": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent"
+      },
+      "pvgridpower": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower"
+      },
+      "pvgridvoltage2": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage2"
+      },
+      "pvgridcurrent2": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent2"
+      },
+      "pvgridpower2": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower2"
+      },
+      "pvgridvoltage3": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage3"
+      },
+      "pvgridcurrent3": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent3"
+      },
+      "pvgridpower3": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower3"
+      },
+      "totworktime": {
+        "unit": "h",
+        "device_class": "duration",
+        "divisor": 7200,
+        "source": "totworktime"
+      },
+      "pvenergytoday": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "pvenergytoday"
+      },
+      "pvenergytotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total_increasing",
+        "divisor": 10,
+        "source": "pvenergytotal"
+      },
+      "epvtotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epvtotal"
+      },
+      "epv1today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1today"
+      },
+      "epv1total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1total"
+      },
+      "epv2today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2today"
+      },
+      "epv2total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2total"
+      },
+      "pvtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvtemperature"
+      },
+      "pvipmtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvipmtemperature"
+      },
+      "recortype1": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "recortype1"
+      },
+      "recortype2": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "recortype2"
+      },
+      "pbusvolt": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "pbusvolt"
+      },
+      "nbusvolt": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "nbusvolt"
+      }
+    },
+    "verified_payload_lengths": [
+      575,
+      829
+    ]
+  },
+  "mod-6": {
+    "protocol": 6,
+    "family": "mod",
+    "observed_payload_length": 575,
+    "text_fields": [
+      "datalogserial",
+      "pvserial"
+    ],
+    "numeric_fields": {
+      "group1start": [
+        67,
+        2,
+        false
+      ],
+      "group1end": [
+        69,
+        2,
+        false
+      ],
+      "pvstatus": [
+        71,
+        2,
+        false
+      ],
+      "pvpowerin": [
+        73,
+        4,
+        true
+      ],
+      "pv1voltage": [
+        77,
+        2,
+        true
+      ],
+      "pv1current": [
+        79,
+        2,
+        true
+      ],
+      "pv1watt": [
+        81,
+        4,
+        true
+      ],
+      "pv2voltage": [
+        85,
+        2,
+        true
+      ],
+      "pv2current": [
+        87,
+        2,
+        true
+      ],
+      "pv2watt": [
+        89,
+        4,
+        true
+      ],
+      "pv3voltage": [
+        93,
+        2,
+        true
+      ],
+      "pv3current": [
+        95,
+        2,
+        true
+      ],
+      "pv3watt": [
+        97,
+        4,
+        true
+      ],
+      "pv4voltage": [
+        101,
+        2,
+        true
+      ],
+      "pv4current": [
+        103,
+        2,
+        true
+      ],
+      "pv4watt": [
+        105,
+        4,
+        true
+      ],
+      "pvpowerout": [
+        109,
+        4,
+        true
+      ],
+      "qac": [
+        113,
+        4,
+        true
+      ],
+      "pac": [
+        117,
+        4,
+        true
+      ],
+      "pvfrequency": [
+        121,
+        2,
+        true
+      ],
+      "pvgridvoltage": [
+        123,
+        2,
+        true
+      ],
+      "pvgridcurrent": [
+        125,
+        2,
+        true
+      ],
+      "pvgridpower": [
+        127,
+        4,
+        true
+      ],
+      "pvgridvoltage2": [
+        131,
+        2,
+        true
+      ],
+      "pvgridcurrent2": [
+        133,
+        2,
+        true
+      ],
+      "pvgridpower2": [
+        135,
+        4,
+        true
+      ],
+      "pvgridvoltage3": [
+        139,
+        2,
+        true
+      ],
+      "pvgridcurrent3": [
+        141,
+        2,
+        true
+      ],
+      "pvgridpower3": [
+        143,
+        4,
+        true
+      ],
+      "vacrs": [
+        147,
+        2,
+        true
+      ],
+      "vacst": [
+        149,
+        2,
+        true
+      ],
+      "vactr": [
+        151,
+        2,
+        true
+      ],
+      "ptousertotal": [
+        153,
+        4,
+        true
+      ],
+      "ptogridtotal": [
+        157,
+        4,
+        true
+      ],
+      "ptoloadtotal": [
+        161,
+        4,
+        true
+      ],
+      "totworktime": [
+        165,
+        4,
+        true
+      ],
+      "eactoday": [
+        169,
+        4,
+        true
+      ],
+      "pvenergytoday": [
+        169,
+        4,
+        true
+      ],
+      "eactotal": [
+        173,
+        4,
+        true
+      ],
+      "pvenergytotal": [
+        173,
+        4,
+        true
+      ],
+      "epvtotal": [
+        177,
+        4,
+        true
+      ],
+      "epv1today": [
+        181,
+        4,
+        true
+      ],
+      "epv1total": [
+        185,
+        4,
+        true
+      ],
+      "epv2today": [
+        189,
+        4,
+        true
+      ],
+      "epv2total": [
+        193,
+        4,
+        true
+      ],
+      "epv3today": [
+        197,
+        4,
+        true
+      ],
+      "epv3total": [
+        201,
+        4,
+        true
+      ],
+      "etousertoday": [
+        205,
+        4,
+        true
+      ],
+      "etousertotal": [
+        209,
+        4,
+        true
+      ],
+      "etogridtoday": [
+        213,
+        4,
+        true
+      ],
+      "etogridtotal": [
+        217,
+        4,
+        true
+      ],
+      "eloadtoday": [
+        221,
+        4,
+        true
+      ],
+      "eloadtotal": [
+        225,
+        4,
+        true
+      ],
+      "epv4today": [
+        229,
+        4,
+        true
+      ],
+      "epv4total": [
+        233,
+        4,
+        true
+      ],
+      "epvtoday": [
+        237,
+        4,
+        true
+      ],
+      "reserved3085": [
+        241,
+        2,
+        true
+      ],
+      "deratingmode": [
+        243,
+        2,
+        true
+      ],
+      "iso": [
+        245,
+        2,
+        true
+      ],
+      "dcir": [
+        247,
+        2,
+        true
+      ],
+      "dcis": [
+        249,
+        2,
+        true
+      ],
+      "dcit": [
+        251,
+        2,
+        true
+      ],
+      "gfci": [
+        253,
+        2,
+        true
+      ],
+      "busvoltage": [
+        255,
+        2,
+        true
+      ],
+      "pvtemperature": [
+        257,
+        2,
+        true
+      ],
+      "pvimptemperature": [
+        259,
+        2,
+        true
+      ],
+      "boosttemperature": [
+        261,
+        2,
+        true
+      ],
+      "temp4": [
+        263,
+        2,
+        true
+      ],
+      "comboardtemperature": [
+        265,
+        2,
+        true
+      ],
+      "pbusvoltage": [
+        267,
+        2,
+        true
+      ],
+      "nbusvoltage": [
+        269,
+        2,
+        true
+      ],
+      "ipf": [
+        271,
+        2,
+        true
+      ],
+      "realoppercent": [
+        273,
+        2,
+        true
+      ],
+      "opfullwatt": [
+        275,
+        4,
+        true
+      ],
+      "standbyflag": [
+        279,
+        2,
+        true
+      ],
+      "faultmaincode": [
+        281,
+        2,
+        true
+      ],
+      "warnmaincode": [
+        283,
+        2,
+        true
+      ],
+      "faultsubcode": [
+        285,
+        2,
+        true
+      ],
+      "warnsubcode": [
+        287,
+        2,
+        true
+      ],
+      "reserved3109": [
+        289,
+        2,
+        true
+      ],
+      "reserved3110": [
+        291,
+        2,
+        true
+      ],
+      "uwpresentfftvaxxxlue_channela": [
+        293,
+        2,
+        true
+      ],
+      "bafcistatus": [
+        295,
+        2,
+        true
+      ],
+      "uwstrength_channela": [
+        297,
+        2,
+        true
+      ],
+      "uwselfcheckvalue_channela": [
+        299,
+        2,
+        true
+      ],
+      "invstartdelaytime": [
+        301,
+        2,
+        true
+      ],
+      "reserved3116": [
+        303,
+        2,
+        true
+      ],
+      "reserved3117": [
+        305,
+        2,
+        true
+      ],
+      "bdconoffstate": [
+        307,
+        2,
+        true
+      ],
+      "drycontactstate": [
+        309,
+        2,
+        true
+      ],
+      "reserved3120": [
+        311,
+        2,
+        true
+      ],
+      "pself": [
+        313,
+        4,
+        true
+      ],
+      "esystoday": [
+        317,
+        4,
+        true
+      ],
+      "edischrtoday": [
+        325,
+        4,
+        true
+      ],
+      "edischrtotal": [
+        329,
+        4,
+        true
+      ],
+      "echrtoday": [
+        333,
+        4,
+        true
+      ],
+      "echrtotal": [
+        337,
+        4,
+        true
+      ],
+      "eacchrtoday": [
+        341,
+        4,
+        true
+      ],
+      "eacchrtotal": [
+        345,
+        4,
+        true
+      ],
+      "esystotal": [
+        349,
+        4,
+        true
+      ],
+      "eselftoday": [
+        353,
+        4,
+        true
+      ],
+      "eselftotal": [
+        357,
+        4,
+        true
+      ],
+      "reserved3143": [
+        361,
+        2,
+        true
+      ],
+      "priority": [
+        363,
+        2,
+        true
+      ],
+      "epsfac": [
+        365,
+        2,
+        true
+      ],
+      "epsvac1": [
+        367,
+        2,
+        true
+      ],
+      "epsiac1": [
+        369,
+        2,
+        true
+      ],
+      "epspac1": [
+        363,
+        4,
+        true
+      ],
+      "epsvac2": [
+        375,
+        2,
+        true
+      ],
+      "epsiac2": [
+        377,
+        2,
+        true
+      ],
+      "epspac2": [
+        379,
+        4,
+        true
+      ],
+      "epsvac3": [
+        383,
+        2,
+        true
+      ],
+      "epsiac3": [
+        385,
+        2,
+        true
+      ],
+      "epspac3": [
+        387,
+        4,
+        true
+      ],
+      "epspac": [
+        391,
+        4,
+        true
+      ],
+      "loadpercent": [
+        395,
+        2,
+        true
+      ],
+      "pf": [
+        397,
+        2,
+        true
+      ],
+      "dcv": [
+        399,
+        2,
+        true
+      ],
+      "reserved3163": [
+        401,
+        2,
+        true
+      ],
+      "newbdcflag": [
+        403,
+        2,
+        true
+      ],
+      "bdcderatingmode": [
+        405,
+        2,
+        true
+      ],
+      "sysstatemode": [
+        407,
+        2,
+        true
+      ],
+      "faultcode": [
+        409,
+        2,
+        true
+      ],
+      "warncode": [
+        411,
+        2,
+        true
+      ],
+      "vbat": [
+        413,
+        2,
+        true
+      ],
+      "ibat": [
+        415,
+        2,
+        true
+      ],
+      "soc": [
+        417,
+        2,
+        true
+      ],
+      "vbus1": [
+        419,
+        2,
+        true
+      ],
+      "vbus2": [
+        421,
+        2,
+        true
+      ],
+      "ibb": [
+        423,
+        2,
+        true
+      ],
+      "illc": [
+        425,
+        2,
+        true
+      ],
+      "tempa": [
+        427,
+        2,
+        true
+      ],
+      "tempb": [
+        429,
+        2,
+        true
+      ],
+      "pdischr": [
+        431,
+        4,
+        true
+      ],
+      "pchr": [
+        435,
+        4,
+        true
+      ],
+      "pchrxxxl": [
+        437,
+        2,
+        true
+      ],
+      "edischrtotalstor": [
+        439,
+        4,
+        true
+      ],
+      "echrtotalstor": [
+        443,
+        4,
+        true
+      ],
+      "reserved3186": [
+        447,
+        2,
+        true
+      ],
+      "bdc1flag": [
+        449,
+        2,
+        true
+      ],
+      "vbus2low": [
+        451,
+        2,
+        true
+      ],
+      "bmsmaxvoltcellno": [
+        453,
+        2,
+        true
+      ],
+      "bmsminvoltcellno": [
+        455,
+        2,
+        true
+      ],
+      "bmsbatteryavgtemp": [
+        457,
+        2,
+        true
+      ],
+      "bmsmaxcelltemp": [
+        459,
+        2,
+        true
+      ],
+      "bmsbatteryavgtemp2": [
+        461,
+        2,
+        true
+      ],
+      "bmsmaxcelltemp2": [
+        463,
+        2,
+        true
+      ],
+      "bmsbatteryavgtemp3": [
+        465,
+        2,
+        true
+      ],
+      "bmsmaxsoc": [
+        467,
+        2,
+        true
+      ],
+      "bmsminsoc": [
+        469,
+        2,
+        true
+      ],
+      "parallelbatterynum": [
+        471,
+        2,
+        true
+      ],
+      "bmsderatereason": [
+        473,
+        2,
+        true
+      ],
+      "bmsgaugefcc_ah": [
+        475,
+        2,
+        true
+      ],
+      "bmsgaugerm_ah": [
+        477,
+        2,
+        true
+      ],
+      "bmserror": [
+        479,
+        2,
+        true
+      ],
+      "bmswarn": [
+        481,
+        2,
+        true
+      ],
+      "bmsfault": [
+        483,
+        2,
+        true
+      ],
+      "bmsfault2": [
+        485,
+        2,
+        true
+      ],
+      "reserved3206": [
+        487,
+        2,
+        true
+      ],
+      "reserved3207": [
+        489,
+        2,
+        true
+      ],
+      "reserved3208": [
+        491,
+        2,
+        true
+      ],
+      "reserved3209": [
+        493,
+        2,
+        true
+      ],
+      "batisostatus": [
+        495,
+        2,
+        true
+      ],
+      "battneedchargerequestflag": [
+        497,
+        2,
+        true
+      ],
+      "bmsstatus": [
+        499,
+        2,
+        true
+      ],
+      "bmserror2": [
+        501,
+        2,
+        true
+      ],
+      "bmswarn2": [
+        503,
+        2,
+        true
+      ],
+      "bmssoc": [
+        505,
+        2,
+        true
+      ],
+      "bmsbatteryvolt": [
+        507,
+        2,
+        true
+      ],
+      "bmsbatterycurr": [
+        509,
+        2,
+        true
+      ],
+      "bmsbatterytemp": [
+        511,
+        2,
+        true
+      ],
+      "bmsmaxcurr": [
+        513,
+        2,
+        true
+      ],
+      "bmsmaxdischrcurr": [
+        515,
+        2,
+        true
+      ],
+      "bmscyclecnt": [
+        517,
+        2,
+        true
+      ],
+      "bmssoh": [
+        519,
+        2,
+        true
+      ],
+      "bmschargevoltlimit": [
+        521,
+        2,
+        true
+      ],
+      "bmsdischargevoltlimit": [
+        523,
+        2,
+        true
+      ],
+      "bmswarn3": [
+        525,
+        2,
+        true
+      ],
+      "bmserror3": [
+        527,
+        2,
+        true
+      ],
+      "reserved3227": [
+        529,
+        2,
+        true
+      ],
+      "reserved3228": [
+        531,
+        2,
+        true
+      ],
+      "reserved3229": [
+        533,
+        2,
+        true
+      ],
+      "bmssinglevoltmax": [
+        535,
+        2,
+        true
+      ],
+      "bmssinglevoltmin": [
+        537,
+        2,
+        true
+      ],
+      "batloadvolt": [
+        539,
+        2,
+        true
+      ],
+      "reserved3233": [
+        541,
+        2,
+        true
+      ],
+      "debugdata1": [
+        543,
+        2,
+        true
+      ],
+      "debugdata2": [
+        545,
+        2,
+        true
+      ],
+      "debugdata3": [
+        547,
+        2,
+        true
+      ],
+      "debugdata4": [
+        549,
+        2,
+        true
+      ],
+      "debugdata5": [
+        551,
+        2,
+        true
+      ],
+      "debugdata6": [
+        553,
+        2,
+        true
+      ],
+      "debugdata7": [
+        555,
+        2,
+        true
+      ],
+      "debugdata8": [
+        557,
+        2,
+        true
+      ],
+      "debugdata9": [
+        559,
+        2,
+        true
+      ],
+      "debugdata10": [
+        561,
+        2,
+        true
+      ],
+      "debugdata11": [
+        563,
+        2,
+        true
+      ],
+      "debugdata12": [
+        565,
+        2,
+        true
+      ],
+      "debugdata13": [
+        567,
+        2,
+        true
+      ],
+      "debugdata14": [
+        569,
+        2,
+        true
+      ],
+      "debugdata15": [
+        571,
+        2,
+        true
+      ],
+      "debugdata16": [
+        573,
+        2,
+        true
+      ]
+    },
+    "excluded_fields": [
+      "debugdata1",
+      "debugdata10",
+      "debugdata11",
+      "debugdata12",
+      "debugdata13",
+      "debugdata14",
+      "debugdata15",
+      "debugdata16",
+      "debugdata2",
+      "debugdata3",
+      "debugdata4",
+      "debugdata5",
+      "debugdata6",
+      "debugdata7",
+      "debugdata8",
+      "debugdata9",
+      "group1end",
+      "group1start",
+      "reserved3085",
+      "reserved3109",
+      "reserved3110",
+      "reserved3116",
+      "reserved3117",
+      "reserved3120",
+      "reserved3163",
+      "reserved3186",
+      "reserved3206",
+      "reserved3207",
+      "reserved3208",
+      "reserved3209",
+      "reserved3227",
+      "reserved3228",
+      "reserved3229",
+      "reserved3233"
+    ],
+    "sensors": {
+      "datalogserial": {
+        "divisor": 1,
+        "source": "datalogserial"
+      },
+      "pvserial": {
+        "divisor": 1,
+        "source": "pvserial"
+      },
+      "pvstatus": {
+        "divisor": 1,
+        "source": "pvstatus"
+      },
+      "pvpowerin": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerin"
+      },
+      "pv1voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1voltage"
+      },
+      "pv1current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1current"
+      },
+      "pv1watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1watt"
+      },
+      "pv2voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2voltage"
+      },
+      "pv2current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2current"
+      },
+      "pv2watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2watt"
+      },
+      "pvpowerout": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pac"
+      },
+      "pvfrequentie": {
+        "unit": "Hz",
+        "device_class": "frequency",
+        "state_class": "measurement",
+        "divisor": 100,
+        "source": "pvfrequency"
+      },
+      "pvgridvoltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage"
+      },
+      "pvgridcurrent": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent"
+      },
+      "pvgridpower": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower"
+      },
+      "pvgridvoltage2": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage2"
+      },
+      "pvgridcurrent2": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent2"
+      },
+      "pvgridpower2": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower2"
+      },
+      "pvgridvoltage3": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage3"
+      },
+      "pvgridcurrent3": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent3"
+      },
+      "pvgridpower3": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower3"
+      },
+      "totworktime": {
+        "unit": "h",
+        "device_class": "duration",
+        "divisor": 7200,
+        "source": "totworktime"
+      },
+      "pvenergytoday": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "pvenergytoday"
+      },
+      "pvenergytotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total_increasing",
+        "divisor": 10,
+        "source": "pvenergytotal"
+      },
+      "epvtotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epvtotal"
+      },
+      "epv1today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1today"
+      },
+      "epv1total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1total"
+      },
+      "epv2today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2today"
+      },
+      "epv2total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2total"
+      },
+      "pvtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvtemperature"
+      },
+      "pvipmtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "comboardtemperature"
+      },
+      "group1start": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "group1start"
+      },
+      "group1end": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "group1end"
+      },
+      "pv3voltage": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "pv3voltage"
+      },
+      "pv3current": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "pv3current"
+      },
+      "pv3watt": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "pv3watt"
+      },
+      "pv4voltage": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "pv4voltage"
+      },
+      "pv4current": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "pv4current"
+      },
+      "pv4watt": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "pv4watt"
+      },
+      "raw_pvpowerout_r3019": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "pvpowerout"
+      },
+      "qac": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "qac"
+      },
+      "vacrs": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "vacrs"
+      },
+      "vacst": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "vacst"
+      },
+      "vactr": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "vactr"
+      },
+      "ptousertotal": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "ptousertotal"
+      },
+      "ptogridtotal": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "ptogridtotal"
+      },
+      "ptoloadtotal": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "ptoloadtotal"
+      },
+      "eactoday": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "eactoday"
+      },
+      "eactotal": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "eactotal"
+      },
+      "epv3today": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epv3today"
+      },
+      "epv3total": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epv3total"
+      },
+      "etousertoday": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "etousertoday"
+      },
+      "etousertotal": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "etousertotal"
+      },
+      "etogridtoday": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "etogridtoday"
+      },
+      "etogridtotal": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "etogridtotal"
+      },
+      "eloadtoday": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "eloadtoday"
+      },
+      "eloadtotal": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "eloadtotal"
+      },
+      "epv4today": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epv4today"
+      },
+      "epv4total": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epv4total"
+      },
+      "epvtoday": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epvtoday"
+      },
+      "reserved3085": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3085"
+      },
+      "deratingmode": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "deratingmode"
+      },
+      "iso": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "iso"
+      },
+      "dcir": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "dcir"
+      },
+      "dcis": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "dcis"
+      },
+      "dcit": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "dcit"
+      },
+      "gfci": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "gfci"
+      },
+      "busvoltage": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "busvoltage"
+      },
+      "pvimptemperature": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "pvimptemperature"
+      },
+      "boosttemperature": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "boosttemperature"
+      },
+      "temp4": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "temp4"
+      },
+      "pbusvoltage": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "pbusvoltage"
+      },
+      "nbusvoltage": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "nbusvoltage"
+      },
+      "ipf": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "ipf"
+      },
+      "realoppercent": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "realoppercent"
+      },
+      "opfullwatt": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "opfullwatt"
+      },
+      "standbyflag": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "standbyflag"
+      },
+      "faultmaincode": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "faultmaincode"
+      },
+      "warnmaincode": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "warnmaincode"
+      },
+      "faultsubcode": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "faultsubcode"
+      },
+      "warnsubcode": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "warnsubcode"
+      },
+      "reserved3109": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3109"
+      },
+      "reserved3110": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3110"
+      },
+      "uwpresentfftvaxxxlue_channela": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "uwpresentfftvaxxxlue_channela"
+      },
+      "bafcistatus": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bafcistatus"
+      },
+      "uwstrength_channela": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "uwstrength_channela"
+      },
+      "uwselfcheckvalue_channela": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "uwselfcheckvalue_channela"
+      },
+      "invstartdelaytime": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "invstartdelaytime"
+      },
+      "reserved3116": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3116"
+      },
+      "reserved3117": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3117"
+      },
+      "bdconoffstate": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bdconoffstate"
+      },
+      "drycontactstate": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "drycontactstate"
+      },
+      "reserved3120": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3120"
+      },
+      "pself": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "pself"
+      },
+      "esystoday": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "esystoday"
+      },
+      "edischrtoday": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "edischrtoday"
+      },
+      "edischrtotal": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "edischrtotal"
+      },
+      "echrtoday": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "echrtoday"
+      },
+      "echrtotal": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "echrtotal"
+      },
+      "eacchrtoday": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "eacchrtoday"
+      },
+      "eacchrtotal": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "eacchrtotal"
+      },
+      "esystotal": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "esystotal"
+      },
+      "eselftoday": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "eselftoday"
+      },
+      "eselftotal": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "eselftotal"
+      },
+      "reserved3143": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3143"
+      },
+      "priority": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "priority"
+      },
+      "epsfac": {
+        "entity_category": "diagnostic",
+        "divisor": 100,
+        "source": "epsfac"
+      },
+      "epsvac1": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epsvac1"
+      },
+      "epsiac1": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epsiac1"
+      },
+      "epspac1": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epspac1"
+      },
+      "epsvac2": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epsvac2"
+      },
+      "epsiac2": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epsiac2"
+      },
+      "epspac2": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epspac2"
+      },
+      "epsvac3": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epsvac3"
+      },
+      "epsiac3": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epsiac3"
+      },
+      "epspac3": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epspac3"
+      },
+      "epspac": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "epspac"
+      },
+      "loadpercent": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "loadpercent"
+      },
+      "pf": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "pf"
+      },
+      "dcv": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "dcv"
+      },
+      "reserved3163": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3163"
+      },
+      "newbdcflag": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "newbdcflag"
+      },
+      "bdcderatingmode": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bdcderatingmode"
+      },
+      "sysstatemode": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "sysstatemode"
+      },
+      "faultcode": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "faultcode"
+      },
+      "warncode": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "warncode"
+      },
+      "vbat": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "entity_category": "diagnostic",
+        "divisor": 100,
+        "source": "vbat"
+      },
+      "ibat": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "ibat"
+      },
+      "soc": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "soc"
+      },
+      "vbus1": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "vbus1"
+      },
+      "vbus2": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "vbus2"
+      },
+      "ibb": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "ibb"
+      },
+      "illc": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "illc"
+      },
+      "tempa": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "tempa"
+      },
+      "tempb": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "tempb"
+      },
+      "pdischr": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "pdischr"
+      },
+      "pchr": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "pchr"
+      },
+      "pchrxxxl": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "pchrxxxl"
+      },
+      "edischrtotalstor": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "edischrtotalstor"
+      },
+      "echrtotalstor": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "echrtotalstor"
+      },
+      "reserved3186": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3186"
+      },
+      "bdc1flag": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bdc1flag"
+      },
+      "vbus2low": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "vbus2low"
+      },
+      "bmsmaxvoltcellno": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmsmaxvoltcellno"
+      },
+      "bmsminvoltcellno": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmsminvoltcellno"
+      },
+      "bmsbatteryavgtemp": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmsbatteryavgtemp"
+      },
+      "bmsmaxcelltemp": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "bmsmaxcelltemp"
+      },
+      "bmsbatteryavgtemp2": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "bmsbatteryavgtemp2"
+      },
+      "bmsmaxcelltemp2": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmsmaxcelltemp2"
+      },
+      "bmsbatteryavgtemp3": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmsbatteryavgtemp3"
+      },
+      "bmsmaxsoc": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmsmaxsoc"
+      },
+      "bmsminsoc": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmsminsoc"
+      },
+      "parallelbatterynum": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "parallelbatterynum"
+      },
+      "bmsderatereason": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmsderatereason"
+      },
+      "bmsgaugefcc_ah": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmsgaugefcc_ah"
+      },
+      "bmsgaugerm_ah": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmsgaugerm_ah"
+      },
+      "bmserror": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmserror"
+      },
+      "bmswarn": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmswarn"
+      },
+      "bmsfault": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmsfault"
+      },
+      "bmsfault2": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmsfault2"
+      },
+      "reserved3206": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3206"
+      },
+      "reserved3207": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3207"
+      },
+      "reserved3208": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3208"
+      },
+      "reserved3209": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3209"
+      },
+      "batisostatus": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "batisostatus"
+      },
+      "battneedchargerequestflag": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "battneedchargerequestflag"
+      },
+      "bmsstatus": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmsstatus"
+      },
+      "bmserror2": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmserror2"
+      },
+      "bmswarn2": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmswarn2"
+      },
+      "bmssoc": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmssoc"
+      },
+      "bmsbatteryvolt": {
+        "entity_category": "diagnostic",
+        "divisor": 100,
+        "source": "bmsbatteryvolt"
+      },
+      "bmsbatterycurr": {
+        "entity_category": "diagnostic",
+        "divisor": 100,
+        "source": "bmsbatterycurr"
+      },
+      "bmsbatterytemp": {
+        "entity_category": "diagnostic",
+        "divisor": 10,
+        "source": "bmsbatterytemp"
+      },
+      "bmsmaxcurr": {
+        "entity_category": "diagnostic",
+        "divisor": 100,
+        "source": "bmsmaxcurr"
+      },
+      "bmsmaxdischrcurr": {
+        "entity_category": "diagnostic",
+        "divisor": 100,
+        "source": "bmsmaxdischrcurr"
+      },
+      "bmscyclecnt": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmscyclecnt"
+      },
+      "bmssoh": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmssoh"
+      },
+      "bmschargevoltlimit": {
+        "entity_category": "diagnostic",
+        "divisor": 100,
+        "source": "bmschargevoltlimit"
+      },
+      "bmsdischargevoltlimit": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmsdischargevoltlimit"
+      },
+      "bmswarn3": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmswarn3"
+      },
+      "bmserror3": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmserror3"
+      },
+      "reserved3227": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3227"
+      },
+      "reserved3228": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3228"
+      },
+      "reserved3229": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3229"
+      },
+      "bmssinglevoltmax": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmssinglevoltmax"
+      },
+      "bmssinglevoltmin": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "bmssinglevoltmin"
+      },
+      "batloadvolt": {
+        "entity_category": "diagnostic",
+        "divisor": 100,
+        "source": "batloadvolt"
+      },
+      "reserved3233": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "reserved3233"
+      },
+      "debugdata1": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata1"
+      },
+      "debugdata2": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata2"
+      },
+      "debugdata3": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata3"
+      },
+      "debugdata4": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata4"
+      },
+      "debugdata5": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata5"
+      },
+      "debugdata6": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata6"
+      },
+      "debugdata7": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata7"
+      },
+      "debugdata8": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata8"
+      },
+      "debugdata9": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata9"
+      },
+      "debugdata10": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata10"
+      },
+      "debugdata11": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata11"
+      },
+      "debugdata12": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata12"
+      },
+      "debugdata13": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata13"
+      },
+      "debugdata14": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata14"
+      },
+      "debugdata15": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata15"
+      },
+      "debugdata16": {
+        "entity_category": "diagnostic",
+        "divisor": 1,
+        "source": "debugdata16"
+      }
+    },
+    "verified_payload_lengths": [
+      575,
+      829
+    ]
+  },
+  "min-6": {
+    "protocol": 6,
+    "family": "min",
+    "observed_payload_length": 575,
+    "text_fields": [
+      "pvserial"
+    ],
+    "numeric_fields": {
+      "group1start": [
+        67,
+        2,
+        false
+      ],
+      "group1end": [
+        69,
+        2,
+        false
+      ],
+      "pvstatus": [
+        71,
+        2,
+        false
+      ],
+      "pvpowerin": [
+        73,
+        4,
+        false
+      ],
+      "pv1voltage": [
+        77,
+        2,
+        false
+      ],
+      "pv1current": [
+        79,
+        2,
+        false
+      ],
+      "pv1watt": [
+        81,
+        4,
+        false
+      ],
+      "pv2voltage": [
+        85,
+        2,
+        false
+      ],
+      "pv2current": [
+        87,
+        2,
+        false
+      ],
+      "pv2watt": [
+        89,
+        4,
+        false
+      ],
+      "pv3voltage": [
+        93,
+        2,
+        false
+      ],
+      "pv3current": [
+        95,
+        2,
+        false
+      ],
+      "pv3watt": [
+        97,
+        4,
+        false
+      ],
+      "pv4voltage": [
+        101,
+        2,
+        false
+      ],
+      "pv4current": [
+        103,
+        2,
+        false
+      ],
+      "pv4watt": [
+        105,
+        4,
+        false
+      ],
+      "pvpowerout": [
+        117,
+        4,
+        false
+      ],
+      "pvfrequentie": [
+        121,
+        2,
+        false
+      ],
+      "pvgridvoltage": [
+        123,
+        2,
+        false
+      ],
+      "pvgridcurrent": [
+        125,
+        2,
+        false
+      ],
+      "pvgridpower": [
+        127,
+        4,
+        false
+      ],
+      "pvgridvoltage2": [
+        131,
+        2,
+        false
+      ],
+      "pvgridcurrent2": [
+        133,
+        2,
+        false
+      ],
+      "pvgridpower2": [
+        135,
+        4,
+        false
+      ],
+      "pvgridvoltage3": [
+        139,
+        2,
+        false
+      ],
+      "pvgridcurrent3": [
+        141,
+        2,
+        false
+      ],
+      "pvgridpower3": [
+        143,
+        4,
+        false
+      ],
+      "vacrs": [
+        147,
+        2,
+        false
+      ],
+      "vacst": [
+        149,
+        2,
+        false
+      ],
+      "vactr": [
+        151,
+        2,
+        false
+      ],
+      "ptousertotal": [
+        153,
+        4,
+        false
+      ],
+      "ptogridtotal": [
+        157,
+        4,
+        false
+      ],
+      "ptoloadtotal": [
+        161,
+        4,
+        false
+      ],
+      "totworktime": [
+        165,
+        4,
+        false
+      ],
+      "pvenergytoday": [
+        169,
+        4,
+        false
+      ],
+      "pvenergytotal": [
+        173,
+        4,
+        false
+      ],
+      "epvtotal": [
+        177,
+        4,
+        false
+      ],
+      "epv1today": [
+        181,
+        4,
+        false
+      ],
+      "epv1total": [
+        185,
+        4,
+        false
+      ],
+      "epv2today": [
+        189,
+        4,
+        false
+      ],
+      "epv2total": [
+        193,
+        4,
+        false
+      ],
+      "epv3today": [
+        197,
+        4,
+        false
+      ],
+      "epv3total": [
+        201,
+        4,
+        false
+      ],
+      "etousertoday": [
+        205,
+        4,
+        false
+      ],
+      "etousertotal": [
+        209,
+        4,
+        false
+      ],
+      "etogridtoday": [
+        213,
+        4,
+        false
+      ],
+      "etogridtotal": [
+        217,
+        4,
+        false
+      ],
+      "eloadtoday": [
+        221,
+        4,
+        false
+      ],
+      "eloadtotal": [
+        225,
+        4,
+        false
+      ],
+      "deratingmode": [
+        243,
+        2,
+        false
+      ],
+      "iso": [
+        245,
+        2,
+        false
+      ],
+      "dcir": [
+        247,
+        2,
+        false
+      ],
+      "dcis": [
+        249,
+        2,
+        false
+      ],
+      "dcit": [
+        251,
+        2,
+        false
+      ],
+      "gfci": [
+        253,
+        4,
+        false
+      ],
+      "pvtemperature": [
+        257,
+        2,
+        false
+      ],
+      "pvipmtemperature": [
+        259,
+        2,
+        false
+      ],
+      "temp3": [
+        261,
+        2,
+        false
+      ],
+      "temp4": [
+        263,
+        2,
+        false
+      ],
+      "temp5": [
+        265,
+        2,
+        false
+      ],
+      "pbusvoltage": [
+        267,
+        2,
+        false
+      ],
+      "nbusvoltage": [
+        269,
+        2,
+        false
+      ],
+      "ipf": [
+        271,
+        2,
+        false
+      ],
+      "realoppercent": [
+        273,
+        2,
+        false
+      ],
+      "opfullwatt": [
+        275,
+        4,
+        false
+      ],
+      "standbyflag": [
+        279,
+        2,
+        false
+      ],
+      "faultcode": [
+        281,
+        2,
+        false
+      ],
+      "warningcode": [
+        283,
+        2,
+        false
+      ],
+      "systemfaultword0": [
+        285,
+        2,
+        false
+      ],
+      "systemfaultword1": [
+        287,
+        2,
+        false
+      ],
+      "systemfaultword2": [
+        289,
+        2,
+        false
+      ],
+      "systemfaultword3": [
+        291,
+        2,
+        false
+      ],
+      "systemfaultword4": [
+        293,
+        2,
+        false
+      ],
+      "systemfaultword5": [
+        295,
+        2,
+        false
+      ],
+      "systemfaultword6": [
+        297,
+        2,
+        false
+      ],
+      "systemfaultword7": [
+        299,
+        2,
+        false
+      ],
+      "invstartdelaytime": [
+        301,
+        2,
+        false
+      ],
+      "bdconoffstate": [
+        307,
+        2,
+        false
+      ],
+      "drycontactstate": [
+        309,
+        2,
+        false
+      ],
+      "group2start": [
+        321,
+        2,
+        false
+      ],
+      "group2end": [
+        323,
+        2,
+        false
+      ],
+      "edischrtoday": [
+        325,
+        4,
+        false
+      ],
+      "edischrtotal": [
+        329,
+        4,
+        false
+      ],
+      "echrtoday": [
+        333,
+        4,
+        false
+      ],
+      "echrtotal": [
+        337,
+        4,
+        false
+      ],
+      "eacchrtoday": [
+        341,
+        4,
+        false
+      ],
+      "eacchrtotal": [
+        345,
+        4,
+        false
+      ],
+      "priority": [
+        363,
+        2,
+        false
+      ],
+      "epsfac": [
+        365,
+        2,
+        false
+      ],
+      "epsvac1": [
+        367,
+        2,
+        false
+      ],
+      "epsiac1": [
+        369,
+        2,
+        false
+      ],
+      "epspac1": [
+        371,
+        4,
+        false
+      ],
+      "epsvac2": [
+        375,
+        2,
+        false
+      ],
+      "epsiac2": [
+        377,
+        2,
+        false
+      ],
+      "epspac2": [
+        379,
+        4,
+        false
+      ],
+      "epsvac3": [
+        383,
+        2,
+        false
+      ],
+      "epsiac3": [
+        385,
+        2,
+        false
+      ],
+      "epspac3": [
+        387,
+        4,
+        false
+      ],
+      "epspac": [
+        391,
+        4,
+        false
+      ],
+      "loadpercent": [
+        395,
+        2,
+        false
+      ],
+      "pf": [
+        397,
+        2,
+        false
+      ],
+      "dcv": [
+        399,
+        2,
+        false
+      ],
+      "bdc1_sysstatemode": [
+        407,
+        2,
+        false
+      ],
+      "bdc1_faultcode": [
+        409,
+        2,
+        false
+      ],
+      "bdc1_warncode": [
+        411,
+        2,
+        false
+      ],
+      "bdc1_vbat": [
+        413,
+        2,
+        false
+      ],
+      "bdc1_ibat": [
+        415,
+        2,
+        false
+      ],
+      "bdc1_soc": [
+        417,
+        2,
+        false
+      ],
+      "bdc1_vbus1": [
+        419,
+        2,
+        false
+      ],
+      "bdc1_vbus2": [
+        421,
+        2,
+        false
+      ],
+      "bdc1_ibb": [
+        423,
+        2,
+        false
+      ],
+      "bdc1_illc": [
+        425,
+        2,
+        false
+      ],
+      "bdc1_tempa": [
+        427,
+        2,
+        false
+      ],
+      "bdc1_tempb": [
+        429,
+        2,
+        false
+      ],
+      "bdc1_pdischr": [
+        431,
+        4,
+        false
+      ],
+      "bdc1_pchr": [
+        435,
+        4,
+        false
+      ],
+      "bdc1_edischrtotal": [
+        439,
+        4,
+        false
+      ],
+      "bdc1_echrtotal": [
+        443,
+        4,
+        false
+      ],
+      "bdc1_flag": [
+        449,
+        2,
+        false
+      ],
+      "bdc2_sysstatemode": [
+        453,
+        2,
+        false
+      ],
+      "bdc2_faultcode": [
+        455,
+        2,
+        false
+      ],
+      "bdc2_warncode": [
+        457,
+        2,
+        false
+      ],
+      "bdc2_vbat": [
+        459,
+        2,
+        false
+      ],
+      "bdc2_ibat": [
+        461,
+        2,
+        false
+      ],
+      "bdc2_soc": [
+        463,
+        2,
+        false
+      ],
+      "bdc2_vbus1": [
+        465,
+        2,
+        false
+      ],
+      "bdc2_vbus2": [
+        467,
+        2,
+        false
+      ],
+      "bdc2_ibb": [
+        469,
+        2,
+        false
+      ],
+      "bdc2_illc": [
+        471,
+        2,
+        false
+      ],
+      "bdc2_tempa": [
+        473,
+        2,
+        false
+      ],
+      "bdc2_tempb": [
+        475,
+        2,
+        false
+      ],
+      "bdc2_pdischr": [
+        477,
+        4,
+        false
+      ],
+      "bdc2_pchr": [
+        481,
+        4,
+        false
+      ],
+      "bdc2_edischrtotal": [
+        485,
+        4,
+        false
+      ],
+      "bdc2_echrtotal": [
+        489,
+        4,
+        false
+      ],
+      "bdc2_flag": [
+        495,
+        4,
+        false
+      ],
+      "bms_status": [
+        499,
+        2,
+        false
+      ],
+      "bms_error": [
+        501,
+        2,
+        false
+      ],
+      "bms_warninfo": [
+        503,
+        2,
+        false
+      ],
+      "bms_soc": [
+        505,
+        2,
+        false
+      ],
+      "bms_batteryvolt": [
+        507,
+        2,
+        false
+      ],
+      "bms_batterycurr": [
+        509,
+        2,
+        true
+      ],
+      "bms_batterytemp": [
+        511,
+        2,
+        false
+      ],
+      "bms_maxcurr": [
+        513,
+        2,
+        false
+      ],
+      "bms_deltavolt": [
+        515,
+        2,
+        false
+      ],
+      "bms_cyclecnt": [
+        517,
+        2,
+        false
+      ],
+      "bms_soh": [
+        519,
+        2,
+        false
+      ],
+      "bms_constantvolt": [
+        521,
+        2,
+        false
+      ],
+      "bms_bms_info": [
+        523,
+        2,
+        false
+      ],
+      "bms_packinfo": [
+        525,
+        2,
+        false
+      ],
+      "bms_usingcap": [
+        527,
+        2,
+        false
+      ],
+      "bms_fw": [
+        529,
+        2,
+        false
+      ],
+      "bms_mcuversion": [
+        531,
+        2,
+        false
+      ],
+      "bms_commtype": [
+        533,
+        2,
+        false
+      ]
+    },
+    "excluded_fields": [
+      "group1end",
+      "group1start",
+      "group2end",
+      "group2start"
+    ],
+    "sensors": {
+      "pvserial": {
+        "divisor": 1,
+        "source": "pvserial"
+      },
+      "group1start": {
+        "divisor": 1,
+        "source": "group1start"
+      },
+      "group1end": {
+        "divisor": 1,
+        "source": "group1end"
+      },
+      "pvstatus": {
+        "divisor": 1,
+        "source": "pvstatus"
+      },
+      "pvpowerin": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerin"
+      },
+      "pv1voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1voltage"
+      },
+      "pv1current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1current"
+      },
+      "pv1watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1watt"
+      },
+      "pv2voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2voltage"
+      },
+      "pv2current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2current"
+      },
+      "pv2watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2watt"
+      },
+      "pv3voltage": {
+        "divisor": 10,
+        "source": "pv3voltage"
+      },
+      "pv3current": {
+        "divisor": 10,
+        "source": "pv3current"
+      },
+      "pv3watt": {
+        "divisor": 10,
+        "source": "pv3watt"
+      },
+      "pv4voltage": {
+        "divisor": 10,
+        "source": "pv4voltage"
+      },
+      "pv4current": {
+        "divisor": 10,
+        "source": "pv4current"
+      },
+      "pv4watt": {
+        "divisor": 10,
+        "source": "pv4watt"
+      },
+      "pvpowerout": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerout"
+      },
+      "pvfrequentie": {
+        "unit": "Hz",
+        "device_class": "frequency",
+        "state_class": "measurement",
+        "divisor": 100,
+        "source": "pvfrequentie"
+      },
+      "pvgridvoltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage"
+      },
+      "pvgridcurrent": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent"
+      },
+      "pvgridpower": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower"
+      },
+      "pvgridvoltage2": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage2"
+      },
+      "pvgridcurrent2": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent2"
+      },
+      "pvgridpower2": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower2"
+      },
+      "pvgridvoltage3": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage3"
+      },
+      "pvgridcurrent3": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent3"
+      },
+      "pvgridpower3": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower3"
+      },
+      "vacrs": {
+        "divisor": 10,
+        "source": "vacrs"
+      },
+      "vacst": {
+        "divisor": 10,
+        "source": "vacst"
+      },
+      "vactr": {
+        "divisor": 10,
+        "source": "vactr"
+      },
+      "ptousertotal": {
+        "divisor": 10,
+        "source": "ptousertotal"
+      },
+      "ptogridtotal": {
+        "divisor": 10,
+        "source": "ptogridtotal"
+      },
+      "ptoloadtotal": {
+        "divisor": 10,
+        "source": "ptoloadtotal"
+      },
+      "totworktime": {
+        "unit": "h",
+        "device_class": "duration",
+        "divisor": 7200,
+        "source": "totworktime"
+      },
+      "pvenergytoday": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "pvenergytoday"
+      },
+      "pvenergytotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total_increasing",
+        "divisor": 10,
+        "source": "pvenergytotal"
+      },
+      "epvtotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epvtotal"
+      },
+      "epv1today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1today"
+      },
+      "epv1total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1total"
+      },
+      "epv2today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2today"
+      },
+      "epv2total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2total"
+      },
+      "epv3today": {
+        "divisor": 10,
+        "source": "epv3today"
+      },
+      "epv3total": {
+        "divisor": 10,
+        "source": "epv3total"
+      },
+      "etousertoday": {
+        "divisor": 10,
+        "source": "etousertoday"
+      },
+      "etousertotal": {
+        "divisor": 10,
+        "source": "etousertotal"
+      },
+      "etogridtoday": {
+        "divisor": 10,
+        "source": "etogridtoday"
+      },
+      "etogridtotal": {
+        "divisor": 10,
+        "source": "etogridtotal"
+      },
+      "eloadtoday": {
+        "divisor": 10,
+        "source": "eloadtoday"
+      },
+      "eloadtotal": {
+        "divisor": 10,
+        "source": "eloadtotal"
+      },
+      "deratingmode": {
+        "divisor": 1,
+        "source": "deratingmode"
+      },
+      "iso": {
+        "divisor": 1,
+        "source": "iso"
+      },
+      "dcir": {
+        "divisor": 10,
+        "source": "dcir"
+      },
+      "dcis": {
+        "divisor": 10,
+        "source": "dcis"
+      },
+      "dcit": {
+        "divisor": 10,
+        "source": "dcit"
+      },
+      "gfci": {
+        "divisor": 1,
+        "source": "gfci"
+      },
+      "pvtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvtemperature"
+      },
+      "pvipmtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvipmtemperature"
+      },
+      "temp3": {
+        "divisor": 10,
+        "source": "temp3"
+      },
+      "temp4": {
+        "divisor": 10,
+        "source": "temp4"
+      },
+      "temp5": {
+        "divisor": 10,
+        "source": "temp5"
+      },
+      "pbusvoltage": {
+        "divisor": 10,
+        "source": "pbusvoltage"
+      },
+      "nbusvoltage": {
+        "divisor": 10,
+        "source": "nbusvoltage"
+      },
+      "ipf": {
+        "divisor": 1,
+        "source": "ipf"
+      },
+      "realoppercent": {
+        "divisor": 1,
+        "source": "realoppercent"
+      },
+      "opfullwatt": {
+        "divisor": 10,
+        "source": "opfullwatt"
+      },
+      "standbyflag": {
+        "divisor": 1,
+        "source": "standbyflag"
+      },
+      "faultcode": {
+        "divisor": 1,
+        "source": "faultcode"
+      },
+      "warningcode": {
+        "divisor": 1,
+        "source": "warningcode"
+      },
+      "systemfaultword0": {
+        "divisor": 1,
+        "source": "systemfaultword0"
+      },
+      "systemfaultword1": {
+        "divisor": 1,
+        "source": "systemfaultword1"
+      },
+      "systemfaultword2": {
+        "divisor": 1,
+        "source": "systemfaultword2"
+      },
+      "systemfaultword3": {
+        "divisor": 1,
+        "source": "systemfaultword3"
+      },
+      "systemfaultword4": {
+        "divisor": 1,
+        "source": "systemfaultword4"
+      },
+      "systemfaultword5": {
+        "divisor": 1,
+        "source": "systemfaultword5"
+      },
+      "systemfaultword6": {
+        "divisor": 1,
+        "source": "systemfaultword6"
+      },
+      "systemfaultword7": {
+        "divisor": 1,
+        "source": "systemfaultword7"
+      },
+      "invstartdelaytime": {
+        "divisor": 1,
+        "source": "invstartdelaytime"
+      },
+      "bdconoffstate": {
+        "divisor": 1,
+        "source": "bdconoffstate"
+      },
+      "drycontactstate": {
+        "divisor": 1,
+        "source": "drycontactstate"
+      },
+      "group2start": {
+        "divisor": 1,
+        "source": "group2start"
+      },
+      "group2end": {
+        "divisor": 1,
+        "source": "group2end"
+      },
+      "edischrtoday": {
+        "divisor": 10,
+        "source": "edischrtoday"
+      },
+      "edischrtotal": {
+        "divisor": 10,
+        "source": "edischrtotal"
+      },
+      "echrtoday": {
+        "divisor": 10,
+        "source": "echrtoday"
+      },
+      "echrtotal": {
+        "divisor": 10,
+        "source": "echrtotal"
+      },
+      "eacchrtoday": {
+        "divisor": 10,
+        "source": "eacchrtoday"
+      },
+      "eacchrtotal": {
+        "divisor": 10,
+        "source": "eacchrtotal"
+      },
+      "priority": {
+        "divisor": 1,
+        "source": "priority"
+      },
+      "epsfac": {
+        "divisor": 100,
+        "source": "epsfac"
+      },
+      "epsvac1": {
+        "divisor": 10,
+        "source": "epsvac1"
+      },
+      "epsiac1": {
+        "divisor": 10,
+        "source": "epsiac1"
+      },
+      "epspac1": {
+        "divisor": 10,
+        "source": "epspac1"
+      },
+      "epsvac2": {
+        "divisor": 10,
+        "source": "epsvac2"
+      },
+      "epsiac2": {
+        "divisor": 10,
+        "source": "epsiac2"
+      },
+      "epspac2": {
+        "divisor": 10,
+        "source": "epspac2"
+      },
+      "epsvac3": {
+        "divisor": 10,
+        "source": "epsvac3"
+      },
+      "epsiac3": {
+        "divisor": 10,
+        "source": "epsiac3"
+      },
+      "epspac3": {
+        "divisor": 10,
+        "source": "epspac3"
+      },
+      "epspac": {
+        "divisor": 10,
+        "source": "epspac"
+      },
+      "loadpercent": {
+        "divisor": 10,
+        "source": "loadpercent"
+      },
+      "pf": {
+        "divisor": 10,
+        "source": "pf"
+      },
+      "dcv": {
+        "divisor": 1,
+        "source": "dcv"
+      },
+      "bdc1_sysstatemode": {
+        "divisor": 1,
+        "source": "bdc1_sysstatemode"
+      },
+      "bdc1_faultcode": {
+        "divisor": 1,
+        "source": "bdc1_faultcode"
+      },
+      "bdc1_warncode": {
+        "divisor": 1,
+        "source": "bdc1_warncode"
+      },
+      "bdc1_vbat": {
+        "divisor": 100,
+        "source": "bdc1_vbat"
+      },
+      "bdc1_ibat": {
+        "divisor": 10,
+        "source": "bdc1_ibat"
+      },
+      "bdc1_soc": {
+        "divisor": 1,
+        "source": "bdc1_soc"
+      },
+      "bdc1_vbus1": {
+        "divisor": 10,
+        "source": "bdc1_vbus1"
+      },
+      "bdc1_vbus2": {
+        "divisor": 10,
+        "source": "bdc1_vbus2"
+      },
+      "bdc1_ibb": {
+        "divisor": 10,
+        "source": "bdc1_ibb"
+      },
+      "bdc1_illc": {
+        "divisor": 10,
+        "source": "bdc1_illc"
+      },
+      "bdc1_tempa": {
+        "divisor": 10,
+        "source": "bdc1_tempa"
+      },
+      "bdc1_tempb": {
+        "divisor": 10,
+        "source": "bdc1_tempb"
+      },
+      "bdc1_pdischr": {
+        "divisor": 10,
+        "source": "bdc1_pdischr"
+      },
+      "bdc1_pchr": {
+        "divisor": 10,
+        "source": "bdc1_pchr"
+      },
+      "bdc1_edischrtotal": {
+        "divisor": 10,
+        "source": "bdc1_edischrtotal"
+      },
+      "bdc1_echrtotal": {
+        "divisor": 10,
+        "source": "bdc1_echrtotal"
+      },
+      "bdc1_flag": {
+        "divisor": 1,
+        "source": "bdc1_flag"
+      },
+      "bdc2_sysstatemode": {
+        "divisor": 1,
+        "source": "bdc2_sysstatemode"
+      },
+      "bdc2_faultcode": {
+        "divisor": 1,
+        "source": "bdc2_faultcode"
+      },
+      "bdc2_warncode": {
+        "divisor": 1,
+        "source": "bdc2_warncode"
+      },
+      "bdc2_vbat": {
+        "divisor": 100,
+        "source": "bdc2_vbat"
+      },
+      "bdc2_ibat": {
+        "divisor": 10,
+        "source": "bdc2_ibat"
+      },
+      "bdc2_soc": {
+        "divisor": 1,
+        "source": "bdc2_soc"
+      },
+      "bdc2_vbus1": {
+        "divisor": 10,
+        "source": "bdc2_vbus1"
+      },
+      "bdc2_vbus2": {
+        "divisor": 10,
+        "source": "bdc2_vbus2"
+      },
+      "bdc2_ibb": {
+        "divisor": 10,
+        "source": "bdc2_ibb"
+      },
+      "bdc2_illc": {
+        "divisor": 10,
+        "source": "bdc2_illc"
+      },
+      "bdc2_tempa": {
+        "divisor": 10,
+        "source": "bdc2_tempa"
+      },
+      "bdc2_tempb": {
+        "divisor": 10,
+        "source": "bdc2_tempb"
+      },
+      "bdc2_pdischr": {
+        "divisor": 10,
+        "source": "bdc2_pdischr"
+      },
+      "bdc2_pchr": {
+        "divisor": 10,
+        "source": "bdc2_pchr"
+      },
+      "bdc2_edischrtotal": {
+        "divisor": 10,
+        "source": "bdc2_edischrtotal"
+      },
+      "bdc2_echrtotal": {
+        "divisor": 10,
+        "source": "bdc2_echrtotal"
+      },
+      "bdc2_flag": {
+        "divisor": 1,
+        "source": "bdc2_flag"
+      },
+      "bms_status": {
+        "divisor": 1,
+        "source": "bms_status"
+      },
+      "bms_error": {
+        "divisor": 1,
+        "source": "bms_error"
+      },
+      "bms_warninfo": {
+        "divisor": 1,
+        "source": "bms_warninfo"
+      },
+      "bms_soc": {
+        "divisor": 1,
+        "source": "bms_soc"
+      },
+      "bms_batteryvolt": {
+        "divisor": 100,
+        "source": "bms_batteryvolt"
+      },
+      "bms_batterycurr": {
+        "divisor": 100,
+        "source": "bms_batterycurr"
+      },
+      "bms_batterytemp": {
+        "divisor": 10,
+        "source": "bms_batterytemp"
+      },
+      "bms_maxcurr": {
+        "divisor": 100,
+        "source": "bms_maxcurr"
+      },
+      "bms_deltavolt": {
+        "divisor": 100,
+        "source": "bms_deltavolt"
+      },
+      "bms_cyclecnt": {
+        "divisor": 1,
+        "source": "bms_cyclecnt"
+      },
+      "bms_soh": {
+        "divisor": 1,
+        "source": "bms_soh"
+      },
+      "bms_constantvolt": {
+        "divisor": 100,
+        "source": "bms_constantvolt"
+      },
+      "bms_bms_info": {
+        "divisor": 1,
+        "source": "bms_bms_info"
+      },
+      "bms_packinfo": {
+        "divisor": 1,
+        "source": "bms_packinfo"
+      },
+      "bms_usingcap": {
+        "divisor": 1,
+        "source": "bms_usingcap"
+      },
+      "bms_fw": {
+        "divisor": 1,
+        "source": "bms_fw"
+      },
+      "bms_mcuversion": {
+        "divisor": 1,
+        "source": "bms_mcuversion"
+      },
+      "bms_commtype": {
+        "divisor": 1,
+        "source": "bms_commtype"
+      }
+    },
+    "verified_payload_lengths": [
+      575,
+      829
+    ]
+  },
+  "sph-6": {
+    "protocol": 6,
+    "family": "sph",
+    "observed_payload_length": 575,
+    "text_fields": [
+      "datalogserial",
+      "pvserial"
+    ],
+    "numeric_fields": {
+      "recortype1": [
+        67,
+        2,
+        false
+      ],
+      "recortype2": [
+        69,
+        2,
+        false
+      ],
+      "pvstatus": [
+        71,
+        2,
+        false
+      ],
+      "pvpowerin": [
+        73,
+        4,
+        false
+      ],
+      "pv1voltage": [
+        77,
+        2,
+        false
+      ],
+      "pv1current": [
+        79,
+        2,
+        false
+      ],
+      "pv1watt": [
+        81,
+        4,
+        false
+      ],
+      "pv2voltage": [
+        85,
+        2,
+        false
+      ],
+      "pv2current": [
+        87,
+        2,
+        false
+      ],
+      "pv2watt": [
+        89,
+        4,
+        false
+      ],
+      "pvpowerout": [
+        141,
+        4,
+        true
+      ],
+      "pvfrequentie": [
+        145,
+        2,
+        false
+      ],
+      "pvgridvoltage": [
+        147,
+        2,
+        false
+      ],
+      "pvgridcurrent": [
+        149,
+        2,
+        false
+      ],
+      "pvgridpower": [
+        151,
+        4,
+        false
+      ],
+      "pvgridvoltage2": [
+        155,
+        2,
+        false
+      ],
+      "pvgridcurrent2": [
+        157,
+        2,
+        false
+      ],
+      "pvgridpower2": [
+        159,
+        4,
+        false
+      ],
+      "pvgridvoltage3": [
+        163,
+        2,
+        false
+      ],
+      "pvgridcurrent3": [
+        165,
+        2,
+        false
+      ],
+      "pvgridpower3": [
+        167,
+        4,
+        false
+      ],
+      "totworktime": [
+        185,
+        4,
+        false
+      ],
+      "eactoday": [
+        177,
+        4,
+        false
+      ],
+      "pvenergytoday": [
+        177,
+        4,
+        false
+      ],
+      "eactotal": [
+        181,
+        4,
+        false
+      ],
+      "epvtotal": [
+        253,
+        4,
+        false
+      ],
+      "epv1today": [
+        189,
+        4,
+        false
+      ],
+      "epv1total": [
+        193,
+        4,
+        false
+      ],
+      "epv2today": [
+        197,
+        4,
+        false
+      ],
+      "epv2total": [
+        201,
+        4,
+        false
+      ],
+      "pvtemperature": [
+        257,
+        2,
+        false
+      ],
+      "pvipmtemperature": [
+        259,
+        2,
+        false
+      ],
+      "pvboosttemp": [
+        261,
+        2,
+        false
+      ],
+      "bat_dsp": [
+        265,
+        2,
+        false
+      ],
+      "pbusvolt": [
+        267,
+        2,
+        false
+      ],
+      "nbusvolt": [
+        269,
+        2,
+        false
+      ],
+      "ipf": [
+        271,
+        2,
+        false
+      ],
+      "realoppercent": [
+        273,
+        2,
+        false
+      ],
+      "opfullwatt": [
+        275,
+        4,
+        false
+      ],
+      "deratingmode": [
+        279,
+        2,
+        false
+      ],
+      "eacharge_today": [
+        295,
+        4,
+        false
+      ],
+      "eacharge_total": [
+        299,
+        4,
+        false
+      ],
+      "batterytype": [
+        309,
+        2,
+        false
+      ],
+      "uwsysworkmode": [
+        325,
+        2,
+        false
+      ],
+      "systemfaultword0": [
+        327,
+        2,
+        false
+      ],
+      "systemfaultword1": [
+        329,
+        2,
+        false
+      ],
+      "systemfaultword2": [
+        331,
+        2,
+        false
+      ],
+      "systemfaultword3": [
+        333,
+        2,
+        false
+      ],
+      "systemfaultword4": [
+        335,
+        2,
+        false
+      ],
+      "systemfaultword5": [
+        337,
+        2,
+        false
+      ],
+      "systemfaultword6": [
+        339,
+        2,
+        false
+      ],
+      "systemfaultword7": [
+        341,
+        2,
+        false
+      ],
+      "pdischarge1": [
+        343,
+        4,
+        false
+      ],
+      "p1charge1": [
+        347,
+        4,
+        false
+      ],
+      "vbat": [
+        351,
+        2,
+        false
+      ],
+      "SOC": [
+        353,
+        2,
+        false
+      ],
+      "pactouserr": [
+        355,
+        4,
+        false
+      ],
+      "pactousers": [
+        359,
+        4,
+        false
+      ],
+      "pactousert": [
+        363,
+        4,
+        false
+      ],
+      "pactousertot": [
+        367,
+        4,
+        false
+      ],
+      "pactogridr": [
+        371,
+        4,
+        false
+      ],
+      "pactogrids": [
+        375,
+        4,
+        false
+      ],
+      "pactogridt": [
+        379,
+        4,
+        false
+      ],
+      "pactogridtot": [
+        383,
+        4,
+        false
+      ],
+      "plocaloadr": [
+        387,
+        4,
+        false
+      ],
+      "plocaloads": [
+        391,
+        4,
+        false
+      ],
+      "plocaloadt": [
+        395,
+        4,
+        false
+      ],
+      "plocaloadtot": [
+        399,
+        4,
+        false
+      ],
+      "ipm": [
+        403,
+        2,
+        false
+      ],
+      "battemp": [
+        405,
+        2,
+        false
+      ],
+      "spdspstatus": [
+        407,
+        2,
+        false
+      ],
+      "spbusvolt": [
+        409,
+        2,
+        false
+      ],
+      "etouser_tod": [
+        413,
+        4,
+        false
+      ],
+      "etouser_tot": [
+        417,
+        4,
+        false
+      ],
+      "etogrid_tod": [
+        421,
+        4,
+        false
+      ],
+      "etogrid_tot": [
+        425,
+        4,
+        false
+      ],
+      "edischarge1_tod": [
+        429,
+        4,
+        false
+      ],
+      "edischarge1_tot": [
+        433,
+        4,
+        false
+      ],
+      "eharge1_tod": [
+        437,
+        4,
+        false
+      ],
+      "eharge1_tot": [
+        441,
+        4,
+        false
+      ],
+      "elocalload_tod": [
+        445,
+        4,
+        false
+      ],
+      "elocalload_tot": [
+        449,
+        4,
+        false
+      ]
+    },
+    "excluded_fields": [
+      "battemp",
+      "deratingmode",
+      "ipf",
+      "ipm",
+      "nbusvolt",
+      "opfullwatt",
+      "pactogrids",
+      "pactogridt",
+      "pactousers",
+      "pactousert",
+      "pbusvolt",
+      "plocaloads",
+      "plocaloadt",
+      "realoppercent",
+      "recortype1",
+      "recortype2"
+    ],
+    "sensors": {
+      "datalogserial": {
+        "divisor": 1,
+        "source": "datalogserial"
+      },
+      "pvserial": {
+        "divisor": 1,
+        "source": "pvserial"
+      },
+      "recortype1": {
+        "divisor": 1,
+        "source": "recortype1"
+      },
+      "recortype2": {
+        "divisor": 1,
+        "source": "recortype2"
+      },
+      "pvstatus": {
+        "divisor": 1,
+        "source": "pvstatus"
+      },
+      "pvpowerin": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerin"
+      },
+      "pv1voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1voltage"
+      },
+      "pv1current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1current"
+      },
+      "pv1watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1watt"
+      },
+      "pv2voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2voltage"
+      },
+      "pv2current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2current"
+      },
+      "pv2watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2watt"
+      },
+      "pvpowerout": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerout"
+      },
+      "pvfrequentie": {
+        "unit": "Hz",
+        "device_class": "frequency",
+        "state_class": "measurement",
+        "divisor": 100,
+        "source": "pvfrequentie"
+      },
+      "pvgridvoltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage"
+      },
+      "pvgridcurrent": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent"
+      },
+      "pvgridpower": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower"
+      },
+      "pvgridvoltage2": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage2"
+      },
+      "pvgridcurrent2": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent2"
+      },
+      "pvgridpower2": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower2"
+      },
+      "pvgridvoltage3": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage3"
+      },
+      "pvgridcurrent3": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent3"
+      },
+      "pvgridpower3": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower3"
+      },
+      "totworktime": {
+        "unit": "h",
+        "device_class": "duration",
+        "divisor": 7200,
+        "source": "totworktime"
+      },
+      "eactoday": {
+        "divisor": 10,
+        "source": "eactoday"
+      },
+      "pvenergytoday": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "pvenergytoday"
+      },
+      "eactotal": {
+        "divisor": 10,
+        "source": "eactotal"
+      },
+      "epvtotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epvtotal"
+      },
+      "epv1today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1today"
+      },
+      "epv1total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1total"
+      },
+      "epv2today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2today"
+      },
+      "epv2total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2total"
+      },
+      "pvtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvtemperature"
+      },
+      "pvipmtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvipmtemperature"
+      },
+      "pvboosttemp": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvboosttemp"
+      },
+      "bat_dsp": {
+        "divisor": 10,
+        "source": "bat_dsp"
+      },
+      "pbusvolt": {
+        "divisor": 10,
+        "source": "pbusvolt"
+      },
+      "nbusvolt": {
+        "divisor": 10,
+        "source": "nbusvolt"
+      },
+      "ipf": {
+        "divisor": 10,
+        "source": "ipf"
+      },
+      "realoppercent": {
+        "divisor": 100,
+        "source": "realoppercent"
+      },
+      "opfullwatt": {
+        "divisor": 10,
+        "source": "opfullwatt"
+      },
+      "deratingmode": {
+        "divisor": 1,
+        "source": "deratingmode"
+      },
+      "eacharge_today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "eacharge_today"
+      },
+      "eacharge_total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total_increasing",
+        "divisor": 10,
+        "source": "eacharge_total"
+      },
+      "batterytype": {
+        "divisor": 1,
+        "source": "batterytype"
+      },
+      "uwsysworkmode": {
+        "divisor": 1,
+        "source": "uwsysworkmode"
+      },
+      "systemfaultword0": {
+        "divisor": 1,
+        "source": "systemfaultword0"
+      },
+      "systemfaultword1": {
+        "divisor": 1,
+        "source": "systemfaultword1"
+      },
+      "systemfaultword2": {
+        "divisor": 1,
+        "source": "systemfaultword2"
+      },
+      "systemfaultword3": {
+        "divisor": 1,
+        "source": "systemfaultword3"
+      },
+      "systemfaultword4": {
+        "divisor": 1,
+        "source": "systemfaultword4"
+      },
+      "systemfaultword5": {
+        "divisor": 1,
+        "source": "systemfaultword5"
+      },
+      "systemfaultword6": {
+        "divisor": 1,
+        "source": "systemfaultword6"
+      },
+      "systemfaultword7": {
+        "divisor": 1,
+        "source": "systemfaultword7"
+      },
+      "pdischarge1": {
+        "divisor": 10,
+        "source": "pdischarge1"
+      },
+      "p1charge1": {
+        "unit": "kW",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "p1charge1"
+      },
+      "vbat": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "vbat"
+      },
+      "SOC": {
+        "unit": "%",
+        "device_class": "battery",
+        "state_class": "measurement",
+        "divisor": 1,
+        "source": "SOC"
+      },
+      "pactouserr": {
+        "unit": "W",
+        "device_class": "power",
+        "divisor": 10,
+        "source": "pactouserr"
+      },
+      "pactousers": {
+        "divisor": 10,
+        "source": "pactousers"
+      },
+      "pactousert": {
+        "divisor": 10,
+        "source": "pactousert"
+      },
+      "pactousertot": {
+        "divisor": 10,
+        "source": "pactousertot"
+      },
+      "pactogridr": {
+        "unit": "Wh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "pactogridr"
+      },
+      "pactogrids": {
+        "divisor": 10,
+        "source": "pactogrids"
+      },
+      "pactogridt": {
+        "divisor": 10,
+        "source": "pactogridt"
+      },
+      "pactogridtot": {
+        "unit": "Wh",
+        "device_class": "energy",
+        "state_class": "total_increasing",
+        "divisor": 10,
+        "source": "pactogridtot"
+      },
+      "plocaloadr": {
+        "unit": "W",
+        "device_class": "power",
+        "divisor": 10,
+        "source": "plocaloadr"
+      },
+      "plocaloads": {
+        "divisor": 10,
+        "source": "plocaloads"
+      },
+      "plocaloadt": {
+        "divisor": 10,
+        "source": "plocaloadt"
+      },
+      "plocaloadtot": {
+        "divisor": 10,
+        "source": "plocaloadtot"
+      },
+      "ipm": {
+        "divisor": 10,
+        "source": "ipm"
+      },
+      "battemp": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "divisor": 10,
+        "source": "battemp"
+      },
+      "spdspstatus": {
+        "divisor": 10,
+        "source": "spdspstatus"
+      },
+      "spbusvolt": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "spbusvolt"
+      },
+      "etouser_tod": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "etouser_tod"
+      },
+      "etouser_tot": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total_increasing",
+        "divisor": 10,
+        "source": "etouser_tot"
+      },
+      "etogrid_tod": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "etogrid_tod"
+      },
+      "etogrid_tot": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total_increasing",
+        "divisor": 10,
+        "source": "etogrid_tot"
+      },
+      "edischarge1_tod": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "edischarge1_tod"
+      },
+      "edischarge1_tot": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total_increasing",
+        "divisor": 10,
+        "source": "edischarge1_tot"
+      },
+      "eharge1_tod": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "eharge1_tod"
+      },
+      "eharge1_tot": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total_increasing",
+        "divisor": 10,
+        "source": "eharge1_tot"
+      },
+      "elocalload_tod": {
+        "unit": "Wh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "elocalload_tod"
+      },
+      "elocalload_tot": {
+        "unit": "Wh",
+        "device_class": "energy",
+        "state_class": "total_increasing",
+        "divisor": 10,
+        "source": "elocalload_tot"
+      }
+    },
+    "verified_payload_lengths": [
+      575,
+      829
+    ]
+  },
+  "tl3-6": {
+    "protocol": 6,
+    "family": "tl3",
+    "observed_payload_length": 575,
+    "text_fields": [
+      "datalogserial",
+      "pvserial"
+    ],
+    "numeric_fields": {
+      "recortype1": [
+        67,
+        2,
+        false
+      ],
+      "recortype2": [
+        69,
+        2,
+        false
+      ],
+      "pvstatus": [
+        71,
+        2,
+        false
+      ],
+      "pvpowerin": [
+        73,
+        4,
+        false
+      ],
+      "pv1voltage": [
+        77,
+        2,
+        false
+      ],
+      "pv1current": [
+        79,
+        2,
+        false
+      ],
+      "pv1watt": [
+        81,
+        4,
+        false
+      ],
+      "pv2voltage": [
+        85,
+        2,
+        false
+      ],
+      "pv2current": [
+        87,
+        2,
+        false
+      ],
+      "pv2watt": [
+        89,
+        4,
+        false
+      ],
+      "pv3voltage": [
+        93,
+        2,
+        false
+      ],
+      "pv3current": [
+        95,
+        2,
+        false
+      ],
+      "pv3watt": [
+        97,
+        4,
+        false
+      ],
+      "pvpowerout": [
+        141,
+        4,
+        true
+      ],
+      "pvfrequentie": [
+        145,
+        2,
+        false
+      ],
+      "pvgridvoltage": [
+        147,
+        2,
+        false
+      ],
+      "pvgridcurrent": [
+        149,
+        2,
+        false
+      ],
+      "pvgridpower": [
+        151,
+        4,
+        false
+      ],
+      "pvgridvoltage2": [
+        155,
+        2,
+        false
+      ],
+      "pvgridcurrent2": [
+        157,
+        2,
+        false
+      ],
+      "pvgridpower2": [
+        159,
+        4,
+        false
+      ],
+      "pvgridvoltage3": [
+        163,
+        2,
+        false
+      ],
+      "pvgridcurrent3": [
+        165,
+        2,
+        false
+      ],
+      "pvgridpower3": [
+        167,
+        4,
+        false
+      ],
+      "Vac_RS": [
+        171,
+        2,
+        false
+      ],
+      "Vac_ST": [
+        173,
+        2,
+        false
+      ],
+      "Vac_TR": [
+        175,
+        2,
+        false
+      ],
+      "pvenergytoday": [
+        177,
+        4,
+        false
+      ],
+      "pvenergytotal": [
+        181,
+        4,
+        false
+      ],
+      "totworktime": [
+        185,
+        4,
+        false
+      ],
+      "epv1today": [
+        189,
+        4,
+        false
+      ],
+      "epv1total": [
+        193,
+        4,
+        false
+      ],
+      "epv2today": [
+        197,
+        4,
+        false
+      ],
+      "epv2total": [
+        201,
+        4,
+        false
+      ],
+      "epvtotal": [
+        253,
+        4,
+        false
+      ],
+      "pvtemperature": [
+        257,
+        2,
+        false
+      ],
+      "pvipmtemperature": [
+        259,
+        2,
+        false
+      ],
+      "pvboottemperature": [
+        261,
+        2,
+        false
+      ],
+      "temp4": [
+        263,
+        2,
+        false
+      ],
+      "uwBatVolt_DSP": [
+        265,
+        2,
+        false
+      ],
+      "pbusvolt": [
+        267,
+        2,
+        false
+      ],
+      "nbusvolt": [
+        269,
+        2,
+        false
+      ]
+    },
+    "excluded_fields": [
+      "pv3current",
+      "pv3voltage",
+      "pv3watt",
+      "recortype1",
+      "recortype2",
+      "temp4"
+    ],
+    "sensors": {
+      "datalogserial": {
+        "divisor": 1,
+        "source": "datalogserial"
+      },
+      "pvserial": {
+        "divisor": 1,
+        "source": "pvserial"
+      },
+      "recortype1": {
+        "divisor": 1,
+        "source": "recortype1"
+      },
+      "recortype2": {
+        "divisor": 1,
+        "source": "recortype2"
+      },
+      "pvstatus": {
+        "divisor": 1,
+        "source": "pvstatus"
+      },
+      "pvpowerin": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerin"
+      },
+      "pv1voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1voltage"
+      },
+      "pv1current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1current"
+      },
+      "pv1watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv1watt"
+      },
+      "pv2voltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2voltage"
+      },
+      "pv2current": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2current"
+      },
+      "pv2watt": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pv2watt"
+      },
+      "pv3voltage": {
+        "divisor": 10,
+        "source": "pv3voltage"
+      },
+      "pv3current": {
+        "divisor": 10,
+        "source": "pv3current"
+      },
+      "pv3watt": {
+        "divisor": 10,
+        "source": "pv3watt"
+      },
+      "pvpowerout": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvpowerout"
+      },
+      "pvfrequentie": {
+        "unit": "Hz",
+        "device_class": "frequency",
+        "state_class": "measurement",
+        "divisor": 100,
+        "source": "pvfrequentie"
+      },
+      "pvgridvoltage": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage"
+      },
+      "pvgridcurrent": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent"
+      },
+      "pvgridpower": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower"
+      },
+      "pvgridvoltage2": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage2"
+      },
+      "pvgridcurrent2": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent2"
+      },
+      "pvgridpower2": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower2"
+      },
+      "pvgridvoltage3": {
+        "unit": "V",
+        "device_class": "voltage",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridvoltage3"
+      },
+      "pvgridcurrent3": {
+        "unit": "A",
+        "device_class": "current",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridcurrent3"
+      },
+      "pvgridpower3": {
+        "unit": "W",
+        "device_class": "power",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvgridpower3"
+      },
+      "Vac_RS": {
+        "divisor": 10,
+        "source": "Vac_RS"
+      },
+      "Vac_ST": {
+        "divisor": 10,
+        "source": "Vac_ST"
+      },
+      "Vac_TR": {
+        "divisor": 10,
+        "source": "Vac_TR"
+      },
+      "pvenergytoday": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "pvenergytoday"
+      },
+      "pvenergytotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total_increasing",
+        "divisor": 10,
+        "source": "pvenergytotal"
+      },
+      "totworktime": {
+        "unit": "h",
+        "device_class": "duration",
+        "divisor": 7200,
+        "source": "totworktime"
+      },
+      "epv1today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1today"
+      },
+      "epv1total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv1total"
+      },
+      "epv2today": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2today"
+      },
+      "epv2total": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epv2total"
+      },
+      "epvtotal": {
+        "unit": "kWh",
+        "device_class": "energy",
+        "state_class": "total",
+        "divisor": 10,
+        "source": "epvtotal"
+      },
+      "pvtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvtemperature"
+      },
+      "pvipmtemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvipmtemperature"
+      },
+      "pvboottemperature": {
+        "unit": "\u00b0C",
+        "device_class": "temperature",
+        "state_class": "measurement",
+        "divisor": 10,
+        "source": "pvboottemperature"
+      },
+      "temp4": {
+        "divisor": 10,
+        "source": "temp4"
+      },
+      "uwBatVolt_DSP": {
+        "divisor": 10,
+        "source": "uwBatVolt_DSP"
+      },
+      "pbusvolt": {
+        "divisor": 1,
+        "source": "pbusvolt"
+      },
+      "nbusvolt": {
+        "divisor": 1,
+        "source": "nbusvolt"
+      }
+    },
+    "verified_payload_lengths": [
+      575,
+      829
+    ]
+  }
+}

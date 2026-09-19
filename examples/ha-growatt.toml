@@ -1,0 +1,21 @@
+# Development only: use an isolated broker and datalogger.
+# auto recognises only the verified default frame sizes described in the docs.
+wire_profile = "auto"
+
+[relay]
+listen_host = "127.0.0.1"
+listen_port = 5279
+upstream_host = "server.growatt.com"
+upstream_port = 5279
+max_connections = 32
+block_commands = true
+
+[mqtt]
+host = "127.0.0.1"
+port = 1883
+username = ""
+tls = false
+retain_state = false
+entity_profile = "v0_1_9_standard"
+include_all = false
+# Supply the password with HA_GROWATT_MQTT_PASSWORD.

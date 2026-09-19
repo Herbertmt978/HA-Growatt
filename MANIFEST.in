@@ -1,0 +1,5 @@
+include LICENSE README.md uv.lock
+include docs/compatibility.md docs/protocol.md docs/provenance.md
+include examples/ha-growatt.toml
+recursive-include tests *.py *.json
+prune docs/aegis

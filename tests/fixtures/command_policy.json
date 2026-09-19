@@ -1,0 +1,433 @@
+{
+  "records": [
+    {
+      "protocol": 2,
+      "unit": 1,
+      "allowed_functions": [
+        3,
+        4,
+        5,
+        22,
+        25,
+        32,
+        80
+      ]
+    },
+    {
+      "protocol": 2,
+      "unit": 80,
+      "allowed_functions": [
+        3,
+        4,
+        5,
+        22,
+        25,
+        27,
+        80
+      ]
+    },
+    {
+      "protocol": 2,
+      "unit": 81,
+      "allowed_functions": [
+        3,
+        4,
+        5,
+        22,
+        25,
+        41,
+        80
+      ]
+    },
+    {
+      "protocol": 2,
+      "unit": 82,
+      "allowed_functions": [
+        22,
+        25,
+        41,
+        80
+      ]
+    },
+    {
+      "protocol": 5,
+      "unit": 1,
+      "allowed_functions": [
+        3,
+        4,
+        5,
+        22,
+        25,
+        32,
+        80
+      ]
+    },
+    {
+      "protocol": 5,
+      "unit": 80,
+      "allowed_functions": [
+        3,
+        4,
+        5,
+        22,
+        25,
+        27,
+        80
+      ]
+    },
+    {
+      "protocol": 5,
+      "unit": 81,
+      "allowed_functions": [
+        3,
+        4,
+        5,
+        22,
+        25,
+        41,
+        80
+      ]
+    },
+    {
+      "protocol": 5,
+      "unit": 82,
+      "allowed_functions": [
+        22,
+        25,
+        41,
+        80
+      ]
+    },
+    {
+      "protocol": 6,
+      "unit": 1,
+      "allowed_functions": [
+        3,
+        4,
+        5,
+        22,
+        25,
+        32,
+        80
+      ]
+    },
+    {
+      "protocol": 6,
+      "unit": 80,
+      "allowed_functions": [
+        3,
+        4,
+        5,
+        22,
+        25,
+        27,
+        80
+      ]
+    },
+    {
+      "protocol": 6,
+      "unit": 81,
+      "allowed_functions": [
+        3,
+        4,
+        5,
+        22,
+        25,
+        41,
+        80
+      ]
+    },
+    {
+      "protocol": 6,
+      "unit": 82,
+      "allowed_functions": [
+        22,
+        25,
+        41,
+        80
+      ]
+    }
+  ],
+  "exemptions": [
+    {
+      "protocol": 2,
+      "command": 0,
+      "allow_destination": false,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 2,
+      "command": 17,
+      "allow_destination": false,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 2,
+      "command": 31,
+      "allow_destination": false,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 2,
+      "command": 32,
+      "allow_destination": false,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 2,
+      "command": 0,
+      "allow_destination": true,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 2,
+      "command": 17,
+      "allow_destination": true,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 2,
+      "command": 31,
+      "allow_destination": true,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 2,
+      "command": 32,
+      "allow_destination": true,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 5,
+      "command": 0,
+      "allow_destination": false,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 5,
+      "command": 0,
+      "allow_destination": false,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 5,
+      "command": 17,
+      "allow_destination": false,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 5,
+      "command": 17,
+      "allow_destination": false,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 5,
+      "command": 31,
+      "allow_destination": false,
+      "corrupt": false,
+      "forwarded": true
+    },
+    {
+      "protocol": 5,
+      "command": 31,
+      "allow_destination": false,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 5,
+      "command": 32,
+      "allow_destination": false,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 5,
+      "command": 32,
+      "allow_destination": false,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 5,
+      "command": 0,
+      "allow_destination": true,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 5,
+      "command": 0,
+      "allow_destination": true,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 5,
+      "command": 17,
+      "allow_destination": true,
+      "corrupt": false,
+      "forwarded": true
+    },
+    {
+      "protocol": 5,
+      "command": 17,
+      "allow_destination": true,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 5,
+      "command": 31,
+      "allow_destination": true,
+      "corrupt": false,
+      "forwarded": true
+    },
+    {
+      "protocol": 5,
+      "command": 31,
+      "allow_destination": true,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 5,
+      "command": 32,
+      "allow_destination": true,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 5,
+      "command": 32,
+      "allow_destination": true,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 6,
+      "command": 0,
+      "allow_destination": false,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 6,
+      "command": 0,
+      "allow_destination": false,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 6,
+      "command": 17,
+      "allow_destination": false,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 6,
+      "command": 17,
+      "allow_destination": false,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 6,
+      "command": 31,
+      "allow_destination": false,
+      "corrupt": false,
+      "forwarded": true
+    },
+    {
+      "protocol": 6,
+      "command": 31,
+      "allow_destination": false,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 6,
+      "command": 32,
+      "allow_destination": false,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 6,
+      "command": 32,
+      "allow_destination": false,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 6,
+      "command": 0,
+      "allow_destination": true,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 6,
+      "command": 0,
+      "allow_destination": true,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 6,
+      "command": 17,
+      "allow_destination": true,
+      "corrupt": false,
+      "forwarded": true
+    },
+    {
+      "protocol": 6,
+      "command": 17,
+      "allow_destination": true,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 6,
+      "command": 31,
+      "allow_destination": true,
+      "corrupt": false,
+      "forwarded": true
+    },
+    {
+      "protocol": 6,
+      "command": 31,
+      "allow_destination": true,
+      "corrupt": true,
+      "forwarded": false
+    },
+    {
+      "protocol": 6,
+      "command": 32,
+      "allow_destination": true,
+      "corrupt": false,
+      "forwarded": false
+    },
+    {
+      "protocol": 6,
+      "command": 32,
+      "allow_destination": true,
+      "corrupt": true,
+      "forwarded": false
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+pytest-cache-files-*/
+.ruff_cache/
+.venv/
+build/
+dist/
+/ha_growatt-*/
+*.egg-info/
+.coverage
+htmlcov/
+*.pcap
+*.pcapng
+*private*
+.env
+docs/aegis/

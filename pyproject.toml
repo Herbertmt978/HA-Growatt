@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ha-growatt"
+version = "0.1.0.dev0"
+description = "Local Growatt telemetry for Home Assistant"
+requires-python = ">=3.12"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "Herbertmt978"}]
+dependencies = ["paho-mqtt==2.1.0"]
+
+[project.urls]
+Repository = "https://github.com/Herbertmt978/HA-Growatt"
+Issues = "https://github.com/Herbertmt978/HA-Growatt/issues"
+
+[dependency-groups]
+dev = [
+    "build==1.4.3",
+    "jinja2==3.1.6",
+    "pytest==9.0.3",
+    "ruff==0.15.21",
+    "setuptools==82.0.1",
+]
+
+[project.scripts]
+ha-growatt = "ha_growatt.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+ha_growatt = ["wire_profiles.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+filterwarnings = ["error"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
