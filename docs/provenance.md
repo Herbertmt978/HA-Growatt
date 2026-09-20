@@ -44,3 +44,8 @@ The MIT licence applies to this project's implementation. Installed dependencies
 retain their own licence notices. Runtime dependencies are
 [Eclipse Paho MQTT](https://github.com/eclipse-paho/paho.mqtt.python) and
 [Python tzdata](https://github.com/python/tzdata).
+
+The app icon depicts a solar inverter and uses the
+[Growatt wordmark](https://en.growatt.com/) to identify the supported hardware.
+The Growatt name and wordmark belong to Growatt. HA Growatt is an independent
+project.
