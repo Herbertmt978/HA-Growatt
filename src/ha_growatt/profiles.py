@@ -13,6 +13,7 @@ def wire_profiles() -> dict:
 def output_fields(profile: str, include_all: bool = False) -> set[str]:
     schema = wire_profiles()[profile]
     keys = set(schema["numeric_fields"]) | set(schema["text_fields"])
+    keys |= set(schema.get("log_fields", {})) | set(schema.get("constants", {}))
     if not include_all:
         keys -= set(schema["excluded_fields"])
     return {key.strip() for key in keys}

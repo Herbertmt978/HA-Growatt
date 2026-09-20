@@ -10,15 +10,26 @@ from ha_growatt.telemetry import Decoder
 
 FIXTURES = Path(__file__).parent / "fixtures"
 PACKETS = {
-    case["name"]: case for case in json.loads((FIXTURES / "telemetry_cases.json").read_text())
+    case["name"]: case
+    for name in ("telemetry_cases.json", "extra_telemetry_cases.json")
+    for case in json.loads((FIXTURES / name).read_text())
 }
 OBSERVED = json.loads((FIXTURES / "selection_cases.json").read_text())
+EXTRA = json.loads((FIXTURES / "extra_selection_cases.json").read_text())
+for section in OBSERVED:
+    OBSERVED[section].extend(EXTRA[section])
 LAYOUTS = {
     "classic-2": "T02NNNN",
     "classic-5": "T05NNNN",
     "classic-6": "T06NNNN",
     "extended-6": "T06NNNNX",
     **{f"{family}-6": f"T06NNNNX{family.upper()}" for family in ("sph", "mod", "min", "tl3")},
+    "extended-5": "T05NNNNX",
+    "sph-5": "T05NNNNXSPH",
+    "spf-5": "T05NNNNSPF",
+    "spf-6": "T06NNNNSPF",
+    "spa-6": "T06NNNNXSPA",
+    "meter-6": "T060120",
 }
 
 

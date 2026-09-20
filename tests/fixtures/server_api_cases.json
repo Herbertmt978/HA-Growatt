@@ -1,0 +1,512 @@
+[
+  {
+    "method": "GET",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=text&value=123",
+    "wires": [
+      "00010006002401190b3d283024264477425e7761747447726f7761747447726f7761747447726f68616b0244"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"test value\"}",
+    "protocol": 6
+  },
+  {
+    "method": "GET",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=hex&value=123",
+    "wires": [
+      "00010006002401190b3d283024264477425e7761747447726f7761747447726f7761747447726f68616b0244"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"test value\"}",
+    "protocol": 6
+  },
+  {
+    "method": "GET",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=dec&value=123",
+    "wires": [
+      "00010006002401190b3d283024264477425e7761747447726f7761747447726f7761747447726f68616b0244"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"test value\"}",
+    "protocol": 6
+  },
+  {
+    "method": "GET",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=text&value=123",
+    "wires": [
+      "00010006002401050b3d283024264477425e7761747447726f7761747447726f7761747447726f68616bc149"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"\\u0000{\"}",
+    "protocol": 6
+  },
+  {
+    "method": "GET",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=hex&value=123",
+    "wires": [
+      "00010006002401050b3d283024264477425e7761747447726f7761747447726f7761747447726f68616bc149"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"007b\"}",
+    "protocol": 6
+  },
+  {
+    "method": "GET",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=dec&value=123",
+    "wires": [
+      "00010006002401050b3d283024264477425e7761747447726f7761747447726f7761747447726f68616bc149"
+    ],
+    "status": 200,
+    "body": "{\"value\": 123}",
+    "protocol": 6
+  },
+  {
+    "method": "GET",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&value=123&startregister=10&endregister=12&format=dec",
+    "wires": [
+      "00010006002401190b3d283024264477425e7761747447726f7761747447726f7761747447726f68616b0244"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"test value\"}",
+    "protocol": 6
+  },
+  {
+    "method": "GET",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&value=123&startregister=10&endregister=12&format=dec",
+    "wires": [
+      "00010006002401050b3d283024264477425e7761747447726f7761747447726f7761747447726f68616bc149"
+    ],
+    "status": 200,
+    "body": "{\"value\": 123}",
+    "protocol": 6
+  },
+  {
+    "method": "PUT",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=text&value=123",
+    "wires": [
+      "00010006002701180b3d283024264477425e7761747447726f7761747447726f7761747447726f68617745754152d4"
+    ],
+    "status": 200,
+    "body": "OK",
+    "protocol": 6
+  },
+  {
+    "method": "PUT",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=hex&value=123",
+    "wires": [
+      "00010006002701180b3d283024264477425e7761747447726f7761747447726f7761747447726f68617745754152d4"
+    ],
+    "status": 200,
+    "body": "OK",
+    "protocol": 6
+  },
+  {
+    "method": "PUT",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=dec&value=123",
+    "wires": [
+      "00010006002701180b3d283024264477425e7761747447726f7761747447726f7761747447726f68617745754152d4"
+    ],
+    "status": 200,
+    "body": "OK",
+    "protocol": 6
+  },
+  {
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=text&value=123",
+    "wires": [
+      "00010006002501060b3d283024264477425e7761747447726f7761747447726f7761747447726f68504647b4dd"
+    ],
+    "status": 200,
+    "body": "OK",
+    "protocol": 6
+  },
+  {
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=hex&value=123",
+    "wires": [
+      "00010006002401060b3d283024264477425e7761747447726f7761747447726f7761747447726f686057403f"
+    ],
+    "status": 200,
+    "body": "OK",
+    "protocol": 6
+  },
+  {
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=dec&value=123",
+    "wires": [
+      "00010006002401060b3d283024264477425e7761747447726f7761747447726f7761747447726f68610f2a3f"
+    ],
+    "status": 200,
+    "body": "OK",
+    "protocol": 6
+  },
+  {
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=multiregister&startregister=10&endregister=12&value=000100020003&format=hex",
+    "wires": [
+      "00010006002a01100b3d283024264477425e7761747447726f7761747447726f7761747447726f7d61787446726d77620da3"
+    ],
+    "status": null,
+    "body": null,
+    "protocol": 6
+  },
+  {
+    "method": "PUT",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&value=123&startregister=10&endregister=12&format=dec",
+    "wires": [
+      "00010006002701180b3d283024264477425e7761747447726f7761747447726f7761747447726f68617745754152d4"
+    ],
+    "status": 200,
+    "body": "OK",
+    "protocol": 6
+  },
+  {
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&value=123&startregister=10&endregister=12&format=dec",
+    "wires": [
+      "00010006002401060b3d283024264477425e7761747447726f7761747447726f7761747447726f68610f2a3f"
+    ],
+    "status": 200,
+    "body": "OK",
+    "protocol": 6
+  },
+  {
+    "protocol": 2,
+    "method": "GET",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=text&value=123",
+    "wires": [
+      "00010002001001194c4f4747455230303031001f001f"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"test value\"}"
+  },
+  {
+    "protocol": 2,
+    "method": "GET",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=hex&value=123",
+    "wires": [
+      "00010002001001194c4f4747455230303031001f001f"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"test value\"}"
+  },
+  {
+    "protocol": 2,
+    "method": "GET",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=dec&value=123",
+    "wires": [
+      "00010002001001194c4f4747455230303031001f001f"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"test value\"}"
+  },
+  {
+    "protocol": 2,
+    "method": "GET",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=text&value=123",
+    "wires": [
+      "00010002001001054c4f4747455230303031001f001f"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"\\u0000{\"}"
+  },
+  {
+    "protocol": 2,
+    "method": "GET",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=hex&value=123",
+    "wires": [
+      "00010002001001054c4f4747455230303031001f001f"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"007b\"}"
+  },
+  {
+    "protocol": 2,
+    "method": "GET",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=dec&value=123",
+    "wires": [
+      "00010002001001054c4f4747455230303031001f001f"
+    ],
+    "status": 200,
+    "body": "{\"value\": 123}"
+  },
+  {
+    "protocol": 2,
+    "method": "GET",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&value=123&startregister=10&endregister=12&format=dec",
+    "wires": [
+      "00010002001001194c4f4747455230303031001f001f"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"test value\"}"
+  },
+  {
+    "protocol": 2,
+    "method": "GET",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&value=123&startregister=10&endregister=12&format=dec",
+    "wires": [
+      "00010002001001054c4f4747455230303031001f001f"
+    ],
+    "status": 200,
+    "body": "{\"value\": 123}"
+  },
+  {
+    "protocol": 2,
+    "method": "PUT",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=text&value=123",
+    "wires": [
+      "00010002001301184c4f4747455230303031001f0003313233"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 2,
+    "method": "PUT",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=hex&value=123",
+    "wires": [
+      "00010002001301184c4f4747455230303031001f0003313233"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 2,
+    "method": "PUT",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=dec&value=123",
+    "wires": [
+      "00010002001301184c4f4747455230303031001f0003313233"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 2,
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=text&value=123",
+    "wires": [
+      "00010002001101064c4f4747455230303031001f313233"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 2,
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=hex&value=123",
+    "wires": [
+      "00010002001001064c4f4747455230303031001f0123"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 2,
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=dec&value=123",
+    "wires": [
+      "00010002001001064c4f4747455230303031001f007b"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 2,
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=multiregister&startregister=10&endregister=12&value=000100020003&format=hex",
+    "wires": [
+      "00010002001601104c4f4747455230303031000a000c000100020003"
+    ],
+    "status": null,
+    "body": null
+  },
+  {
+    "protocol": 2,
+    "method": "PUT",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&value=123&startregister=10&endregister=12&format=dec",
+    "wires": [
+      "00010002001301184c4f4747455230303031001f0003313233"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 2,
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&value=123&startregister=10&endregister=12&format=dec",
+    "wires": [
+      "00010002001001064c4f4747455230303031001f007b"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 5,
+    "method": "GET",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=text&value=123",
+    "wires": [
+      "00010005001001190b3d283024264477425e777e746be91e"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"test value\"}"
+  },
+  {
+    "protocol": 5,
+    "method": "GET",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=hex&value=123",
+    "wires": [
+      "00010005001001190b3d283024264477425e777e746be91e"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"test value\"}"
+  },
+  {
+    "protocol": 5,
+    "method": "GET",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=dec&value=123",
+    "wires": [
+      "00010005001001190b3d283024264477425e777e746be91e"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"test value\"}"
+  },
+  {
+    "protocol": 5,
+    "method": "GET",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=text&value=123",
+    "wires": [
+      "00010005001001050b3d283024264477425e777e746be002"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"\\u0000{\"}"
+  },
+  {
+    "protocol": 5,
+    "method": "GET",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=hex&value=123",
+    "wires": [
+      "00010005001001050b3d283024264477425e777e746be002"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"007b\"}"
+  },
+  {
+    "protocol": 5,
+    "method": "GET",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=dec&value=123",
+    "wires": [
+      "00010005001001050b3d283024264477425e777e746be002"
+    ],
+    "status": 200,
+    "body": "{\"value\": 123}"
+  },
+  {
+    "protocol": 5,
+    "method": "GET",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&value=123&startregister=10&endregister=12&format=dec",
+    "wires": [
+      "00010005001001190b3d283024264477425e777e746be91e"
+    ],
+    "status": 200,
+    "body": "{\"value\": \"test value\"}"
+  },
+  {
+    "protocol": 5,
+    "method": "GET",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&value=123&startregister=10&endregister=12&format=dec",
+    "wires": [
+      "00010005001001050b3d283024264477425e777e746be002"
+    ],
+    "status": 200,
+    "body": "{\"value\": 123}"
+  },
+  {
+    "protocol": 5,
+    "method": "PUT",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=text&value=123",
+    "wires": [
+      "00010005001301180b3d283024264477425e777e747776405ceaed"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 5,
+    "method": "PUT",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=hex&value=123",
+    "wires": [
+      "00010005001301180b3d283024264477425e777e747776405ceaed"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 5,
+    "method": "PUT",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&format=dec&value=123",
+    "wires": [
+      "00010005001301180b3d283024264477425e777e747776405ceaed"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 5,
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=text&value=123",
+    "wires": [
+      "00010005001101060b3d283024264477425e777e454674743c"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 5,
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=hex&value=123",
+    "wires": [
+      "00010005001001060b3d283024264477425e777e75576040"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 5,
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&format=dec&value=123",
+    "wires": [
+      "00010005001001060b3d283024264477425e777e740f0a40"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 5,
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=multiregister&startregister=10&endregister=12&value=000100020003&format=hex",
+    "wires": [
+      "00010005001601100b3d283024264477425e776b747847736f756177efd3"
+    ],
+    "status": null,
+    "body": null
+  },
+  {
+    "protocol": 5,
+    "method": "PUT",
+    "path": "/datalogger?datalogger=LOGGER0001&command=register&register=31&value=123&startregister=10&endregister=12&format=dec",
+    "wires": [
+      "00010005001301180b3d283024264477425e777e747776405ceaed"
+    ],
+    "status": 200,
+    "body": "OK"
+  },
+  {
+    "protocol": 5,
+    "method": "PUT",
+    "path": "/inverter?inverter=INVERT0001&command=register&register=31&value=123&startregister=10&endregister=12&format=dec",
+    "wires": [
+      "00010005001001060b3d283024264477425e777e740f0a40"
+    ],
+    "status": 200,
+    "body": "OK"
+  }
+]

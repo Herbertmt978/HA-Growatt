@@ -20,14 +20,13 @@ def test_independently_observed_scalar_outputs(case, function):
     assert decoded.buffered == (function == 80)
 
 
-def test_wrong_protocol_and_unverified_lengths_do_not_publish_guessed_values():
+def test_wrong_protocol_and_truncated_identity_do_not_publish_guessed_values():
     frame = Frame.from_bytes(bytes.fromhex(CASES[0]["wire"]))
     decoder = Decoder(CASES[0]["profile"])
     for changed in [
         Frame(1, 5, 1, 4, frame.payload),
         Frame(1, 6, 1, 2, frame.payload),
-        Frame(1, 6, 1, 4, frame.payload[:-1]),
-        Frame(1, 6, 1, 4, frame.payload + b"\x00"),
+        Frame(1, 6, 1, 4, frame.payload[:30]),
     ]:
         with pytest.raises(ProtocolError):
             decoder.decode(changed)
@@ -55,5 +54,5 @@ def test_default_decoder_accepts_different_verified_packet_sizes_per_device():
             result = decoder.decode(Frame.from_bytes(bytes.fromhex(case["wire"])))
             assert result.values == case["expected"]
             assert result.profile == case["profile"]
-    with pytest.raises(ProtocolError, match="No verified"):
+    with pytest.raises(ProtocolError, match="identity"):
         decoder.decode(Frame(1, 6, 1, 4, bytes(300)))

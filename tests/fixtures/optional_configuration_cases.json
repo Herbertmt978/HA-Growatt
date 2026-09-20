@@ -1,0 +1,371 @@
+[
+  {
+    "name": "ini",
+    "ini": "[Generic]\nip=127.0.0.1\nmode=sniff\nverbose=False\nincludeall=True\ninverterid=INVERT0001\ntimezone=Europe/London\ntime=auto\nsendbuf=True\nvalueoffset=8\n[MQTT]\nip=raw.invalid\nport=2883\ntopic=solar/readings\nmtopic=True\nmtopicname=solar/meter\ninverterintopic=True\nretain=True\nauth=True\nuser=synthetic-user\npassword=synthetic-password\n[PVOutput]\npvoutput=False\napikey=synthetic-api-key\nsystemid=12345\npvuplimit=7\npvtemp=True\npvdisv1=True\n[influx]\ninflux=False\nip=influx.invalid\nport=9999\nuser=synthetic-user\npassword=synthetic-password\ndbname=testdb\norg=testorg\nbucket=testbucket\ntoken=synthetic-token\n[extension]\nextension=False\nextname=grotcsv\nextvar={\"outpath\":\"/synthetic\"}\n",
+    "environment": {},
+    "expected": {
+      "mode": "sniff",
+      "verbose": false,
+      "includeall": true,
+      "inverterid": "INVERT0001",
+      "tmzone": "Europe/London",
+      "gtime": "auto",
+      "sendbuf": true,
+      "offset": 6,
+      "mqttip": "raw.invalid",
+      "mqttport": 2883,
+      "mqtttopic": "solar/readings",
+      "mqttmtopic": true,
+      "mqttmtopicname": "solar/meter",
+      "mqttinverterintopic": true,
+      "mqttretain": true,
+      "mqttauth": true,
+      "mqttuser": "synthetic-user",
+      "mqttpsw": "synthetic-password",
+      "pvoutput": false,
+      "pvsystemid": {
+        "1": "12345"
+      },
+      "pvinverterid": {
+        "1": "inverter1"
+      },
+      "pvuplimit": 7,
+      "pvtemp": true,
+      "pvdisv1": true,
+      "influx": false,
+      "influx2": false,
+      "ifip": "influx.invalid",
+      "ifport": 9999,
+      "ifuser": "synthetic-user",
+      "ifpsw": "synthetic-password",
+      "ifdbname": "testdb",
+      "iforg": "testorg",
+      "ifbucket": "testbucket",
+      "iftoken": "synthetic-token",
+      "extension": false,
+      "extname": "grotcsv",
+      "extvar": {
+        "outpath": "/synthetic"
+      },
+      "blockcmd": false,
+      "layout_strict": false,
+      "layout_auto_family": true
+    },
+    "topics": [
+      "solar/readings/INVERT0001",
+      "solar/meter"
+    ]
+  },
+  {
+    "name": "override",
+    "ini": "[Generic]\nip=127.0.0.1\nmode=sniff\nverbose=False\nincludeall=True\ninverterid=INVERT0001\ntimezone=Europe/London\ntime=auto\nsendbuf=True\nvalueoffset=8\n[MQTT]\nip=raw.invalid\nport=2883\ntopic=solar/readings\nmtopic=True\nmtopicname=solar/meter\ninverterintopic=True\nretain=True\nauth=True\nuser=synthetic-user\npassword=synthetic-password\n[PVOutput]\npvoutput=False\napikey=synthetic-api-key\nsystemid=12345\npvuplimit=7\npvtemp=True\npvdisv1=True\n[influx]\ninflux=False\nip=influx.invalid\nport=9999\nuser=synthetic-user\npassword=synthetic-password\ndbname=testdb\norg=testorg\nbucket=testbucket\ntoken=synthetic-token\n[extension]\nextension=False\nextname=grotcsv\nextvar={\"outpath\":\"/synthetic\"}\n",
+    "environment": {
+      "gmode": "proxy",
+      "gverbose": "True",
+      "gtimezone": "UTC",
+      "gsendbuf": "False",
+      "gtime": "server",
+      "gmqttip": "override.invalid",
+      "gmqttport": "3883",
+      "gmqtttopic": "other",
+      "gmqttmtopic": "False",
+      "gmqttinverterintopic": "False",
+      "gmqttretain": "False",
+      "gmqttuser": "override-user",
+      "gmqttpassword": "override-password",
+      "gextension": "True"
+    },
+    "expected": {
+      "mode": "proxy",
+      "verbose": true,
+      "includeall": true,
+      "inverterid": "INVERT0001",
+      "tmzone": "UTC",
+      "gtime": "server",
+      "sendbuf": false,
+      "offset": 6,
+      "mqttip": "override.invalid",
+      "mqttport": 3883,
+      "mqtttopic": "other",
+      "mqttmtopic": false,
+      "mqttmtopicname": "solar/meter",
+      "mqttinverterintopic": "False",
+      "mqttretain": false,
+      "mqttauth": true,
+      "mqttuser": "override-user",
+      "mqttpsw": "override-password",
+      "pvoutput": false,
+      "pvsystemid": {
+        "1": "12345"
+      },
+      "pvinverterid": {
+        "1": "inverter1"
+      },
+      "pvuplimit": 7,
+      "pvtemp": true,
+      "pvdisv1": true,
+      "influx": false,
+      "influx2": false,
+      "ifip": "influx.invalid",
+      "ifport": 9999,
+      "ifuser": "synthetic-user",
+      "ifpsw": "synthetic-password",
+      "ifdbname": "testdb",
+      "iforg": "testorg",
+      "ifbucket": "testbucket",
+      "iftoken": "synthetic-token",
+      "extension": true,
+      "extname": "grotcsv",
+      "extvar": {
+        "outpath": "/synthetic"
+      },
+      "blockcmd": false,
+      "layout_strict": false,
+      "layout_auto_family": true
+    },
+    "topics": [
+      "other/INVERT0001",
+      "other/LOGGER0001"
+    ]
+  },
+  {
+    "name": "pv-one",
+    "ini": "[Generic]\nip=127.0.0.1\nmode=sniff\nverbose=False\nincludeall=True\ninverterid=INVERT0001\ntimezone=Europe/London\ntime=auto\nsendbuf=True\nvalueoffset=8\n[MQTT]\nip=raw.invalid\nport=2883\ntopic=solar/readings\nmtopic=True\nmtopicname=solar/meter\ninverterintopic=True\nretain=True\nauth=True\nuser=synthetic-user\npassword=synthetic-password\n[PVOutput]\npvoutput=False\napikey=synthetic-api-key\nsystemid=12345\npvuplimit=7\npvtemp=True\npvdisv1=True\n[influx]\ninflux=False\nip=influx.invalid\nport=9999\nuser=synthetic-user\npassword=synthetic-password\ndbname=testdb\norg=testorg\nbucket=testbucket\ntoken=synthetic-token\n[extension]\nextension=False\nextname=grotcsv\nextvar={\"outpath\":\"/synthetic\"}\n",
+    "environment": {
+      "gpvoutput": "True",
+      "gpvsystemid": "45678"
+    },
+    "expected": {
+      "mode": "sniff",
+      "verbose": false,
+      "includeall": true,
+      "inverterid": "INVERT0001",
+      "tmzone": "Europe/London",
+      "gtime": "auto",
+      "sendbuf": true,
+      "offset": 6,
+      "mqttip": "raw.invalid",
+      "mqttport": 2883,
+      "mqtttopic": "solar/readings",
+      "mqttmtopic": true,
+      "mqttmtopicname": "solar/meter",
+      "mqttinverterintopic": true,
+      "mqttretain": true,
+      "mqttauth": true,
+      "mqttuser": "synthetic-user",
+      "mqttpsw": "synthetic-password",
+      "pvoutput": true,
+      "pvsystemid": {
+        "1": "45678"
+      },
+      "pvinverterid": {
+        "1": "inverter1"
+      },
+      "pvuplimit": 7,
+      "pvtemp": true,
+      "pvdisv1": true,
+      "influx": false,
+      "influx2": false,
+      "ifip": "influx.invalid",
+      "ifport": 9999,
+      "ifuser": "synthetic-user",
+      "ifpsw": "synthetic-password",
+      "ifdbname": "testdb",
+      "iforg": "testorg",
+      "ifbucket": "testbucket",
+      "iftoken": "synthetic-token",
+      "extension": false,
+      "extname": "grotcsv",
+      "extvar": {
+        "outpath": "/synthetic"
+      },
+      "blockcmd": false,
+      "layout_strict": false,
+      "layout_auto_family": true
+    },
+    "topics": [
+      "solar/readings/INVERT0001",
+      "solar/meter"
+    ]
+  },
+  {
+    "name": "pv-two",
+    "ini": "[Generic]\nip=127.0.0.1\nmode=sniff\nverbose=False\nincludeall=True\ninverterid=INVERT0001\ntimezone=Europe/London\ntime=auto\nsendbuf=True\nvalueoffset=8\n[MQTT]\nip=raw.invalid\nport=2883\ntopic=solar/readings\nmtopic=True\nmtopicname=solar/meter\ninverterintopic=True\nretain=True\nauth=True\nuser=synthetic-user\npassword=synthetic-password\n[PVOutput]\npvoutput=False\napikey=synthetic-api-key\npvinverters=2\nsystemid1=12345\ninverterid1=INVERT0001\nsystemid2=23456\ninverterid2=INVERT0002\npvuplimit=7\npvtemp=True\npvdisv1=True\n[influx]\ninflux=False\nip=influx.invalid\nport=9999\nuser=synthetic-user\npassword=synthetic-password\ndbname=testdb\norg=testorg\nbucket=testbucket\ntoken=synthetic-token\n[extension]\nextension=False\nextname=grotcsv\nextvar={\"outpath\":\"/synthetic\"}\n",
+    "environment": {
+      "gpvoutput": "True"
+    },
+    "expected": {
+      "mode": "sniff",
+      "verbose": false,
+      "includeall": true,
+      "inverterid": "INVERT0001",
+      "tmzone": "Europe/London",
+      "gtime": "auto",
+      "sendbuf": true,
+      "offset": 6,
+      "mqttip": "raw.invalid",
+      "mqttport": 2883,
+      "mqtttopic": "solar/readings",
+      "mqttmtopic": true,
+      "mqttmtopicname": "solar/meter",
+      "mqttinverterintopic": true,
+      "mqttretain": true,
+      "mqttauth": true,
+      "mqttuser": "synthetic-user",
+      "mqttpsw": "synthetic-password",
+      "pvoutput": true,
+      "pvsystemid": {
+        "1": "12345",
+        "2": "23456"
+      },
+      "pvinverterid": {
+        "1": "INVERT0001",
+        "2": "INVERT0002"
+      },
+      "pvuplimit": 7,
+      "pvtemp": true,
+      "pvdisv1": true,
+      "influx": false,
+      "influx2": false,
+      "ifip": "influx.invalid",
+      "ifport": 9999,
+      "ifuser": "synthetic-user",
+      "ifpsw": "synthetic-password",
+      "ifdbname": "testdb",
+      "iforg": "testorg",
+      "ifbucket": "testbucket",
+      "iftoken": "synthetic-token",
+      "extension": false,
+      "extname": "grotcsv",
+      "extvar": {
+        "outpath": "/synthetic"
+      },
+      "blockcmd": false,
+      "layout_strict": false,
+      "layout_auto_family": true
+    },
+    "topics": [
+      "solar/readings/INVERT0001",
+      "solar/meter"
+    ]
+  },
+  {
+    "name": "influx-one",
+    "ini": "[Generic]\nip=127.0.0.1\nmode=sniff\nverbose=False\nincludeall=True\ninverterid=INVERT0001\ntimezone=Europe/London\ntime=auto\nsendbuf=True\nvalueoffset=8\n[MQTT]\nip=raw.invalid\nport=2883\ntopic=solar/readings\nmtopic=True\nmtopicname=solar/meter\ninverterintopic=True\nretain=True\nauth=True\nuser=synthetic-user\npassword=synthetic-password\n[PVOutput]\npvoutput=False\napikey=synthetic-api-key\nsystemid=12345\npvuplimit=7\npvtemp=True\npvdisv1=True\n[influx]\ninflux=False\nip=influx.invalid\nport=9999\nuser=synthetic-user\npassword=synthetic-password\ndbname=testdb\norg=testorg\nbucket=testbucket\ntoken=synthetic-token\n[extension]\nextension=False\nextname=grotcsv\nextvar={\"outpath\":\"/synthetic\"}\n",
+    "environment": {
+      "ginflux": "True"
+    },
+    "expected": {
+      "mode": "sniff",
+      "verbose": false,
+      "includeall": true,
+      "inverterid": "INVERT0001",
+      "tmzone": "Europe/London",
+      "gtime": "auto",
+      "sendbuf": true,
+      "offset": 6,
+      "mqttip": "raw.invalid",
+      "mqttport": 2883,
+      "mqtttopic": "solar/readings",
+      "mqttmtopic": true,
+      "mqttmtopicname": "solar/meter",
+      "mqttinverterintopic": true,
+      "mqttretain": true,
+      "mqttauth": true,
+      "mqttuser": "synthetic-user",
+      "mqttpsw": "synthetic-password",
+      "pvoutput": false,
+      "pvsystemid": {
+        "1": "12345"
+      },
+      "pvinverterid": {
+        "1": "inverter1"
+      },
+      "pvuplimit": 7,
+      "pvtemp": true,
+      "pvdisv1": true,
+      "influx": true,
+      "influx2": false,
+      "ifip": "influx.invalid",
+      "ifport": 9999,
+      "ifuser": "synthetic-user",
+      "ifpsw": "synthetic-password",
+      "ifdbname": "testdb",
+      "iforg": "testorg",
+      "ifbucket": "testbucket",
+      "iftoken": "synthetic-token",
+      "extension": false,
+      "extname": "grotcsv",
+      "extvar": {
+        "outpath": "/synthetic"
+      },
+      "blockcmd": false,
+      "layout_strict": false,
+      "layout_auto_family": true
+    },
+    "topics": [
+      "solar/readings/INVERT0001",
+      "solar/meter"
+    ]
+  },
+  {
+    "name": "influx-two",
+    "ini": "[Generic]\nip=127.0.0.1\nmode=sniff\nverbose=False\nincludeall=True\ninverterid=INVERT0001\ntimezone=Europe/London\ntime=auto\nsendbuf=True\nvalueoffset=8\n[MQTT]\nip=raw.invalid\nport=2883\ntopic=solar/readings\nmtopic=True\nmtopicname=solar/meter\ninverterintopic=True\nretain=True\nauth=True\nuser=synthetic-user\npassword=synthetic-password\n[PVOutput]\npvoutput=False\napikey=synthetic-api-key\nsystemid=12345\npvuplimit=7\npvtemp=True\npvdisv1=True\n[influx]\ninflux=False\nip=influx.invalid\nport=9999\nuser=synthetic-user\npassword=synthetic-password\ndbname=testdb\norg=testorg\nbucket=testbucket\ntoken=synthetic-token\n[extension]\nextension=False\nextname=grotcsv\nextvar={\"outpath\":\"/synthetic\"}\n",
+    "environment": {
+      "ginflux": "True",
+      "ginflux2": "True"
+    },
+    "expected": {
+      "mode": "sniff",
+      "verbose": false,
+      "includeall": true,
+      "inverterid": "INVERT0001",
+      "tmzone": "Europe/London",
+      "gtime": "auto",
+      "sendbuf": true,
+      "offset": 6,
+      "mqttip": "raw.invalid",
+      "mqttport": 2883,
+      "mqtttopic": "solar/readings",
+      "mqttmtopic": true,
+      "mqttmtopicname": "solar/meter",
+      "mqttinverterintopic": true,
+      "mqttretain": true,
+      "mqttauth": true,
+      "mqttuser": "synthetic-user",
+      "mqttpsw": "synthetic-password",
+      "pvoutput": false,
+      "pvsystemid": {
+        "1": "12345"
+      },
+      "pvinverterid": {
+        "1": "inverter1"
+      },
+      "pvuplimit": 7,
+      "pvtemp": true,
+      "pvdisv1": true,
+      "influx": true,
+      "influx2": true,
+      "ifip": "influx.invalid",
+      "ifport": 9999,
+      "ifuser": "synthetic-user",
+      "ifpsw": "synthetic-password",
+      "ifdbname": "testdb",
+      "iforg": "testorg",
+      "ifbucket": "testbucket",
+      "iftoken": "synthetic-token",
+      "extension": false,
+      "extname": "grotcsv",
+      "extvar": {
+        "outpath": "/synthetic"
+      },
+      "blockcmd": false,
+      "layout_strict": false,
+      "layout_auto_family": true
+    },
+    "topics": [
+      "solar/readings/INVERT0001",
+      "solar/meter"
+    ]
+  }
+]

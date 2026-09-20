@@ -11,7 +11,10 @@ readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{name = "Herbertmt978"}]
-dependencies = ["paho-mqtt==2.1.0"]
+dependencies = [
+    "paho-mqtt==2.1.0",
+    "tzdata>=2026.4",
+]
 
 [project.urls]
 Repository = "https://github.com/Herbertmt978/HA-Growatt"

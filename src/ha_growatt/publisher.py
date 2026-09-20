@@ -29,6 +29,7 @@ class MqttSettings:
     delivery_seconds: float = 5
     entity_profile: str = "v0_1_9_standard"
     include_all: bool = False
+    client_id: str = ""
 
     def __post_init__(self) -> None:
         if (
@@ -54,7 +55,9 @@ class Publisher:
 
     def __init__(self, settings: MqttSettings) -> None:
         self.settings = settings
-        self._client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, protocol=mqtt.MQTTv311)
+        self._client = mqtt.Client(
+            mqtt.CallbackAPIVersion.VERSION2, client_id=settings.client_id, protocol=mqtt.MQTTv311
+        )
         self._connected = threading.Event()
         self._lock = threading.Lock()
         self._generation = 0
@@ -97,10 +100,10 @@ class Publisher:
         self._client.connect_async(self.settings.host, self.settings.port, keepalive=60)
         self._client.loop_start()
 
-    async def _send(self, topic: str, payload: str, retain: bool) -> None:
+    async def _send(self, topic: str, payload: str, retain: bool, *, qos: int = 1) -> None:
         if not self._connected.is_set():
             raise ConnectionError("MQTT is not connected")
-        receipt = self._client.publish(topic, payload, qos=1, retain=retain)
+        receipt = self._client.publish(topic, payload, qos=qos, retain=retain)
         if receipt.rc != mqtt.MQTT_ERR_SUCCESS:
             raise ConnectionError("MQTT rejected the publication")
         async with asyncio.timeout(self.settings.delivery_seconds):
@@ -110,9 +113,15 @@ class Publisher:
                 await asyncio.sleep(0.01)
 
     async def publish(self, telemetry: Telemetry) -> None:
-        identity = telemetry.values.get("pvserial")
+        identity = telemetry.device_id or telemetry.values.get("pvserial")
         if not isinstance(identity, str):
             raise ValueError("Telemetry requires an inverter identity")
+        if not self._connected.is_set():
+            connected = await asyncio.to_thread(
+                self._connected.wait, self.settings.delivery_seconds
+            )
+            if not connected:
+                raise ConnectionError("MQTT did not connect before the delivery deadline")
         async with self._publish_lock:
             with self._lock:
                 generation = self._generation
@@ -123,11 +132,17 @@ class Publisher:
                     profile=self.settings.entity_profile,
                     wire_profile=telemetry.profile,
                     include_all=self.settings.include_all,
+                    sensor_metadata=telemetry.sensor_metadata,
                 )
                 for topic, config in configs.items():
                     await self._send(topic, json.dumps(config, separators=(",", ":")), True)
                 previous = self._topics.get(identity, set())
-                if telemetry.profile in {"mod-6", "extended-6"}:
+                if telemetry.profile in {
+                    "mod-6",
+                    "extended-6",
+                    "custom:T06NNNNXMOD",
+                    "custom:T06NNNNX",
+                }:
                     previous = previous | lineage_topics(identity)
                 pending = self._pending_cleanup.setdefault(identity, set())
                 pending.update(previous - configs.keys())
@@ -142,7 +157,7 @@ class Publisher:
                     _LOG.warning("Discovery cleanup incomplete; retrying on the next packet")
                     break
                 pending.remove(topic)
-            payload = state_message(telemetry.values, datetime.now(UTC))
+            payload = state_message(telemetry.values, datetime.now(UTC), identity)
             await self._send(state_topic(identity), payload, self.settings.retain_state)
 
     async def close(self) -> None:

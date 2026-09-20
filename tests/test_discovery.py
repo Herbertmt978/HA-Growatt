@@ -1,10 +1,32 @@
 import json
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
 from jinja2 import Environment
 
 from ha_growatt.discovery import STANDARD_SENSORS, discovery_messages, state_message, state_topic
+
+
+@pytest.mark.parametrize(
+    "case",
+    json.loads((Path(__file__).parent / "fixtures/discovery_contracts.json").read_text()),
+    ids=lambda case: f"{case['profile']}-{case['include_all']}",
+)
+def test_observed_full_discovery_names_identities_and_measurement_metadata(case):
+    configurations = discovery_messages(
+        "INVERT0001", wire_profile=case["profile"], profile="all", include_all=case["include_all"]
+    )
+    actual = {
+        item["unique_id"].removeprefix("grott_INVERT0001_"): {
+            key: value
+            for key, value in item.items()
+            if key not in {"value_template", "device", "origin"}
+        }
+        for item in configurations.values()
+        if not item["unique_id"].endswith("_grott_last_push")
+    }
+    assert actual == case["configs"]
 
 
 def test_existing_sensor_and_device_identity_survives_rebranding():

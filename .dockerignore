@@ -1,0 +1,12 @@
+**
+!Dockerfile
+!pyproject.toml
+!requirements.lock
+!requirements-build.lock
+!README.md
+!LICENSE
+!src/
+!src/**
+src/**/__pycache__/
+src/**/*.pyc
+src/**/*.egg-info/

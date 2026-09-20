@@ -1,0 +1,1478 @@
+[
+  {
+    "mode": "raw",
+    "time": "auto",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "mqtt",
+        "topic": "energy/growatt",
+        "message": {
+          "device": "INVERT0001",
+          "time": "2026-09-19T12:34:56",
+          "buffered": "no",
+          "values": {
+            "datalogserial": "LOGGER0001",
+            "pvserial": "INVERT0001",
+            "pvstatus": 1,
+            "pvpowerin": 42,
+            "pv1voltage": 2300,
+            "pv1current": 5,
+            "pv1watt": 35,
+            "pv2voltage": 2300,
+            "pv2current": 24,
+            "pv2watt": 38,
+            "pvpowerout": 4,
+            "pvfrequentie": 5000,
+            "pvgridvoltage": 2300,
+            "pvgridcurrent": 3,
+            "pvgridpower": 6,
+            "pvgridvoltage2": 2300,
+            "pvgridcurrent2": 27,
+            "pvgridpower2": 5,
+            "pvgridvoltage3": 2300,
+            "pvgridcurrent3": 6,
+            "pvgridpower3": 36,
+            "pvenergytoday": 28,
+            "pvenergytotal": 4,
+            "totworktime": 37,
+            "pvtemperature": 250,
+            "pvipmtemperature": 250,
+            "epv1today": 36,
+            "epv1total": 9,
+            "epv2today": 19,
+            "epv2total": 27,
+            "epvtotal": 10
+          }
+        },
+        "options": {
+          "qos": 0,
+          "retain": false,
+          "hostname": "localhost",
+          "port": 1883,
+          "keepalive": 60,
+          "auth": null
+        }
+      }
+    ]
+  },
+  {
+    "mode": "raw",
+    "time": "server",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "mqtt",
+        "topic": "energy/growatt",
+        "message": {
+          "device": "INVERT0001",
+          "time": "2026-09-20T09:30:00",
+          "buffered": "no",
+          "values": {
+            "datalogserial": "LOGGER0001",
+            "pvserial": "INVERT0001",
+            "pvstatus": 1,
+            "pvpowerin": 42,
+            "pv1voltage": 2300,
+            "pv1current": 5,
+            "pv1watt": 35,
+            "pv2voltage": 2300,
+            "pv2current": 24,
+            "pv2watt": 38,
+            "pvpowerout": 4,
+            "pvfrequentie": 5000,
+            "pvgridvoltage": 2300,
+            "pvgridcurrent": 3,
+            "pvgridpower": 6,
+            "pvgridvoltage2": 2300,
+            "pvgridcurrent2": 27,
+            "pvgridpower2": 5,
+            "pvgridvoltage3": 2300,
+            "pvgridcurrent3": 6,
+            "pvgridpower3": 36,
+            "pvenergytoday": 28,
+            "pvenergytotal": 4,
+            "totworktime": 37,
+            "pvtemperature": 250,
+            "pvipmtemperature": 250,
+            "epv1today": 36,
+            "epv1total": 9,
+            "epv2today": 19,
+            "epv2total": 27,
+            "epvtotal": 10
+          }
+        },
+        "options": {
+          "qos": 0,
+          "retain": false,
+          "hostname": "localhost",
+          "port": 1883,
+          "keepalive": 60,
+          "auth": null
+        }
+      }
+    ]
+  },
+  {
+    "mode": "raw",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "mqtt",
+        "topic": "energy/growatt",
+        "message": {
+          "device": "INVERT0001",
+          "time": "2026-09-19T12:34:56",
+          "buffered": "yes",
+          "values": {
+            "datalogserial": "LOGGER0001",
+            "pvserial": "INVERT0001",
+            "pvstatus": 1,
+            "pvpowerin": 42,
+            "pv1voltage": 2300,
+            "pv1current": 5,
+            "pv1watt": 35,
+            "pv2voltage": 2300,
+            "pv2current": 24,
+            "pv2watt": 38,
+            "pvpowerout": 4,
+            "pvfrequentie": 5000,
+            "pvgridvoltage": 2300,
+            "pvgridcurrent": 3,
+            "pvgridpower": 6,
+            "pvgridvoltage2": 2300,
+            "pvgridcurrent2": 27,
+            "pvgridpower2": 5,
+            "pvgridvoltage3": 2300,
+            "pvgridcurrent3": 6,
+            "pvgridpower3": 36,
+            "pvenergytoday": 28,
+            "pvenergytotal": 4,
+            "totworktime": 37,
+            "pvtemperature": 250,
+            "pvipmtemperature": 250,
+            "epv1today": 36,
+            "epv1total": 9,
+            "epv2today": 19,
+            "epv2total": 27,
+            "epvtotal": 10
+          }
+        },
+        "options": {
+          "qos": 0,
+          "retain": false,
+          "hostname": "localhost",
+          "port": 1883,
+          "keepalive": 60,
+          "auth": null
+        }
+      }
+    ]
+  },
+  {
+    "mode": "raw",
+    "time": "server",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "mqtt",
+        "topic": "energy/growatt",
+        "message": {
+          "device": "INVERT0001",
+          "time": "2026-09-19T12:34:56",
+          "buffered": "yes",
+          "values": {
+            "datalogserial": "LOGGER0001",
+            "pvserial": "INVERT0001",
+            "pvstatus": 1,
+            "pvpowerin": 42,
+            "pv1voltage": 2300,
+            "pv1current": 5,
+            "pv1watt": 35,
+            "pv2voltage": 2300,
+            "pv2current": 24,
+            "pv2watt": 38,
+            "pvpowerout": 4,
+            "pvfrequentie": 5000,
+            "pvgridvoltage": 2300,
+            "pvgridcurrent": 3,
+            "pvgridpower": 6,
+            "pvgridvoltage2": 2300,
+            "pvgridcurrent2": 27,
+            "pvgridpower2": 5,
+            "pvgridvoltage3": 2300,
+            "pvgridcurrent3": 6,
+            "pvgridpower3": 36,
+            "pvenergytoday": 28,
+            "pvenergytotal": 4,
+            "totworktime": 37,
+            "pvtemperature": 250,
+            "pvipmtemperature": 250,
+            "epv1today": 36,
+            "epv1total": 9,
+            "epv2today": 19,
+            "epv2total": 27,
+            "epvtotal": 10
+          }
+        },
+        "options": {
+          "qos": 0,
+          "retain": false,
+          "hostname": "localhost",
+          "port": 1883,
+          "keepalive": 60,
+          "auth": null
+        }
+      }
+    ]
+  },
+  {
+    "mode": "raw",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": false,
+    "case": "classic-6-255-False-7",
+    "captures": []
+  },
+  {
+    "mode": "topic-device",
+    "time": "auto",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "mqtt",
+        "topic": "energy/growatt/INVERT0001",
+        "message": {
+          "device": "INVERT0001",
+          "time": "2026-09-19T12:34:56",
+          "buffered": "no",
+          "values": {
+            "datalogserial": "LOGGER0001",
+            "pvserial": "INVERT0001",
+            "pvstatus": 1,
+            "pvpowerin": 42,
+            "pv1voltage": 2300,
+            "pv1current": 5,
+            "pv1watt": 35,
+            "pv2voltage": 2300,
+            "pv2current": 24,
+            "pv2watt": 38,
+            "pvpowerout": 4,
+            "pvfrequentie": 5000,
+            "pvgridvoltage": 2300,
+            "pvgridcurrent": 3,
+            "pvgridpower": 6,
+            "pvgridvoltage2": 2300,
+            "pvgridcurrent2": 27,
+            "pvgridpower2": 5,
+            "pvgridvoltage3": 2300,
+            "pvgridcurrent3": 6,
+            "pvgridpower3": 36,
+            "pvenergytoday": 28,
+            "pvenergytotal": 4,
+            "totworktime": 37,
+            "pvtemperature": 250,
+            "pvipmtemperature": 250,
+            "epv1today": 36,
+            "epv1total": 9,
+            "epv2today": 19,
+            "epv2total": 27,
+            "epvtotal": 10
+          }
+        },
+        "options": {
+          "qos": 0,
+          "retain": false,
+          "hostname": "localhost",
+          "port": 1883,
+          "keepalive": 60,
+          "auth": null
+        }
+      }
+    ]
+  },
+  {
+    "mode": "topic-device",
+    "time": "server",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "mqtt",
+        "topic": "energy/growatt/INVERT0001",
+        "message": {
+          "device": "INVERT0001",
+          "time": "2026-09-20T09:30:00",
+          "buffered": "no",
+          "values": {
+            "datalogserial": "LOGGER0001",
+            "pvserial": "INVERT0001",
+            "pvstatus": 1,
+            "pvpowerin": 42,
+            "pv1voltage": 2300,
+            "pv1current": 5,
+            "pv1watt": 35,
+            "pv2voltage": 2300,
+            "pv2current": 24,
+            "pv2watt": 38,
+            "pvpowerout": 4,
+            "pvfrequentie": 5000,
+            "pvgridvoltage": 2300,
+            "pvgridcurrent": 3,
+            "pvgridpower": 6,
+            "pvgridvoltage2": 2300,
+            "pvgridcurrent2": 27,
+            "pvgridpower2": 5,
+            "pvgridvoltage3": 2300,
+            "pvgridcurrent3": 6,
+            "pvgridpower3": 36,
+            "pvenergytoday": 28,
+            "pvenergytotal": 4,
+            "totworktime": 37,
+            "pvtemperature": 250,
+            "pvipmtemperature": 250,
+            "epv1today": 36,
+            "epv1total": 9,
+            "epv2today": 19,
+            "epv2total": 27,
+            "epvtotal": 10
+          }
+        },
+        "options": {
+          "qos": 0,
+          "retain": false,
+          "hostname": "localhost",
+          "port": 1883,
+          "keepalive": 60,
+          "auth": null
+        }
+      }
+    ]
+  },
+  {
+    "mode": "topic-device",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "mqtt",
+        "topic": "energy/growatt/INVERT0001",
+        "message": {
+          "device": "INVERT0001",
+          "time": "2026-09-19T12:34:56",
+          "buffered": "yes",
+          "values": {
+            "datalogserial": "LOGGER0001",
+            "pvserial": "INVERT0001",
+            "pvstatus": 1,
+            "pvpowerin": 42,
+            "pv1voltage": 2300,
+            "pv1current": 5,
+            "pv1watt": 35,
+            "pv2voltage": 2300,
+            "pv2current": 24,
+            "pv2watt": 38,
+            "pvpowerout": 4,
+            "pvfrequentie": 5000,
+            "pvgridvoltage": 2300,
+            "pvgridcurrent": 3,
+            "pvgridpower": 6,
+            "pvgridvoltage2": 2300,
+            "pvgridcurrent2": 27,
+            "pvgridpower2": 5,
+            "pvgridvoltage3": 2300,
+            "pvgridcurrent3": 6,
+            "pvgridpower3": 36,
+            "pvenergytoday": 28,
+            "pvenergytotal": 4,
+            "totworktime": 37,
+            "pvtemperature": 250,
+            "pvipmtemperature": 250,
+            "epv1today": 36,
+            "epv1total": 9,
+            "epv2today": 19,
+            "epv2total": 27,
+            "epvtotal": 10
+          }
+        },
+        "options": {
+          "qos": 0,
+          "retain": false,
+          "hostname": "localhost",
+          "port": 1883,
+          "keepalive": 60,
+          "auth": null
+        }
+      }
+    ]
+  },
+  {
+    "mode": "topic-device",
+    "time": "server",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "mqtt",
+        "topic": "energy/growatt/INVERT0001",
+        "message": {
+          "device": "INVERT0001",
+          "time": "2026-09-19T12:34:56",
+          "buffered": "yes",
+          "values": {
+            "datalogserial": "LOGGER0001",
+            "pvserial": "INVERT0001",
+            "pvstatus": 1,
+            "pvpowerin": 42,
+            "pv1voltage": 2300,
+            "pv1current": 5,
+            "pv1watt": 35,
+            "pv2voltage": 2300,
+            "pv2current": 24,
+            "pv2watt": 38,
+            "pvpowerout": 4,
+            "pvfrequentie": 5000,
+            "pvgridvoltage": 2300,
+            "pvgridcurrent": 3,
+            "pvgridpower": 6,
+            "pvgridvoltage2": 2300,
+            "pvgridcurrent2": 27,
+            "pvgridpower2": 5,
+            "pvgridvoltage3": 2300,
+            "pvgridcurrent3": 6,
+            "pvgridpower3": 36,
+            "pvenergytoday": 28,
+            "pvenergytotal": 4,
+            "totworktime": 37,
+            "pvtemperature": 250,
+            "pvipmtemperature": 250,
+            "epv1today": 36,
+            "epv1total": 9,
+            "epv2today": 19,
+            "epv2total": 27,
+            "epvtotal": 10
+          }
+        },
+        "options": {
+          "qos": 0,
+          "retain": false,
+          "hostname": "localhost",
+          "port": 1883,
+          "keepalive": 60,
+          "auth": null
+        }
+      }
+    ]
+  },
+  {
+    "mode": "topic-device",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": false,
+    "case": "classic-6-255-False-7",
+    "captures": []
+  },
+  {
+    "mode": "pvoutput",
+    "time": "auto",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "http",
+        "url": "https://pvoutput.org/service/r2/addstatus.jsp",
+        "data": {
+          "d": "20260919",
+          "t": "12:34",
+          "v2": 0.4,
+          "v6": 230.0,
+          "v1": 2800
+        },
+        "headers": {
+          "X-Pvoutput-Apikey": "synthetic-api-key",
+          "X-Pvoutput-SystemId": "12345"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "pvoutput",
+    "time": "server",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "http",
+        "url": "https://pvoutput.org/service/r2/addstatus.jsp",
+        "data": {
+          "d": "20260920",
+          "t": "09:30",
+          "v2": 0.4,
+          "v6": 230.0,
+          "v1": 2800
+        },
+        "headers": {
+          "X-Pvoutput-Apikey": "synthetic-api-key",
+          "X-Pvoutput-SystemId": "12345"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "pvoutput",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "http",
+        "url": "https://pvoutput.org/service/r2/addstatus.jsp",
+        "data": {
+          "d": "20260919",
+          "t": "12:34",
+          "v2": 0.4,
+          "v6": 230.0,
+          "v1": 2800
+        },
+        "headers": {
+          "X-Pvoutput-Apikey": "synthetic-api-key",
+          "X-Pvoutput-SystemId": "12345"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "pvoutput",
+    "time": "server",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "http",
+        "url": "https://pvoutput.org/service/r2/addstatus.jsp",
+        "data": {
+          "d": "20260919",
+          "t": "12:34",
+          "v2": 0.4,
+          "v6": 230.0,
+          "v1": 2800
+        },
+        "headers": {
+          "X-Pvoutput-Apikey": "synthetic-api-key",
+          "X-Pvoutput-SystemId": "12345"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "pvoutput",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": false,
+    "case": "classic-6-255-False-7",
+    "captures": []
+  },
+  {
+    "mode": "pvoutput-temp",
+    "time": "auto",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "http",
+        "url": "https://pvoutput.org/service/r2/addstatus.jsp",
+        "data": {
+          "d": "20260919",
+          "t": "12:34",
+          "v2": 0.4,
+          "v6": 230.0,
+          "v1": 2800,
+          "v5": 25.0
+        },
+        "headers": {
+          "X-Pvoutput-Apikey": "synthetic-api-key",
+          "X-Pvoutput-SystemId": "12345"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "pvoutput-temp",
+    "time": "server",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "http",
+        "url": "https://pvoutput.org/service/r2/addstatus.jsp",
+        "data": {
+          "d": "20260920",
+          "t": "09:30",
+          "v2": 0.4,
+          "v6": 230.0,
+          "v1": 2800,
+          "v5": 25.0
+        },
+        "headers": {
+          "X-Pvoutput-Apikey": "synthetic-api-key",
+          "X-Pvoutput-SystemId": "12345"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "pvoutput-temp",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "http",
+        "url": "https://pvoutput.org/service/r2/addstatus.jsp",
+        "data": {
+          "d": "20260919",
+          "t": "12:34",
+          "v2": 0.4,
+          "v6": 230.0,
+          "v1": 2800,
+          "v5": 25.0
+        },
+        "headers": {
+          "X-Pvoutput-Apikey": "synthetic-api-key",
+          "X-Pvoutput-SystemId": "12345"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "pvoutput-temp",
+    "time": "server",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "http",
+        "url": "https://pvoutput.org/service/r2/addstatus.jsp",
+        "data": {
+          "d": "20260919",
+          "t": "12:34",
+          "v2": 0.4,
+          "v6": 230.0,
+          "v1": 2800,
+          "v5": 25.0
+        },
+        "headers": {
+          "X-Pvoutput-Apikey": "synthetic-api-key",
+          "X-Pvoutput-SystemId": "12345"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "pvoutput-temp",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": false,
+    "case": "classic-6-255-False-7",
+    "captures": []
+  },
+  {
+    "mode": "pvoutput-nov1",
+    "time": "auto",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "http",
+        "url": "https://pvoutput.org/service/r2/addstatus.jsp",
+        "data": {
+          "d": "20260919",
+          "t": "12:34",
+          "v2": 0.4,
+          "v6": 230.0
+        },
+        "headers": {
+          "X-Pvoutput-Apikey": "synthetic-api-key",
+          "X-Pvoutput-SystemId": "12345"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "pvoutput-nov1",
+    "time": "server",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "http",
+        "url": "https://pvoutput.org/service/r2/addstatus.jsp",
+        "data": {
+          "d": "20260920",
+          "t": "09:30",
+          "v2": 0.4,
+          "v6": 230.0
+        },
+        "headers": {
+          "X-Pvoutput-Apikey": "synthetic-api-key",
+          "X-Pvoutput-SystemId": "12345"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "pvoutput-nov1",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "http",
+        "url": "https://pvoutput.org/service/r2/addstatus.jsp",
+        "data": {
+          "d": "20260919",
+          "t": "12:34",
+          "v2": 0.4,
+          "v6": 230.0
+        },
+        "headers": {
+          "X-Pvoutput-Apikey": "synthetic-api-key",
+          "X-Pvoutput-SystemId": "12345"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "pvoutput-nov1",
+    "time": "server",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "http",
+        "url": "https://pvoutput.org/service/r2/addstatus.jsp",
+        "data": {
+          "d": "20260919",
+          "t": "12:34",
+          "v2": 0.4,
+          "v6": 230.0
+        },
+        "headers": {
+          "X-Pvoutput-Apikey": "synthetic-api-key",
+          "X-Pvoutput-SystemId": "12345"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "pvoutput-nov1",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": false,
+    "case": "classic-6-255-False-7",
+    "captures": []
+  },
+  {
+    "mode": "influx1",
+    "time": "auto",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "influx",
+        "args": [
+          [
+            {
+              "measurement": "INVERT0001",
+              "time": "2026-09-19T12:34:56",
+              "fields": {
+                "datalogserial": "LOGGER0001",
+                "pvserial": "INVERT0001",
+                "pvstatus": 1,
+                "pvpowerin": 42,
+                "pv1voltage": 2300,
+                "pv1current": 5,
+                "pv1watt": 35,
+                "pv2voltage": 2300,
+                "pv2current": 24,
+                "pv2watt": 38,
+                "pvpowerout": 4,
+                "pvfrequentie": 5000,
+                "pvgridvoltage": 2300,
+                "pvgridcurrent": 3,
+                "pvgridpower": 6,
+                "pvgridvoltage2": 2300,
+                "pvgridcurrent2": 27,
+                "pvgridpower2": 5,
+                "pvgridvoltage3": 2300,
+                "pvgridcurrent3": 6,
+                "pvgridpower3": 36,
+                "pvenergytoday": 28,
+                "pvenergytotal": 4,
+                "totworktime": 37,
+                "pvtemperature": 250,
+                "pvipmtemperature": 250,
+                "epv1today": 36,
+                "epv1total": 9,
+                "epv2today": 19,
+                "epv2total": 27,
+                "epvtotal": 10
+              }
+            }
+          ]
+        ],
+        "options": {}
+      }
+    ]
+  },
+  {
+    "mode": "influx1",
+    "time": "server",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "influx",
+        "args": [
+          [
+            {
+              "measurement": "INVERT0001",
+              "time": "2026-09-20T09:30:00",
+              "fields": {
+                "datalogserial": "LOGGER0001",
+                "pvserial": "INVERT0001",
+                "pvstatus": 1,
+                "pvpowerin": 42,
+                "pv1voltage": 2300,
+                "pv1current": 5,
+                "pv1watt": 35,
+                "pv2voltage": 2300,
+                "pv2current": 24,
+                "pv2watt": 38,
+                "pvpowerout": 4,
+                "pvfrequentie": 5000,
+                "pvgridvoltage": 2300,
+                "pvgridcurrent": 3,
+                "pvgridpower": 6,
+                "pvgridvoltage2": 2300,
+                "pvgridcurrent2": 27,
+                "pvgridpower2": 5,
+                "pvgridvoltage3": 2300,
+                "pvgridcurrent3": 6,
+                "pvgridpower3": 36,
+                "pvenergytoday": 28,
+                "pvenergytotal": 4,
+                "totworktime": 37,
+                "pvtemperature": 250,
+                "pvipmtemperature": 250,
+                "epv1today": 36,
+                "epv1total": 9,
+                "epv2today": 19,
+                "epv2total": 27,
+                "epvtotal": 10
+              }
+            }
+          ]
+        ],
+        "options": {}
+      }
+    ]
+  },
+  {
+    "mode": "influx1",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "influx",
+        "args": [
+          [
+            {
+              "measurement": "INVERT0001",
+              "time": "2026-09-19T12:34:56",
+              "fields": {
+                "datalogserial": "LOGGER0001",
+                "pvserial": "INVERT0001",
+                "pvstatus": 1,
+                "pvpowerin": 42,
+                "pv1voltage": 2300,
+                "pv1current": 5,
+                "pv1watt": 35,
+                "pv2voltage": 2300,
+                "pv2current": 24,
+                "pv2watt": 38,
+                "pvpowerout": 4,
+                "pvfrequentie": 5000,
+                "pvgridvoltage": 2300,
+                "pvgridcurrent": 3,
+                "pvgridpower": 6,
+                "pvgridvoltage2": 2300,
+                "pvgridcurrent2": 27,
+                "pvgridpower2": 5,
+                "pvgridvoltage3": 2300,
+                "pvgridcurrent3": 6,
+                "pvgridpower3": 36,
+                "pvenergytoday": 28,
+                "pvenergytotal": 4,
+                "totworktime": 37,
+                "pvtemperature": 250,
+                "pvipmtemperature": 250,
+                "epv1today": 36,
+                "epv1total": 9,
+                "epv2today": 19,
+                "epv2total": 27,
+                "epvtotal": 10
+              }
+            }
+          ]
+        ],
+        "options": {}
+      }
+    ]
+  },
+  {
+    "mode": "influx1",
+    "time": "server",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "influx",
+        "args": [
+          [
+            {
+              "measurement": "INVERT0001",
+              "time": "2026-09-19T12:34:56",
+              "fields": {
+                "datalogserial": "LOGGER0001",
+                "pvserial": "INVERT0001",
+                "pvstatus": 1,
+                "pvpowerin": 42,
+                "pv1voltage": 2300,
+                "pv1current": 5,
+                "pv1watt": 35,
+                "pv2voltage": 2300,
+                "pv2current": 24,
+                "pv2watt": 38,
+                "pvpowerout": 4,
+                "pvfrequentie": 5000,
+                "pvgridvoltage": 2300,
+                "pvgridcurrent": 3,
+                "pvgridpower": 6,
+                "pvgridvoltage2": 2300,
+                "pvgridcurrent2": 27,
+                "pvgridpower2": 5,
+                "pvgridvoltage3": 2300,
+                "pvgridcurrent3": 6,
+                "pvgridpower3": 36,
+                "pvenergytoday": 28,
+                "pvenergytotal": 4,
+                "totworktime": 37,
+                "pvtemperature": 250,
+                "pvipmtemperature": 250,
+                "epv1today": 36,
+                "epv1total": 9,
+                "epv2today": 19,
+                "epv2total": 27,
+                "epvtotal": 10
+              }
+            }
+          ]
+        ],
+        "options": {}
+      }
+    ]
+  },
+  {
+    "mode": "influx1",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": false,
+    "case": "classic-6-255-False-7",
+    "captures": []
+  },
+  {
+    "mode": "influx2",
+    "time": "auto",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "influx",
+        "args": [
+          "grottdb",
+          "grottorg",
+          [
+            {
+              "measurement": "INVERT0001",
+              "time": "2026-09-19T12:34:56",
+              "fields": {
+                "datalogserial": "LOGGER0001",
+                "pvserial": "INVERT0001",
+                "pvstatus": 1,
+                "pvpowerin": 42,
+                "pv1voltage": 2300,
+                "pv1current": 5,
+                "pv1watt": 35,
+                "pv2voltage": 2300,
+                "pv2current": 24,
+                "pv2watt": 38,
+                "pvpowerout": 4,
+                "pvfrequentie": 5000,
+                "pvgridvoltage": 2300,
+                "pvgridcurrent": 3,
+                "pvgridpower": 6,
+                "pvgridvoltage2": 2300,
+                "pvgridcurrent2": 27,
+                "pvgridpower2": 5,
+                "pvgridvoltage3": 2300,
+                "pvgridcurrent3": 6,
+                "pvgridpower3": 36,
+                "pvenergytoday": 28,
+                "pvenergytotal": 4,
+                "totworktime": 37,
+                "pvtemperature": 250,
+                "pvipmtemperature": 250,
+                "epv1today": 36,
+                "epv1total": 9,
+                "epv2today": 19,
+                "epv2total": 27,
+                "epvtotal": 10
+              }
+            }
+          ]
+        ],
+        "options": {}
+      }
+    ]
+  },
+  {
+    "mode": "influx2",
+    "time": "server",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "influx",
+        "args": [
+          "grottdb",
+          "grottorg",
+          [
+            {
+              "measurement": "INVERT0001",
+              "time": "2026-09-20T09:30:00",
+              "fields": {
+                "datalogserial": "LOGGER0001",
+                "pvserial": "INVERT0001",
+                "pvstatus": 1,
+                "pvpowerin": 42,
+                "pv1voltage": 2300,
+                "pv1current": 5,
+                "pv1watt": 35,
+                "pv2voltage": 2300,
+                "pv2current": 24,
+                "pv2watt": 38,
+                "pvpowerout": 4,
+                "pvfrequentie": 5000,
+                "pvgridvoltage": 2300,
+                "pvgridcurrent": 3,
+                "pvgridpower": 6,
+                "pvgridvoltage2": 2300,
+                "pvgridcurrent2": 27,
+                "pvgridpower2": 5,
+                "pvgridvoltage3": 2300,
+                "pvgridcurrent3": 6,
+                "pvgridpower3": 36,
+                "pvenergytoday": 28,
+                "pvenergytotal": 4,
+                "totworktime": 37,
+                "pvtemperature": 250,
+                "pvipmtemperature": 250,
+                "epv1today": 36,
+                "epv1total": 9,
+                "epv2today": 19,
+                "epv2total": 27,
+                "epvtotal": 10
+              }
+            }
+          ]
+        ],
+        "options": {}
+      }
+    ]
+  },
+  {
+    "mode": "influx2",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "influx",
+        "args": [
+          "grottdb",
+          "grottorg",
+          [
+            {
+              "measurement": "INVERT0001",
+              "time": "2026-09-19T12:34:56",
+              "fields": {
+                "datalogserial": "LOGGER0001",
+                "pvserial": "INVERT0001",
+                "pvstatus": 1,
+                "pvpowerin": 42,
+                "pv1voltage": 2300,
+                "pv1current": 5,
+                "pv1watt": 35,
+                "pv2voltage": 2300,
+                "pv2current": 24,
+                "pv2watt": 38,
+                "pvpowerout": 4,
+                "pvfrequentie": 5000,
+                "pvgridvoltage": 2300,
+                "pvgridcurrent": 3,
+                "pvgridpower": 6,
+                "pvgridvoltage2": 2300,
+                "pvgridcurrent2": 27,
+                "pvgridpower2": 5,
+                "pvgridvoltage3": 2300,
+                "pvgridcurrent3": 6,
+                "pvgridpower3": 36,
+                "pvenergytoday": 28,
+                "pvenergytotal": 4,
+                "totworktime": 37,
+                "pvtemperature": 250,
+                "pvipmtemperature": 250,
+                "epv1today": 36,
+                "epv1total": 9,
+                "epv2today": 19,
+                "epv2total": 27,
+                "epvtotal": 10
+              }
+            }
+          ]
+        ],
+        "options": {}
+      }
+    ]
+  },
+  {
+    "mode": "influx2",
+    "time": "server",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "influx",
+        "args": [
+          "grottdb",
+          "grottorg",
+          [
+            {
+              "measurement": "INVERT0001",
+              "time": "2026-09-19T12:34:56",
+              "fields": {
+                "datalogserial": "LOGGER0001",
+                "pvserial": "INVERT0001",
+                "pvstatus": 1,
+                "pvpowerin": 42,
+                "pv1voltage": 2300,
+                "pv1current": 5,
+                "pv1watt": 35,
+                "pv2voltage": 2300,
+                "pv2current": 24,
+                "pv2watt": 38,
+                "pvpowerout": 4,
+                "pvfrequentie": 5000,
+                "pvgridvoltage": 2300,
+                "pvgridcurrent": 3,
+                "pvgridpower": 6,
+                "pvgridvoltage2": 2300,
+                "pvgridcurrent2": 27,
+                "pvgridpower2": 5,
+                "pvgridvoltage3": 2300,
+                "pvgridcurrent3": 6,
+                "pvgridpower3": 36,
+                "pvenergytoday": 28,
+                "pvenergytotal": 4,
+                "totworktime": 37,
+                "pvtemperature": 250,
+                "pvipmtemperature": 250,
+                "epv1today": 36,
+                "epv1total": 9,
+                "epv2today": 19,
+                "epv2total": 27,
+                "epvtotal": 10
+              }
+            }
+          ]
+        ],
+        "options": {}
+      }
+    ]
+  },
+  {
+    "mode": "influx2",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": false,
+    "case": "classic-6-255-False-7",
+    "captures": []
+  },
+  {
+    "mode": "extension",
+    "time": "auto",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "extension",
+        "message": {
+          "device": "INVERT0001",
+          "time": "2026-09-19T12:34:56",
+          "buffered": "no",
+          "values": {
+            "datalogserial": "LOGGER0001",
+            "pvserial": "INVERT0001",
+            "pvstatus": 1,
+            "pvpowerin": 42,
+            "pv1voltage": 2300,
+            "pv1current": 5,
+            "pv1watt": 35,
+            "pv2voltage": 2300,
+            "pv2current": 24,
+            "pv2watt": 38,
+            "pvpowerout": 4,
+            "pvfrequentie": 5000,
+            "pvgridvoltage": 2300,
+            "pvgridcurrent": 3,
+            "pvgridpower": 6,
+            "pvgridvoltage2": 2300,
+            "pvgridcurrent2": 27,
+            "pvgridpower2": 5,
+            "pvgridvoltage3": 2300,
+            "pvgridcurrent3": 6,
+            "pvgridpower3": 36,
+            "pvenergytoday": 28,
+            "pvenergytotal": 4,
+            "totworktime": 37,
+            "pvtemperature": 250,
+            "pvipmtemperature": 250,
+            "epv1today": 36,
+            "epv1total": 9,
+            "epv2today": 19,
+            "epv2total": 27,
+            "epvtotal": 10
+          }
+        },
+        "extvar": {
+          "test": "value"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "extension",
+    "time": "server",
+    "buffered": false,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "extension",
+        "message": {
+          "device": "INVERT0001",
+          "time": "2026-09-20T09:30:00",
+          "buffered": "no",
+          "values": {
+            "datalogserial": "LOGGER0001",
+            "pvserial": "INVERT0001",
+            "pvstatus": 1,
+            "pvpowerin": 42,
+            "pv1voltage": 2300,
+            "pv1current": 5,
+            "pv1watt": 35,
+            "pv2voltage": 2300,
+            "pv2current": 24,
+            "pv2watt": 38,
+            "pvpowerout": 4,
+            "pvfrequentie": 5000,
+            "pvgridvoltage": 2300,
+            "pvgridcurrent": 3,
+            "pvgridpower": 6,
+            "pvgridvoltage2": 2300,
+            "pvgridcurrent2": 27,
+            "pvgridpower2": 5,
+            "pvgridvoltage3": 2300,
+            "pvgridcurrent3": 6,
+            "pvgridpower3": 36,
+            "pvenergytoday": 28,
+            "pvenergytotal": 4,
+            "totworktime": 37,
+            "pvtemperature": 250,
+            "pvipmtemperature": 250,
+            "epv1today": 36,
+            "epv1total": 9,
+            "epv2today": 19,
+            "epv2total": 27,
+            "epvtotal": 10
+          }
+        },
+        "extvar": {
+          "test": "value"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "extension",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "extension",
+        "message": {
+          "device": "INVERT0001",
+          "time": "2026-09-19T12:34:56",
+          "buffered": "yes",
+          "values": {
+            "datalogserial": "LOGGER0001",
+            "pvserial": "INVERT0001",
+            "pvstatus": 1,
+            "pvpowerin": 42,
+            "pv1voltage": 2300,
+            "pv1current": 5,
+            "pv1watt": 35,
+            "pv2voltage": 2300,
+            "pv2current": 24,
+            "pv2watt": 38,
+            "pvpowerout": 4,
+            "pvfrequentie": 5000,
+            "pvgridvoltage": 2300,
+            "pvgridcurrent": 3,
+            "pvgridpower": 6,
+            "pvgridvoltage2": 2300,
+            "pvgridcurrent2": 27,
+            "pvgridpower2": 5,
+            "pvgridvoltage3": 2300,
+            "pvgridcurrent3": 6,
+            "pvgridpower3": 36,
+            "pvenergytoday": 28,
+            "pvenergytotal": 4,
+            "totworktime": 37,
+            "pvtemperature": 250,
+            "pvipmtemperature": 250,
+            "epv1today": 36,
+            "epv1total": 9,
+            "epv2today": 19,
+            "epv2total": 27,
+            "epvtotal": 10
+          }
+        },
+        "extvar": {
+          "test": "value"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "extension",
+    "time": "server",
+    "buffered": true,
+    "sendbuf": true,
+    "case": "classic-6-255-False-7",
+    "captures": [
+      {
+        "kind": "extension",
+        "message": {
+          "device": "INVERT0001",
+          "time": "2026-09-19T12:34:56",
+          "buffered": "yes",
+          "values": {
+            "datalogserial": "LOGGER0001",
+            "pvserial": "INVERT0001",
+            "pvstatus": 1,
+            "pvpowerin": 42,
+            "pv1voltage": 2300,
+            "pv1current": 5,
+            "pv1watt": 35,
+            "pv2voltage": 2300,
+            "pv2current": 24,
+            "pv2watt": 38,
+            "pvpowerout": 4,
+            "pvfrequentie": 5000,
+            "pvgridvoltage": 2300,
+            "pvgridcurrent": 3,
+            "pvgridpower": 6,
+            "pvgridvoltage2": 2300,
+            "pvgridcurrent2": 27,
+            "pvgridpower2": 5,
+            "pvgridvoltage3": 2300,
+            "pvgridcurrent3": 6,
+            "pvgridpower3": 36,
+            "pvenergytoday": 28,
+            "pvenergytotal": 4,
+            "totworktime": 37,
+            "pvtemperature": 250,
+            "pvipmtemperature": 250,
+            "epv1today": 36,
+            "epv1total": 9,
+            "epv2today": 19,
+            "epv2total": 27,
+            "epvtotal": 10
+          }
+        },
+        "extvar": {
+          "test": "value"
+        }
+      }
+    ]
+  },
+  {
+    "mode": "extension",
+    "time": "auto",
+    "buffered": true,
+    "sendbuf": false,
+    "case": "classic-6-255-False-7",
+    "captures": []
+  }
+]

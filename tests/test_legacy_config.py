@@ -46,30 +46,51 @@ def test_observed_ini_and_environment_precedence(case, tmp_path, monkeypatch):
     assert "override-synthetic" not in repr(settings)
 
 
-@pytest.mark.parametrize(
-    "environment",
-    [
-        {"gmode": "sniff"},
-        {"gtime": "auto"},
-        {"gsendbuf": "True"},
-        {"gnomqtt": "False"},
-        {"gextension": "False"},
-        {"gextname": "custom_extension"},
-        {"gcompat": "True"},
-        {"gpvoutput": "True"},
-        {"ginflux": "True"},
-        {"gminrecl": "120"},
-        {"gvalueoffset": "8"},
-        {"ginvtypemap": '{"INVERT0001":"sph"}'},
-    ],
-)
-def test_unsupported_paths_are_reported_before_startup(environment, tmp_path, monkeypatch):
+@pytest.mark.parametrize("environment", [{"gcompat": "True"}, {"gpvoutput": "True"}])
+def test_incomplete_or_unimplemented_configuration_stops_before_startup(
+    environment, tmp_path, monkeypatch
+):
     path = tmp_path / "grott.ini"
     path.write_text(CASES[0]["ini"])
     for key, value in environment.items():
         monkeypatch.setenv(key, value)
     with pytest.raises(ValueError):
         load_settings(path)
+
+
+def test_optional_outputs_and_record_policy_are_loaded(tmp_path, monkeypatch):
+    path = tmp_path / "grott.ini"
+    path.write_text(CASES[0]["ini"])
+    for key, value in {
+        "gtime": "auto",
+        "gsendbuf": "True",
+        "gnomqtt": "False",
+        "gmqttip": "raw-broker.invalid",
+        "gmqttinverterintopic": "True",
+        "ginflux": "True",
+        "ginflux2": "True",
+        "giftoken": "synthetic-token",
+        "gifip": "http://influx.invalid:8086",
+        "gminrecl": "120",
+        "ginvtypemap": '{"INVERT0001":"spf"}',
+        "gpvoutput": "True",
+        "gpvapikey": "synthetic-key",
+        "gpvsystemid": "12345",
+    }.items():
+        monkeypatch.setenv(key, value)
+    settings = load_settings(path)
+    assert settings.runtime.home_assistant
+    assert settings.runtime.policy.time_source == "auto"
+    assert settings.runtime.policy.send_buffered
+    assert settings.runtime.raw_mqtt.broker.host == "raw-broker.invalid"
+    assert settings.runtime.raw_mqtt.inverter_in_topic
+    assert settings.runtime.influx.version == 2
+    assert settings.runtime.influx.endpoint == "http://influx.invalid:8086"
+    assert settings.runtime.pvoutput.default_system == "12345"
+    assert settings.runtime.minimum_record_bytes == 120
+    assert settings.selection.device_families == {"INVERT0001": "spf"}
+    assert "synthetic-token" not in repr(settings)
+    assert "synthetic-key" not in repr(settings)
 
 
 def test_mapping_cannot_execute_code_or_disclose_its_contents(tmp_path, monkeypatch):
@@ -135,10 +156,76 @@ def test_addon_options_keep_broker_settings_and_family_choice(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "options", [[], {"unknown": True}, {"ha_plugin": False}, {"sendbuf": True}, {"time": "auto"}]
+    "options",
+    [[], {"unknown": True}, {"ha_plugin": "invalid"}, {"sendbuf": 1}, {"time": "invalid"}],
 )
-def test_unimplemented_or_invalid_addon_options_do_not_start(tmp_path, options):
+def test_invalid_addon_options_do_not_start(tmp_path, options):
     path = tmp_path / "options.json"
     path.write_text(json.dumps(options))
     with pytest.raises(ValueError):
         load_settings(path)
+
+
+def test_app_raw_output_and_buffered_time_policy(tmp_path):
+    path = tmp_path / "options.json"
+    path.write_text(json.dumps({"ha_plugin": False, "sendbuf": True, "time": "auto"}))
+    settings = load_settings(path)
+    assert not settings.runtime.home_assistant
+    assert settings.runtime.raw_mqtt.broker.host == "core-mosquitto"
+    assert settings.runtime.policy.send_buffered
+    assert settings.runtime.policy.time_source == "auto"
+
+
+@pytest.mark.parametrize(
+    "case",
+    json.loads((Path(__file__).parent / "fixtures/optional_configuration_cases.json").read_text()),
+    ids=lambda case: case["name"],
+)
+def test_observed_optional_ini_options_and_overrides(case, tmp_path):
+    path = tmp_path / "ha-growatt.ini"
+    path.write_text(case["ini"])
+    settings = load_settings(path, case["environment"])
+    runtime, expected = settings.runtime, case["expected"]
+    assert runtime.mode == expected["mode"]
+    assert runtime.verbose == expected["verbose"]
+    assert runtime.policy.timezone == expected["tmzone"]
+    assert runtime.policy.time_source == expected["gtime"]
+    assert runtime.policy.send_buffered == expected["sendbuf"]
+    assert runtime.inverter_identity == expected["inverterid"]
+    if runtime.compatibility:
+        assert runtime.value_offset == expected["offset"]
+    assert settings.relay.block_commands == expected["blockcmd"]
+    assert settings.selection.strict == expected["layout_strict"]
+    assert settings.selection.automatic == expected["layout_auto_family"]
+    raw = runtime.raw_mqtt
+    assert raw.broker.host == expected["mqttip"]
+    assert raw.broker.port == expected["mqttport"]
+    assert raw.broker.username == expected["mqttuser"]
+    assert raw.broker.password == expected["mqttpsw"]
+    assert raw.broker.retain_state == expected["mqttretain"]
+    assert raw.broker.client_id == expected["inverterid"]
+    assert raw.topic == expected["mqtttopic"]
+    assert raw.inverter_in_topic == bool(expected["mqttinverterintopic"])
+    assert raw.meter_topic == (expected["mqttmtopicname"] if expected["mqttmtopic"] else None)
+    assert [
+        raw.topic_for({"device": "INVERT0001"}),
+        raw.topic_for({"device": "LOGGER0001"}, meter=True),
+    ] == case["topics"]
+    if runtime.pvoutput:
+        assert runtime.pvoutput.interval_minutes == expected["pvuplimit"]
+        assert runtime.pvoutput.temperature == expected["pvtemp"]
+        assert runtime.pvoutput.omit_energy == expected["pvdisv1"]
+        if len(expected["pvsystemid"]) == 1:
+            assert runtime.pvoutput.default_system == expected["pvsystemid"]["1"]
+        else:
+            assert runtime.pvoutput.systems == {
+                expected["pvinverterid"][key]: value
+                for key, value in expected["pvsystemid"].items()
+            }
+    if runtime.influx:
+        assert runtime.influx.endpoint == f"http://{expected['ifip']}:{expected['ifport']}"
+        assert runtime.influx.version == (2 if expected["influx2"] else 1)
+        assert runtime.influx.database == expected["ifdbname"]
+        assert runtime.influx.organisation == expected["iforg"]
+        assert runtime.influx.bucket == expected["ifbucket"]
+    assert runtime.extension == (expected["extname"] if expected["extension"] else None)

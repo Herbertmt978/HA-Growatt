@@ -1,0 +1,47 @@
+name: HA Growatt
+version: 0.1.0.dev0
+slug: ha_growatt
+description: Growatt readings through MQTT with Home Assistant discovery
+url: https://github.com/Herbertmt978/HA-Growatt
+arch: [amd64, aarch64]
+startup: services
+boot: auto
+init: false
+tmpfs: true
+image: ghcr.io/herbertmt978/ha-growatt
+ports:
+  5279/tcp: 5279
+ports_description:
+  5279/tcp: Growatt datalogger connection
+options:
+  mode: proxy
+  blockcmd: true
+  time: server
+  sendbuf: false
+  invtype: default
+  layout_strict: false
+  layout_auto_family: true
+  diagnostic_logging: false
+  ha_plugin: true
+  ha_entity_profile: v0_1_9_standard
+  mqtt_host: core-mosquitto
+  mqtt_port: 1883
+  mqtt_user: ""
+  mqtt_password: ""
+  mqtt_retain: false
+schema:
+  mode: list(proxy)
+  blockcmd: bool
+  time: list(auto|server)
+  sendbuf: bool
+  invtype: list(default|sph|spf|spa|mod|min|tl3|max)
+  layout_strict: bool
+  layout_auto_family: bool
+  diagnostic_logging: bool
+  ha_plugin: bool
+  ha_entity_profile: list(v0_1_9_standard|all)
+  mqtt_host: str
+  mqtt_port: port
+  mqtt_user: str
+  mqtt_password: password
+  mqtt_retain: bool

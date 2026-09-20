@@ -121,6 +121,12 @@ class Relay:
     def active_connections(self) -> int:
         return len(self._sessions)
 
+    @property
+    def running(self) -> bool:
+        return bool(self._server and self._server.is_serving()) and (
+            self._worker is None or not self._worker.done()
+        )
+
     async def start(self) -> None:
         if self._server is not None or self._closing:
             raise RuntimeError("A relay instance can only be started once")

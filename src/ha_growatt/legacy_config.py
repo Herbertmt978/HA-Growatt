@@ -1,4 +1,4 @@
-"""Read existing proxy/HA settings; reject paths the bridge cannot yet run."""
+"""Read existing INI settings and Home Assistant app options."""
 
 from __future__ import annotations
 
@@ -9,8 +9,10 @@ import os
 from dataclasses import replace
 from pathlib import Path
 
+from .outputs import InfluxSettings, PublicationPolicy, PVOutputSettings, RawMqttSettings
 from .publisher import MqttSettings
 from .relay import RelaySettings
+from .runtime_options import RuntimeOptions
 from .selection import SelectionSettings
 
 
@@ -63,47 +65,13 @@ def _mapping(value: object) -> dict:
 
 
 def _selection(get) -> SelectionSettings:
-    if _mapping(get("Generic", "invtypemap", "ginvtypemap", "{}")):
-        raise ValueError("Per-device family mappings are not yet supported")
     return SelectionSettings(
         family=get("Generic", "invtype", "ginvtype", "default"),
         strict=_boolean(get("Generic", "layout_strict", "glayoutstrict", False)),
         automatic=_boolean(get("Generic", "layout_auto_family", "glayoutautofamily", True)),
         minimum_score=_integer(get("Generic", "layout_min_score", "glayoutminscore", 20)),
+        device_families=_mapping(get("Generic", "invtypemap", "ginvtypemap", "{}")),
     )
-
-
-def _require_supported(get) -> None:
-    if get("Generic", "mode", "gmode", "proxy") != "proxy":
-        raise ValueError("Only proxy mode is available in this development version")
-    if get("Generic", "time", "gtime", "auto") != "server":
-        raise ValueError(
-            "Inverter timestamp policy is not yet supported; keep using the existing service"
-        )
-    if _boolean(get("Generic", "sendbuf", "gsendbuf", True)):
-        raise ValueError(
-            "Buffered publication is not yet supported; keep using the existing service"
-        )
-    if not _boolean(get("MQTT", "nomqtt", "gnomqtt", False)):
-        raise ValueError("Native MQTT output is not yet supported")
-    if (
-        not _boolean(get("extension", "extension", "gextension", False))
-        or get("extension", "extname", "gextname", "") != "grottext.ha"
-    ):
-        raise ValueError("This configuration loader requires Home Assistant MQTT discovery")
-    for section, key, variable in (
-        ("Generic", "compat", "gcompat"),
-        ("PVOutput", "pvoutput", "gpvoutput"),
-        ("influx", "influx", "ginflux"),
-    ):
-        if _boolean(get(section, key, variable, False)):
-            raise ValueError(f"The enabled {key} option is not yet supported")
-    for key, variable, default in (
-        ("minrecl", "gminrecl", 100),
-        ("valueoffset", "gvalueoffset", 6),
-    ):
-        if _integer(get("Generic", key, variable, default)) != default:
-            raise ValueError(f"A custom {key} option is not yet supported")
 
 
 def _mqtt(options: dict) -> MqttSettings:
@@ -132,7 +100,7 @@ def _mqtt(options: dict) -> MqttSettings:
     )
 
 
-def _addon(path: Path) -> tuple[RelaySettings, MqttSettings, SelectionSettings]:
+def _addon(path: Path) -> tuple[RelaySettings, MqttSettings, SelectionSettings, RuntimeOptions]:
     options = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(options, dict):
         raise ValueError("Home Assistant app options must be an object")
@@ -155,10 +123,9 @@ def _addon(path: Path) -> tuple[RelaySettings, MqttSettings, SelectionSettings]:
     }
     if set(options) - allowed:
         raise ValueError("The Home Assistant app contains an unsupported option")
-    if options.get("mode", "proxy") != "proxy" or not _boolean(options.get("ha_plugin", True)):
-        raise ValueError("Only proxy mode with Home Assistant discovery is available")
-    if options.get("time", "server") != "server" or _boolean(options.get("sendbuf", False)):
-        raise ValueError("Inverter timestamps and buffered publication are not yet supported")
+    if options.get("mode", "proxy") != "proxy":
+        raise ValueError("The Home Assistant app supports proxy mode")
+    ha_enabled = _boolean(options.get("ha_plugin", True))
     mqtt = _mqtt(
         {
             "ha_mqtt_host": options.get("mqtt_host", "core-mosquitto"),
@@ -181,10 +148,21 @@ def _addon(path: Path) -> tuple[RelaySettings, MqttSettings, SelectionSettings]:
             strict=_boolean(options.get("layout_strict", False)),
             automatic=_boolean(options.get("layout_auto_family", True)),
         ),
+        RuntimeOptions(
+            home_assistant=ha_enabled,
+            raw_mqtt=None if ha_enabled else RawMqttSettings(mqtt),
+            policy=PublicationPolicy(
+                options.get("time", "server"), _boolean(options.get("sendbuf", False))
+            ),
+            diagnostic_logging=_boolean(options.get("diagnostic_logging", False)),
+        ),
     )
 
 
-def load_legacy_options(path: Path) -> tuple[RelaySettings, MqttSettings, SelectionSettings]:
+def load_legacy_options(
+    path: Path,
+    environment: dict[str, str] | None = None,
+) -> tuple[RelaySettings, MqttSettings, SelectionSettings, RuntimeOptions]:
     if path.suffix.lower() == ".json":
         return _addon(path)
     config = configparser.ConfigParser(interpolation=None)
@@ -215,22 +193,160 @@ def load_legacy_options(path: Path) -> tuple[RelaySettings, MqttSettings, Select
         "decrypt",
         "includeall",
         "invtypemap",
+        "timezone",
+        "layouts_directory",
+        "sniff_interface",
+        "api_host",
+        "api_port",
+        "trace",
     }
     if config.has_section("Generic") and set(config.options("Generic")) - generic_options:
         raise ValueError("The INI configuration contains an unsupported Generic option")
 
     def get(section, key, variable, default):
-        return os.environ.get(variable, config.get(section, key, fallback=default))
+        variables = os.environ if environment is None else environment
+        return variables.get(variable, config.get(section, key, fallback=default))
 
-    _require_supported(get)
     relay = RelaySettings(
         upstream_host=get("Growatt", "ip", "ggrowattip", "server.growatt.com"),
         upstream_port=_integer(get("Growatt", "port", "ggrowattport", 5279)),
         listen_host=get("Generic", "ip", "ggrottip", "0.0.0.0"),
         listen_port=_integer(get("Generic", "port", "ggrottport", 5279)),
-        block_commands=_boolean(get("Generic", "blockcmd", "gblockcmd", True)),
+        block_commands=_boolean(get("Generic", "blockcmd", "gblockcmd", False)),
         allow_destination_change=_boolean(get("Generic", "noipf", "gnoipf", False)),
     )
-    mqtt = _mqtt(_mapping(get("extension", "extvar", "gextvar", "{}")))
+    whitelist = path.parent / "recwl.txt"
+    if not whitelist.is_file():
+        whitelist = Path.cwd() / "recwl.txt"
+    if whitelist.is_file():
+        try:
+            records = frozenset(
+                int(line.strip(), 16) for line in whitelist.read_text().splitlines() if line.strip()
+            )
+            relay = replace(relay, permitted_records=records)
+        except ValueError:
+            raise ValueError("Record whitelist entries must be four hexadecimal digits") from None
+    extension_enabled = _boolean(get("extension", "extension", "gextension", False))
+    extension_name = get("extension", "extname", "gextname", "grottext")
+    extension_options = _mapping(get("extension", "extvar", "gextvar", "{}"))
+    ha = extension_enabled and extension_name in {"grottext.ha", "grott_ha"}
+    mqtt = _mqtt(extension_options) if ha else MqttSettings("localhost")
     mqtt = replace(mqtt, include_all=_boolean(get("Generic", "includeall", "gincludeall", False)))
-    return relay, mqtt, _selection(get)
+    raw = None
+    variables = os.environ if environment is None else environment
+    if not _boolean(get("MQTT", "nomqtt", "gnomqtt", False)):
+        auth = _boolean(get("MQTT", "auth", "gmqttauth", False))
+        raw = RawMqttSettings(
+            MqttSettings(
+                host=get("MQTT", "ip", "gmqttip", "localhost"),
+                port=_integer(get("MQTT", "port", "gmqttport", 1883)),
+                username=get("MQTT", "user", "gmqttuser", "grott") if auth else "",
+                password=get("MQTT", "password", "gmqttpassword", "growatt2020") if auth else "",
+                retain_state=_boolean(get("MQTT", "retain", "gmqttretain", False)),
+                client_id=get("Generic", "inverterid", "ginverterid", "automatic"),
+            ),
+            topic=get("MQTT", "topic", "gmqtttopic", "energy/growatt"),
+            # Existing environment overrides use non-empty text as enabled,
+            # including the literal "False". Keep established topic identities.
+            inverter_in_topic=bool(variables["gmqttinverterintopic"])
+            if variables.get("gmqttinverterintopic")
+            else _boolean(config.get("MQTT", "inverterintopic", fallback=False)),
+            meter_topic=get("MQTT", "mtopicname", "gmqttmtopicname", "energy/meter")
+            if _boolean(get("MQTT", "mtopic", "gmqttmtopic", False))
+            else None,
+        )
+    pv = None
+    if _boolean(get("PVOutput", "pvoutput", "gpvoutput", False)):
+        count = _integer(get("PVOutput", "pvinverters", "gpvinverters", 1))
+        systems = {}
+        default = None
+        if count == 1:
+            default = get("PVOutput", "systemid", "gpvsystemid", "systemid1")
+        else:
+            for number in range(1, count + 1):
+                identity = get("PVOutput", f"inverterid{number}", f"gpvinverterid{number}", "")
+                systems[identity] = get("PVOutput", f"systemid{number}", f"gpvsystemid{number}", "")
+        pv = PVOutputSettings(
+            get("PVOutput", "apikey", "gpvapikey", ""),
+            systems,
+            default,
+            _integer(get("PVOutput", "pvuplimit", "pvuplimit", 5)),
+            _boolean(get("PVOutput", "pvtemp", "gpvtemp", False)),
+            _boolean(get("PVOutput", "pvdisv1", "gpvdisv1", False)),
+        )
+    influx = None
+    if _boolean(get("influx", "influx", "ginflux", False)):
+        version = 2 if _boolean(get("influx", "influx2", "ginflux2", False)) else 1
+        host = get("influx", "ip", "gifip", "localhost")
+        if "://" not in host:
+            host = f"http://{host}:{_integer(get('influx', 'port', 'gifport', 8086))}"
+        influx = InfluxSettings(
+            host,
+            version,
+            get("influx", "dbname", "gifdbname", "grottdb"),
+            get("influx", "user", "gifuser", "grott"),
+            get("influx", "password", "gifpassword", "growatt2020"),
+            get("influx", "token", "giftoken", ""),
+            get("influx", "org", "giforg", "grottorg"),
+            get("influx", "bucket", "gifbucket", "grottdb"),
+        )
+    runtime = RuntimeOptions(
+        mode=get("Generic", "mode", "gmode", "proxy"),
+        home_assistant=ha,
+        policy=PublicationPolicy(
+            get("Generic", "time", "gtime", "auto"),
+            _boolean(get("Generic", "sendbuf", "gsendbuf", True)),
+            get("Generic", "timezone", "gtimezone", "local"),
+        ),
+        raw_mqtt=raw,
+        pvoutput=pv,
+        influx=influx,
+        extension=extension_name if extension_enabled and not ha else None,
+        extension_options=extension_options,
+        minimum_record_bytes=_integer(get("Generic", "minrecl", "gminrecl", 100)),
+        layouts_directory=Path(
+            get("Generic", "layouts_directory", "HA_GROWATT_LAYOUTS", str(path.parent))
+        ),
+        sniff_interface=get("Generic", "sniff_interface", "HA_GROWATT_INTERFACE", None),
+        diagnostic_logging=_boolean(
+            get("Generic", "diagnostic_logging", "gdiagnosticlogging", False)
+        ),
+        verbose=_boolean(get("Generic", "verbose", "gverbose", False)),
+        trace=_boolean(get("Generic", "trace", "gtrace", False)),
+        api_host=get("Generic", "api_host", "HA_GROWATT_API_HOST", "127.0.0.1"),
+        api_port=_integer(get("Generic", "api_port", "HA_GROWATT_API_PORT", 5782)),
+        compatibility=_boolean(get("Generic", "compat", "gcompat", False)),
+        inverter_identity=get("Generic", "inverterid", "ginverterid", "automatic"),
+        value_offset=_integer(get("Generic", "valueoffset", "gvalueoffset", 6)),
+        decrypt=_boolean(get("Generic", "decrypt", "gdecrypt", True)),
+    )
+    if runtime.compatibility:
+        from .compat import CompatibilityDecoder
+
+        CompatibilityDecoder(runtime.inverter_identity, runtime.value_offset, runtime.decrypt)
+    runtime = replace(
+        runtime,
+        extension_context={
+            "verbose": runtime.verbose,
+            "trace": runtime.trace,
+            "mode": runtime.mode,
+            "gtime": runtime.policy.time_source,
+            "sendbuf": runtime.policy.send_buffered,
+            "tmzone": runtime.policy.timezone,
+            "inverterid": runtime.inverter_identity,
+            "invtype": _selection(get).family,
+            "includeall": mqtt.include_all,
+            "grottip": relay.listen_host,
+            "grottport": relay.listen_port,
+            "growattip": relay.upstream_host,
+            "growattport": relay.upstream_port,
+            "nomqtt": raw is None,
+            "blockcmd": relay.block_commands,
+            "noipf": relay.allow_destination_change,
+            "minrecl": runtime.minimum_record_bytes,
+            "compat": runtime.compatibility,
+            "offset": runtime.value_offset,
+            "decrypt": runtime.decrypt,
+        },
+    )
+    return relay, mqtt, _selection(get), runtime

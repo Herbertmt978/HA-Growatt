@@ -30,10 +30,14 @@ Compatibility evidence is treated separately from implementation source:
   The new selector and configuration loader were written from those observations.
 - Publication fixtures capture the existing proxy's handling of announcement,
   telemetry and buffered packets, with external delivery replaced by a recorder.
+- Server command and acknowledgement fixtures record loopback observations for
+  protocols 2, 5 and 6. Optional output fixtures record synthetic MQTT, PVOutput,
+  InfluxDB, CSV and HTTP results. No production account is used by those tests.
 - Tests for transport, register envelopes, discovery and delivery were written
   for the new implementation. Passing them does not prove untested modes or
   hardware compatibility.
 
 The MIT licence applies to this project's implementation. Installed dependencies
-retain their own licence notices. The current runtime dependency is
-[Eclipse Paho MQTT](https://github.com/eclipse-paho/paho.mqtt.python).
+retain their own licence notices. Runtime dependencies are
+[Eclipse Paho MQTT](https://github.com/eclipse-paho/paho.mqtt.python) and
+[Python tzdata](https://github.com/python/tzdata).

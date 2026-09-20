@@ -23,6 +23,7 @@ class Sensor:
     state_class: str | None = None
     source: str | None = None
     entity_category: str | None = None
+    icon: str | None = None
 
 
 def _standard_sensors() -> tuple[Sensor, ...]:
@@ -102,6 +103,7 @@ def discovery_messages(
     profile: str = "v0_1_9_standard",
     wire_profile: str | None = None,
     include_all: bool = False,
+    sensor_metadata: dict | None = None,
 ) -> dict[str, dict]:
     """Return retained config messages; no network operation takes place."""
     validate_identity(identity)
@@ -109,19 +111,28 @@ def discovery_messages(
         raise ValueError("Unknown Home Assistant entity profile")
     sensors = STANDARD_SENSORS
     standard = wire_profile is None or (
-        profile == "v0_1_9_standard" and wire_profile in {"mod-6", "extended-6"}
+        profile == "v0_1_9_standard"
+        and wire_profile in {"mod-6", "extended-6", "custom:T06NNNNXMOD", "custom:T06NNNNX"}
     )
     if not standard:
-        schema = wire_profiles()[wire_profile]
-        available = output_fields(wire_profile, include_all)
+        schema = (
+            {"sensors": sensor_metadata}
+            if sensor_metadata is not None
+            else wire_profiles()[wire_profile]
+        )
+        available = (
+            {v["source"] for v in sensor_metadata.values()}
+            if sensor_metadata is not None
+            else output_fields(wire_profile, include_all)
+        )
         sensors = tuple(
-            Sensor(key, key, **metadata)
+            Sensor(key, **({"label": key} | metadata))
             for key, metadata in sorted(schema["sensors"].items())
             if metadata["source"] in available
         ) + (STANDARD_SENSORS[-1],)
     result = {}
     for sensor in sensors:
-        template = "{{ value_json." + (sensor.source or sensor.key)
+        template = "{{ value_json[" + json.dumps(sensor.source or sensor.key) + "]"
         if sensor.divisor != 1:
             template += f" | float / {sensor.divisor}"
         template += " }}"
@@ -132,7 +143,7 @@ def discovery_messages(
             "pvipmtemperature": 'value_json.get("comboardtemperature", '
             'value_json.get("pvipmtemperature") if "pvfrequentie" in value_json else none)',
         }
-        if (standard or wire_profile == "mod-6") and sensor.key in aliases:
+        if (standard or wire_profile in {"mod-6", "custom:T06NNNNXMOD"}) and sensor.key in aliases:
             template = (
                 "{% set reading = " + aliases[sensor.key] + " %}"
                 "{% if reading is not none %}{{ reading | float / "
@@ -159,6 +170,11 @@ def discovery_messages(
             config["state_class"] = sensor.state_class
         if sensor.entity_category:
             config["entity_category"] = sensor.entity_category
+        icon = sensor.icon
+        if standard:
+            icon = wire_profiles()["extended-6"]["sensors"].get(sensor.key, {}).get("icon")
+        if icon:
+            config["icon"] = icon
         if sensor.key == "grott_last_push":
             config["expire_after"] = 900
         result[f"homeassistant/sensor/grott/{identity}_{sensor.key}/config"] = config
@@ -172,11 +188,11 @@ def lineage_topics(identity: str) -> set[str]:
     return {f"homeassistant/sensor/grott/{identity}_{key}/config" for key in keys}
 
 
-def state_message(values: dict, received_at: datetime) -> str:
+def state_message(values: dict, received_at: datetime, identity: str | None = None) -> str:
     """Serialise raw telemetry using the established scalar field names."""
     if received_at.tzinfo is None or received_at.utcoffset() is None:
         raise ValueError("Receipt time must include a timezone")
-    identity = values.get("pvserial")
+    identity = identity or values.get("pvserial")
     if not isinstance(identity, str):
         raise ValueError("Telemetry has no inverter identity")
     validate_identity(identity)
