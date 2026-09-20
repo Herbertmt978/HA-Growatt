@@ -74,6 +74,12 @@ uv run --locked ha-growatt inspect sample.bin
 The inspector reports record types, sizes and register counts without printing
 device identities or packet contents. Extract and reassemble PCAP streams first.
 
+## Disclaimer
+
+By using HA Growatt, you accept responsibility for the security of the data you
+extract. Neither HA Growatt nor Growatt can be held responsible for data breaches
+stemming from the extraction of data outside of the Growatt ecosystem.
+
 ## Licence
 
 [MIT](LICENSE), copyright Herbertmt978. Dependencies retain their own licences.
