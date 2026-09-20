@@ -188,6 +188,46 @@ async def application():
                     await process.wait()
 
 
+async def supervisor_application():
+    """Supervisor protects its options with mode 0600 and root ownership."""
+    assert os.getuid() == 0
+    health = Path("/tmp/ha-growatt.health")
+    with tempfile.TemporaryDirectory(prefix="ha-growatt-supervisor-") as directory:
+        options = Path(directory) / "options.json"
+        options.write_text(json.dumps({"mqtt_host": "127.0.0.1", "mqtt_port": free_port()}))
+        options.chmod(0o600)
+        process = await asyncio.create_subprocess_exec(
+            sys.executable,
+            "-m",
+            "ha_growatt",
+            "app",
+            "--config",
+            str(options),
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        try:
+            async with asyncio.timeout(15):
+                while not healthy(health):
+                    if process.returncode is not None:
+                        raise AssertionError("App could not read Supervisor's private options")
+                    await asyncio.sleep(0.05)
+            status = await asyncio.to_thread(Path(f"/proc/{process.pid}/status").read_text)
+            fields = dict(line.split(":", 1) for line in status.splitlines() if ":" in line)
+            assert fields["Uid"].split() == ["10001"] * 4
+            assert fields["Gid"].split() == ["10001"] * 4
+            assert not fields["Groups"].strip()
+            assert (await asyncio.to_thread(health.stat)).st_uid == 10001
+            process.send_signal(signal.SIGTERM)
+            out, error = await asyncio.wait_for(process.communicate(), 20)
+            assert process.returncode == 0, (out.decode(), error.decode())
+            assert not await asyncio.to_thread(health.exists)
+        finally:
+            if process.returncode is None:
+                process.kill()
+                await process.wait()
+
+
 def installed_profiles():
     total = 0
     for filename in ("telemetry_cases.json", "extra_telemetry_cases.json", "csv_meter_cases.json"):
@@ -204,8 +244,12 @@ def installed_profiles():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--sniff", action="store_true")
+    parser.add_argument("--supervisor", action="store_true")
     arguments = parser.parse_args()
-    if arguments.sniff:
+    if arguments.supervisor:
+        asyncio.run(supervisor_application())
+        print(json.dumps({"private_app_options": "passed", "privilege_drop": "passed"}))
+    elif arguments.sniff:
         asyncio.run(sniff())
         print(json.dumps({"sniffer": "passed"}))
     else:

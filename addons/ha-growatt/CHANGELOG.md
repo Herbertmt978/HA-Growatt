@@ -1,5 +1,5 @@
-# Development
+# 0.1.0
 
-The first release is being qualified. The new runtime includes cloud forwarding,
-MQTT discovery and the existing app options. Installation checks are still
-outstanding.
+First release with cloud forwarding, MQTT discovery and the existing app options.
+Existing sensor identifiers, units and history are retained. The app reads
+Supervisor’s protected settings before running without root privileges.

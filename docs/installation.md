@@ -1,8 +1,8 @@
 # Installation and migration
 
-The packages are being qualified. There is no replacement release yet. These
-instructions describe the prepared installation; wait for a release before
-changing a working service.
+Use the versioned packages from the [release page](https://github.com/Herbertmt978/HA-Growatt/releases).
+Keep a recoverable copy of an existing service until the replacement is receiving
+fresh readings from every inverter.
 
 ## Docker
 
@@ -35,14 +35,15 @@ Writable CSV or log output needs a dedicated writable mount.
 
 ## Home Assistant app
 
-After a release is available, add this repository to the app store:
+Add this repository to the app store:
 
 ```text
 https://github.com/Herbertmt978/HA-Growatt
 ```
 
 Install HA Growatt, enter the MQTT broker details and keep the intended host
-port. The app reads `/data/options.json` directly. It needs no Home Assistant
+port. The app reads Supervisor’s protected options before dropping to user
+and group 10001. Network services run under that account. It needs no Home Assistant
 API token, Docker access or host networking. The app supports the current
 Home Assistant architectures, amd64 and aarch64. Standalone Docker packaging
 also targets arm/v7 and 386.
@@ -91,4 +92,7 @@ Run it for each supported Docker platform. Test passive capture separately on
 Linux with only `NET_RAW`, using the probe's `--sniff` option. The probe checks
 installed profile data, real proxy/server sockets, passive health and SIGTERM
 shutdown. Native broker and Home Assistant migration checks are additional
-release requirements.
+release requirements. The `--supervisor` probe also checks root-owned private
+options and the privilege drop. Run the test harness as root with `SETUID`,
+`SETGID` and `KILL`; the last capability lets the parent test signal the child
+after its user changes. The service itself has no effective capabilities.

@@ -95,6 +95,10 @@ async def _run(
     path: Path, environment: dict | None = None, health_path: Path | None = None
 ) -> None:
     settings = load_settings(path, environment)
+    await _run_settings(settings, health_path)
+
+
+async def _run_settings(settings, health_path: Path | None = None) -> None:
     if settings.runtime.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     pipeline = Pipeline(settings, ha_publisher=Publisher)
@@ -137,6 +141,8 @@ def main() -> None:
         parser.add_argument(*flags, dest=destination, action="store_true")
     commands = parser.add_subparsers(dest="command")
     commands.add_parser("container", help="Use the mounted Docker or Home Assistant configuration")
+    app = commands.add_parser("app", help="Read Supervisor options before dropping privileges")
+    app.add_argument("--config", type=Path, default=Path("/data/options.json"))
     inspect = commands.add_parser("inspect", help="Validate raw binary TCP-stream frames offline")
     inspect.add_argument("path", type=Path)
     relay = commands.add_parser("relay", help="Start the development TCP relay")
@@ -165,6 +171,16 @@ def main() -> None:
             inspect_capture(arguments.path)
         elif arguments.command == "relay":
             asyncio.run(_relay(arguments))
+        elif arguments.command == "app":
+            if not hasattr(os, "geteuid"):
+                raise OSError("The app entry point requires Linux")
+            settings = load_settings(arguments.config)
+            if os.geteuid() == 0:
+                os.setgroups([])
+                os.setgid(10001)
+                os.setuid(10001)
+            logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+            asyncio.run(_run_settings(settings, Path("/tmp/ha-growatt.health")))
         else:
             environment = dict(os.environ)
             for key, value in vars(arguments).items():

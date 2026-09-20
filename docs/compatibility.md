@@ -17,7 +17,7 @@ Real captures and installation details remain outside this repository.
 | Configuration | INI settings, environment overrides, app options, time zones, buffered publication, native MQTT, optional destinations, custom layouts and extension settings are covered. |
 | Python and Linux | All 2,727 tests, lint checks and package builds pass on Python 3.12, 3.13 and 3.14. The full suite also passes against the installed Linux Python 3.13 image. |
 | Container platforms | amd64, arm64, arm/v7 and 386 images pass installed-package decoding, real proxy/server connections, passive health, SIGTERM shutdown and Linux capture probes. |
-| Native Home Assistant | An isolated instance on HAOS-DEV accepts the old and new discovery records with the same 64 entity identities, values, units and classes. Full discovery and cleanup, MQTT reload/birth and broker restart pass. Recorder retains history and the expected statistic metadata. |
+| Native Home Assistant | An isolated instance on HAOS-DEV accepts the old and new discovery records with the same 64 entity identities, values, units and classes. Full discovery and cleanup, MQTT reload/birth, broker restart and Core restart pass. Recorder retains history and the expected statistic metadata. |
 | Physical installation | Ninety daylight frames from both inverters match the previous decoder, with no mismatches. Both fresh MQTT states match. The 64 discovery records retain their identities and metadata; the freshness label becomes “Last data push”. |
 
 ## Layouts and identifiers
@@ -63,9 +63,10 @@ logs do not provide the inverter fields required by PVOutput.
 
 ## Installation qualification
 
-A replacement release still requires native Home Assistant migration and
-restart checks, including entity identity, history, statistics, full-profile
-changes and broker reconnection. The live service remains in place until those installation checks pass.
+Native Home Assistant migration and restart checks pass, including entity
+identity, history, statistics, full-profile changes and broker reconnection.
+The app also passes native Supervisor installation, protected-options startup
+and restart checks on HAOS-DEV.
 
 After promotion, verify fresh readings from both inverters, continued cloud
 forwarding and the existing Home Assistant entities. Keep the previous service

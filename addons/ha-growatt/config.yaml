@@ -1,5 +1,5 @@
 name: HA Growatt
-version: 0.1.0.dev0
+version: 0.1.0
 slug: ha_growatt
 description: Growatt readings through MQTT with Home Assistant discovery
 url: https://github.com/Herbertmt978/HA-Growatt
@@ -8,7 +8,6 @@ startup: services
 boot: auto
 init: false
 tmpfs: true
-image: ghcr.io/herbertmt978/ha-growatt
 ports:
   5279/tcp: 5279
 ports_description:

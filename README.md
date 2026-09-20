@@ -4,9 +4,9 @@ HA Growatt reads Growatt datalogger traffic and publishes inverter and meter
 readings. It can forward the connection to Growatt, run as a local datalogger
 server, or listen passively to traffic on a Linux network interface.
 
-This is still a development version. Keep your working service until the
-replacement release has passed the Docker and Home Assistant installation
-checks. The image references in this repository are development references.
+Version 0.1.0 includes Docker images and a Home Assistant app. Follow the
+[migration instructions](docs/installation.md) when replacing an existing
+service so its configuration and sensor history are retained.
 
 Home Assistant discovery keeps existing device and sensor identifiers, units
 and statistics settings. The standard profile exposes 32 sensors for the
@@ -28,7 +28,7 @@ The implementation includes:
 
 See [configuration](docs/configuration.md), [installation](docs/installation.md)
 and the [compatibility record](docs/compatibility.md). The compatibility record
-distinguishes observed behaviour from installation checks still outstanding.
+describes the behaviour checked and the limits of physical hardware testing.
 
 ## Run from Python
 
