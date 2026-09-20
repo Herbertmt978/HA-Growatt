@@ -36,7 +36,7 @@ The decoder rejects an unverified size rather than producing guessed values.
 With `wire_profile = "auto"`, the bridge scores the verified layouts for each
 packet. The `[selection]` table accepts `family`, `strict`, `automatic` and
 `minimum_score`. Defaults match the current proxy setup: `default`, `false`,
-`true` and `20`. A score of zero disables the minimum-score check. Explicit wire
+`true` and `20`. Setting `minimum_score = 0` disables that check. Explicit wire
 profiles continue to use that profile alone.
 
 Automatic selection can choose different supported families for different
@@ -54,15 +54,17 @@ Select `entity_profile = "all"` in the MQTT table for full discovery, and
 The standard profile continues to expose 32 entities for generic/MOD packets
 regardless of the include-all setting. State retains the complete decoded data.
 
-The current bridge observes live function-4 telemetry only. Other valid frames
+The bridge publishes function-3 announcements and function-4 telemetry. Other
+valid frames
 continue through the relay, subject to the current development command filter.
 With `block_commands = true`, the relay uses the observed record allowlist in
 both directions. Valid protocol-5/6 time-setting requests are permitted;
 destination-setting requests require `allow_destination_change = true`.
 Invalid checksums cannot use these exceptions. Disabling `block_commands`
 permits other records unless an explicit cloud function block is configured.
-Offline decoding covers functions 3, 4 and 80; publishing announce and buffered
-records requires the pending time and buffered-record policy work.
+Offline decoding covers functions 3, 4 and 80. The existing Home Assistant output
+skips buffered records; the bridge preserves that rule. Time and buffered-record
+policies for the other output modes still need work.
 
 ## Configuration
 

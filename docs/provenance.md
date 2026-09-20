@@ -28,6 +28,8 @@ Compatibility evidence is treated separately from implementation source:
   from controlled calls to the working version. Configuration fixtures record
   effective settings for synthetic INI files and environment overrides.
   The new selector and configuration loader were written from those observations.
+- Publication fixtures capture the existing proxy's handling of announcement,
+  telemetry and buffered packets, with external delivery replaced by a recorder.
 - Tests for transport, register envelopes, discovery and delivery were written
   for the new implementation. Passing them does not prove untested modes or
   hardware compatibility.

@@ -63,7 +63,7 @@ async def _run(path: Path) -> None:
     publisher = Publisher(settings.mqtt)
 
     async def observe(direction, frame):
-        if direction == "device" and frame.function == 4:
+        if direction == "device" and frame.function in {3, 4}:
             await publisher.publish(decoder.decode(frame))
 
     publisher.start()
