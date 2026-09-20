@@ -1,4 +1,5 @@
 import asyncio
+from dataclasses import replace
 
 import pytest
 from test_fallback import cloud, receive, report
@@ -6,6 +7,38 @@ from test_fallback import cloud, receive, report
 from ha_growatt.device_protocol import logger_prefix
 from ha_growatt.protocol import Frame, read_frame
 from ha_growatt.relay import Relay, RelaySession, RelaySettings
+from ha_growatt.telemetry import Decoder
+
+
+@pytest.mark.parametrize("protocol", [2, 5, 6])
+@pytest.mark.parametrize("padding", [b"\0", b" "])
+def test_padded_inverter_identity_matches_telemetry_and_accepts_commands(protocol, padding):
+    async def scenario():
+        async with cloud() as (port, clients):
+            async with Relay(RelaySettings("127.0.0.1", port, listen_port=0)) as relay:
+                reader, writer = await asyncio.open_connection(*relay.addresses[0][:2])
+                cloud_reader, cloud_writer = await clients.get()
+                frame = report(protocol)
+                width = 30 if protocol == 6 else 10
+                payload = bytearray(frame.payload)
+                payload[width : width + 10] = b"SHORT001".ljust(10, padding)
+                frame = replace(frame, payload=bytes(payload))
+                identity = Decoder(f"classic-{protocol}").decode(frame).values["pvserial"]
+                assert identity == "SHORT001"
+                writer.write(frame.to_bytes())
+                assert await receive(cloud_reader) == frame
+                cloud_writer.write(Frame(7, protocol, 1, 4, b"\0").to_bytes())
+                await receive(reader)
+                assert relay.connection(identity) == "cloud"
+                command = asyncio.create_task(relay.command(identity, 5, b"\0\3\0\3"))
+                request = await receive(reader)
+                response = replace(request, payload=request.payload + b"\0\x32")
+                writer.write(response.to_bytes())
+                assert await asyncio.wait_for(command, 2) == response
+                writer.close()
+                await writer.wait_closed()
+
+    asyncio.run(scenario())
 
 
 @pytest.mark.parametrize("protocol", [2, 5, 6])

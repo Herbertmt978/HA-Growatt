@@ -275,7 +275,7 @@ class Relay:
                 session.clock_since = asyncio.get_running_loop().time()
             width = 30 if frame.protocol == 6 else 10
             if frame.function in {3, 4, 80} and len(frame.payload) >= width + 10:
-                identity = frame.payload[width : width + 10].decode("ascii")
+                identity = frame.payload[width : width + 10].decode("ascii").rstrip("\x00 ")
                 validate_identity(identity)
                 if identity not in session.devices and len(session.devices) >= 64:
                     return
