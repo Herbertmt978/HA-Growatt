@@ -1,0 +1,29 @@
+adopt_history:
+  name: Preview or adopt history
+  description: Check an unused historical sensor ID, then explicitly let an HA Growatt sensor use it. No statistics are deleted or merged. Compare the actual readings and make a backup before confirming.
+  fields:
+    target_entity:
+      name: HA Growatt sensor
+      required: true
+      selector:
+        entity:
+          domain: sensor
+          integration: mqtt
+    source_entity_id:
+      name: Historical entity ID
+      description: The old sensor must have been removed and its statistics retained.
+      required: true
+      example: sensor.previous_solar_energy_total
+      selector:
+        text:
+    confirm:
+      name: Apply the change
+      default: false
+      selector:
+        boolean:
+    same_measurement:
+      name: Both sensors measure the same inverter and quantity
+      description: Check daily versus lifetime energy and the measured circuit, not just the unit.
+      default: false
+      selector:
+        boolean:

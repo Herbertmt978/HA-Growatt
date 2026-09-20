@@ -1,5 +1,5 @@
 name: HA Growatt
-version: 0.2.1
+version: 0.3.0
 slug: ha_growatt
 description: Growatt readings through MQTT with Home Assistant discovery
 url: https://github.com/Herbertmt978/HA-Growatt
@@ -24,6 +24,9 @@ options:
   mode: proxy
   blockcmd: true
   cloud_fallback: true
+  cloud_recovery_seconds: 300
+  settings_refresh_seconds: 300
+  buffered_events: true
   ha_features: true
   ha_controls: true
   time: server
@@ -48,6 +51,9 @@ schema:
   mode: list(proxy)
   blockcmd: bool
   cloud_fallback: bool
+  cloud_recovery_seconds: int(0,86400)
+  settings_refresh_seconds: int(0,86400)
+  buffered_events: bool
   ha_features: bool
   ha_controls: bool
   time: list(auto|server)
@@ -71,3 +77,5 @@ schema:
     - serial: str
       family: list(default|sph|spf|spa|mod|min|tl3|max)
       controls: list(auto|sph|spa|min_tl_xh|mod_tl3_xh)
+      model: str?
+      firmware: str?

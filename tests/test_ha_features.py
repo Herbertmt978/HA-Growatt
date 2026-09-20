@@ -2,6 +2,7 @@ import asyncio
 import json
 from types import SimpleNamespace
 
+from ha_growatt.diagnostics import ObservationStats
 from ha_growatt.discovery import discovery_messages
 from ha_growatt.ha_features import Device, HomeAssistantFeatures, feature_discovery
 from ha_growatt.telemetry import Telemetry
@@ -23,7 +24,12 @@ def features(controls=True):
         connection=lambda _: "cloud", stats=SimpleNamespace(fallback_connections=0)
     )
     relay.session_key = lambda _: 1
-    return HomeAssistantFeatures(publisher, relay, SimpleNamespace(failures=0), controls=controls)
+    return HomeAssistantFeatures(
+        publisher,
+        relay,
+        SimpleNamespace(failures=0, observations=ObservationStats()),
+        controls=controls,
+    )
 
 
 def packet(profile="mod-6"):
@@ -154,6 +160,7 @@ def test_feature_state_has_no_raw_packets_addresses_or_credentials():
             "settings",
             "schedules",
             "rejected_commands",
+            "schema",
         }
 
     asyncio.run(scenario())

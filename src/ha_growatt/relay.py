@@ -39,6 +39,7 @@ class RelaySettings:
     cloud_fallback: bool = True
     cloud_response_seconds: float = 15
     command_seconds: float = 10
+    cloud_recovery_seconds: float = 300
 
     def __post_init__(self) -> None:
         if any(
@@ -65,6 +66,12 @@ class RelaySettings:
             for value in deadlines
         ):
             raise ValueError("Limits and deadlines must be positive")
+        if (
+            type(self.cloud_recovery_seconds) not in {int, float}
+            or not math.isfinite(self.cloud_recovery_seconds)
+            or self.cloud_recovery_seconds < 0
+        ):
+            raise ValueError("Cloud recovery interval must be non-negative; zero disables it")
         if any(
             type(value) is not int or value <= 0
             for value in (self.max_connections, self.queue_size)
@@ -96,6 +103,8 @@ class RelayStats:
     session_failures: int = 0
     fallback_connections: int = 0
     local_replies: int = 0
+    recovery_probes: int = 0
+    recovery_reconnects: int = 0
 
 
 @dataclass(eq=False)
@@ -117,6 +126,7 @@ class RelaySession:
     next_sequence: int = 65535
     last_command: float = 0
     clock_needed: bool = False
+    heartbeat: Frame | None = None
 
     def sequence(self) -> int:
         used = self.local_sequences | self.cloud_sequences
@@ -137,9 +147,13 @@ def _reply_key(frame: Frame) -> tuple:
 
 async def _close(writer: asyncio.StreamWriter) -> None:
     writer.close()
+    closed = asyncio.create_task(writer.wait_closed())
+    # StreamWriter shares its close waiter. Cancelling one session's cleanup
+    # must not cancel that waiter for the relay's final shutdown sweep.
+    closed.add_done_callback(lambda task: None if task.cancelled() else task.exception())
     try:
         async with asyncio.timeout(2):
-            await writer.wait_closed()
+            await asyncio.shield(closed)
     except (ConnectionError, OSError, TimeoutError):
         pass
 
@@ -204,6 +218,8 @@ class Relay:
         self._connections.add(session)
         flows: list[asyncio.Task[None]] = []
         try:
+            if self.settings.cloud_fallback and self.settings.cloud_recovery_seconds:
+                flows.append(asyncio.create_task(self._recover_cloud(session)))
             try:
                 async with asyncio.timeout(self.settings.connection_seconds):
                     cloud_reader, session.upstream = await asyncio.open_connection(
@@ -269,6 +285,8 @@ class Relay:
             if session.logger and session.logger != logger:
                 raise ProtocolError("Datalogger identity changed during a connection")
             session.logger, session.protocol = logger, frame.protocol
+            if frame.function == 22 and len(frame.payload) <= 32:
+                session.heartbeat = frame
             if frame.function == 3:
                 session.clock_needed = True
             width = 30 if frame.protocol == 6 else 10
@@ -336,6 +354,65 @@ class Relay:
                 _, sent = next(iter(session.awaiting_cloud.values()))
                 if asyncio.get_running_loop().time() - sent >= self.settings.cloud_response_seconds:
                     await self._fallback(session)
+
+    async def _probe_cloud(self, session: RelaySession) -> bool:
+        """Require a protocol reply, not just a listening TCP port.
+
+        The heartbeat contains the logger identity but no measurements or writes.
+        Its replies stay on this disposable connection and never reach the device.
+        """
+        from .device_protocol import logger_prefix
+
+        writer = None
+        self.stats.recovery_probes += 1
+        try:
+            async with asyncio.timeout(self.settings.connection_seconds):
+                reader, writer = await asyncio.open_connection(
+                    self.settings.upstream_host, self.settings.upstream_port
+                )
+            ping = Frame(
+                1,
+                session.protocol,
+                1,
+                22,
+                logger_prefix(session.logger, session.protocol)
+                + (b"\0\0" if session.protocol == 6 else b""),
+            )
+            if session.heartbeat is not None:
+                ping = replace(session.heartbeat, transaction=1)
+            writer.write(ping.to_bytes())
+            async with asyncio.timeout(self.settings.write_seconds):
+                await writer.drain()
+            wire = await read_frame(reader, self.settings.cloud_response_seconds)
+            return wire is not None and Frame.from_bytes(wire) == ping
+        except (OSError, TimeoutError, ProtocolError):
+            return False
+        finally:
+            if writer is not None:
+                await _close(writer)
+
+    async def _recover_cloud(self, session: RelaySession) -> None:
+        interval = self.settings.cloud_recovery_seconds
+        delay = interval
+        while not self._closing and not session.writer.is_closing():
+            await asyncio.sleep(delay)
+            if session.cloud or not session.logger:
+                delay = interval
+                continue
+            if not await self._probe_cloud(session):
+                delay = min(delay * 2, interval * 8)
+                continue
+            # Finish local commands and their read-back before inviting the logger
+            # to reconnect. Never change ACK ownership inside an existing session.
+            while not self._closing and not session.writer.is_closing():
+                async with session.command_lock, session.send_lock:
+                    quiet = asyncio.get_running_loop().time() - session.last_command >= 30
+                    if quiet and not session.pending:
+                        self.stats.recovery_reconnects += 1
+                        _LOG.info("Growatt cloud replied; reconnecting the datalogger")
+                        session.writer.close()
+                        return
+                await asyncio.sleep(1)
 
     async def _cloud_frames(self, reader, session: RelaySession) -> None:
         try:

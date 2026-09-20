@@ -19,6 +19,8 @@
         <h2 id="connection-title">Connection checks</h2>
         <div id="checks" class="checks"></div>
         <ul id="warnings"></ul>
+        <p id="packet-summary"></p>
+        <p>Checks refresh automatically every ten seconds while this page is visible.</p>
         <button id="refresh">Refresh checks</button>
       </section>
       <section aria-labelledby="devices-title">
@@ -103,6 +105,13 @@
           download="ha-growatt-diagnostics.json"
           >Download diagnostics</a
         >
+        <p>For an intermittent problem, collect up to ten minutes of packet summaries.
+          The file includes packet sizes, protocols and decode outcomes. It contains
+          no serial numbers, payloads or household readings.</p>
+        <button id="capture-start">Start support capture</button>
+        <button id="capture-stop">Stop capture</button>
+        <a class="button" href="api/capture" download="ha-growatt-capture.json">Download capture</a>
+        <p id="capture-status" role="status"></p>
         <p>
           <a
             href="https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/home-assistant-features.md"

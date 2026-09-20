@@ -129,6 +129,9 @@ def addon_options(
         "mqtt_password",
         "mqtt_retain",
         "cloud_fallback",
+        "cloud_recovery_seconds",
+        "settings_refresh_seconds",
+        "buffered_events",
         "ha_features",
         "ha_controls",
         "mqtt_auto",
@@ -162,20 +165,29 @@ def addon_options(
 
     families = {}
     models = {}
+    hardware = {}
     for item in inverters:
-        if not isinstance(item, dict) or set(item) - {"serial", "family", "controls"}:
+        if not isinstance(item, dict) or set(item) - {
+            "serial",
+            "family",
+            "controls",
+            "model",
+            "firmware",
+        }:
             raise ValueError("Invalid inverter profile")
         validate_identity(item.get("serial", ""))
         if item["serial"] in families:
             raise ValueError("Each inverter must have only one profile")
         families[item["serial"]] = item.get("family", "default")
         models[item["serial"]] = item.get("controls", "auto")
+        hardware[item["serial"]] = {key: item[key] for key in ("model", "firmware") if key in item}
     return (
         RelaySettings(
             "server.growatt.com",
             listen_host="0.0.0.0",
             block_commands=_boolean(options.get("blockcmd", True)),
             cloud_fallback=_boolean(options.get("cloud_fallback", True)),
+            cloud_recovery_seconds=_integer(options.get("cloud_recovery_seconds", 300)),
         ),
         mqtt,
         SelectionSettings(
@@ -190,6 +202,9 @@ def addon_options(
             ha_controls=_boolean(options.get("ha_controls", True)),
             experimental_controls=_boolean(options.get("experimental_controls", False)),
             control_models=models,
+            hardware=hardware,
+            settings_refresh_seconds=_integer(options.get("settings_refresh_seconds", 300)),
+            buffered_events=_boolean(options.get("buffered_events", True)),
             raw_mqtt=None if ha_enabled else RawMqttSettings(mqtt),
             policy=PublicationPolicy(
                 options.get("time", "server"), _boolean(options.get("sendbuf", False))
@@ -235,6 +250,10 @@ def load_legacy_options(
         "invtypemap",
         "experimental_controls",
         "control_models",
+        "hardware",
+        "settings_refresh_seconds",
+        "buffered_events",
+        "cloud_recovery_seconds",
         "timezone",
         "layouts_directory",
         "sniff_interface",
@@ -261,6 +280,9 @@ def load_legacy_options(
         allow_destination_change=_boolean(get("Generic", "noipf", "gnoipf", False)),
         cloud_fallback=_boolean(
             get("Generic", "cloud_fallback", "HA_GROWATT_CLOUD_FALLBACK", True)
+        ),
+        cloud_recovery_seconds=_integer(
+            get("Generic", "cloud_recovery_seconds", "HA_GROWATT_CLOUD_RECOVERY_SECONDS", 300)
         ),
     )
     whitelist = path.parent / "recwl.txt"
@@ -348,6 +370,13 @@ def load_legacy_options(
         ),
         control_models=_mapping(
             get("Generic", "control_models", "HA_GROWATT_CONTROL_MODELS", "{}")
+        ),
+        hardware=_mapping(get("Generic", "hardware", "HA_GROWATT_HARDWARE", "{}")),
+        settings_refresh_seconds=_integer(
+            get("Generic", "settings_refresh_seconds", "HA_GROWATT_SETTINGS_REFRESH_SECONDS", 300)
+        ),
+        buffered_events=_boolean(
+            get("Generic", "buffered_events", "HA_GROWATT_BUFFERED_EVENTS", True)
         ),
         policy=PublicationPolicy(
             get("Generic", "time", "gtime", "auto"),

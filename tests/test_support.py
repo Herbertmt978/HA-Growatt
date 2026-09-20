@@ -1,6 +1,7 @@
 import asyncio
 import json
 from contextlib import suppress
+from dataclasses import replace
 from types import SimpleNamespace
 
 import pytest
@@ -200,5 +201,85 @@ def test_profile_save_refuses_a_concurrent_options_change():
     async def scenario():
         with pytest.raises(ValueError, match="options changed"):
             await Client().profile("INVERT0001", "sph", "sph")
+
+    asyncio.run(scenario())
+
+
+def test_hardware_edit_preserves_profile_cache_and_unknown_details():
+    class Client(Supervisor):
+        def __init__(self):
+            self.options = {}
+
+        def request(self, path, data=None):
+            if data:
+                self.options = data["options"]
+            return {"options": self.options}
+
+    async def scenario():
+        server = support()
+        server.supervisor = Client()
+        device = server.pipeline.features.devices["PRIVATE001"]
+        before = device.profile, device.last_record, device.readings
+
+        async def forbidden(_):
+            raise AssertionError("A hardware label must not discard saved readings")
+
+        server.pipeline.ha.forget = forbidden
+        code, _, response = await server.dispatch(
+            "POST",
+            "/api/profiles",
+            {"x-ha-growatt": "1", "content-type": "application/json"},
+            json.dumps(
+                {
+                    "serial": "PRIVATE001",
+                    "family": "default",
+                    "controls": "auto",
+                    "model": "Confirmed inverter model",
+                    "firmware": "GH1.02",
+                }
+            ).encode(),
+        )
+        assert code == 200
+        assert (device.profile, device.last_record, device.readings) == before
+        assert server.pipeline.features.hardware["PRIVATE001"]["firmware"] == "GH1.02"
+        assert "Confirmed inverter model" not in json.dumps(server.status(redacted=True))
+
+    asyncio.run(scenario())
+
+
+def test_firmware_read_preserves_the_global_reading_profile():
+    class Client(Supervisor):
+        def __init__(self):
+            self.options = {"invtype": "sph"}
+
+        def request(self, path, data=None):
+            if data:
+                self.options = data["options"]
+            return {"options": self.options}
+
+    async def scenario():
+        from ha_growatt.protocol import Frame
+
+        server = support()
+        server.supervisor = Client()
+        settings = server.pipeline.settings
+        server.pipeline.settings = replace(
+            settings, selection=replace(settings.selection, family="sph")
+        )
+
+        async def command(identity, function, body):
+            assert function == 5
+            return Frame(1, 6, 1, 5, bytes(30) + body + b"GH1.02GH2.01")
+
+        server.transport.command = command
+        code, _, _ = await server.dispatch(
+            "POST",
+            "/api/hardware/read",
+            {"x-ha-growatt": "1", "content-type": "application/json"},
+            b'{"serial":"PRIVATE001"}',
+        )
+        assert code == 200
+        assert server.supervisor.options["inverters"][0]["family"] == "sph"
+        assert server.pipeline.settings.selection.family == "sph"
 
     asyncio.run(scenario())

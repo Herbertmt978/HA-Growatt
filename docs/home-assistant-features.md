@@ -1,6 +1,6 @@
 # Home Assistant features
 
-These features are included in 0.2.0. Additional battery profiles and schedules
+These features are included in 0.3.0. Additional battery profiles and schedules
 are experimental and disabled by default; see the hardware evidence below.
 
 ## Setup and support page
@@ -31,6 +31,20 @@ The same list can be edited in the app configuration before the first packet.
 profiles, connection status and counters. It excludes serials, credentials,
 addresses, measurement values and raw packets. The page uses authenticated HA
 ingress; it does not expose another port on the household network.
+
+Checks refresh every ten seconds while the page is visible, without replacing
+unfinished profile or schedule edits. Measurement failures, incomplete fields
+and announcements that are not measurement records have separate counters.
+**Start support capture** collects up to 256 packet summaries over ten minutes.
+Download the result before restarting the app. It describes protocols, lengths
+and decode outcomes; payloads, serials and household readings are excluded even
+for an unknown packet layout. This is not a raw packet recording.
+
+Enter the exact model printed on each inverter. **Read firmware from inverter**
+reads holding registers 9–14 and accepts only valid ASCII version text. If the
+model does not implement those registers, enter its displayed version manually.
+These details appear on the existing MQTT device. Blank fields remain unknown;
+neither packet size nor a selected control profile establishes an exact model.
 
 ## Restart recovery
 
@@ -73,10 +87,17 @@ Packets already forwarded but still awaiting acknowledgement receive a local
 reply. Other datalogger connections continue independently.
 
 Once local replies begin, that connection stays local. This prevents competing
-cloud and local acknowledgements. The next datalogger connection tries the cloud
-again. Devices that keep a connection open for a long time may therefore remain
-local after an outage until they reconnect. No buffered cloud replay is added.
+cloud and local acknowledgements. By default a separate connection checks the
+cloud every five minutes, backing off to at most forty minutes after failures.
+The check requires an echoed protocol heartbeat; an open TCP port is insufficient.
+After a successful check and thirty seconds without local commands, HA Growatt
+closes the local connection so the datalogger reconnects through the cloud.
+No measurement is resent by the probe. The datalogger owns reconnection and any
+buffered uploads; no additional buffered cloud replay is added.
 ShinePhone will have a gap for records collected only locally.
+
+Set `cloud_recovery_seconds` to change the initial interval, or zero to leave
+reconnection to the datalogger. This does not disable local fallback.
 
 Turning `cloud_fallback` off restores the previous behaviour: a cloud connection
 failure ends the datalogger session. Existing cloud command filtering still
@@ -169,7 +190,9 @@ integration's identity, take a backup and follow HA's entity/history migration
 procedure only after checking the proposed mapping. Unmatched sensors need a
 manual comparison. Preview requires HA Core and its recorder to be available.
 
-HA Growatt reads settings on first contact and every five minutes. **Refresh
+HA Growatt reads settings on first contact and every five minutes by default.
+`settings_refresh_seconds` accepts 30–86400 seconds, or zero for manual reads only.
+**Refresh
 settings** requests a read immediately. No periodic task writes settings back
 to the inverter. A user change is sent once, then read back. Rejection, a
 different returned value or lost confirmation is shown in Last command result;
@@ -216,3 +239,54 @@ Native Home Assistant qualification checks discovery and its actual MQTT
 number, switch and button services. These checks do not establish that every
 listed model or firmware accepts every register. New physical combinations still need
 verification. Development does not change settings on the household inverters.
+
+## Optional native Home Assistant companion
+
+Add this repository to HACS as an **Integration**, download HA Growatt, restart
+Home Assistant and add **HA Growatt** under Devices & services. The app, MQTT
+integration and companion must use the same broker. The companion needs no new
+credentials and does not listen for dataloggers or create measurement sensors.
+
+The companion raises HA Repairs for an app that stops reporting, measurements
+that cannot be decoded, or an inverter that stays silent during daylight. It
+uses HA's configured location and Sun integration, waits two minutes after its
+own startup and, by default, thirty minutes after sunrise. The default stale
+threshold is fifteen minutes. Change these under the companion's options.
+Fresh readings clear feed warnings; night-time silence does not raise them.
+App/broker failures are reported separately, including at night. Existing sensor
+values and their original timestamps are preserved throughout.
+
+Buffered readings never overwrite current sensors. With `buffered_events`
+enabled in the app and companion, they produce `ha_growatt_buffered_record` events
+containing the inverter, its local recorded time and unscaled decoded integer
+fields. Automations must apply the appropriate field scaling. A bounded duplicate
+filter and rejection of retained replays prevent common duplicate deliveries;
+this is not an exactly-once archival feed. Disable the option to discard these
+events. Raw MQTT, InfluxDB and other existing outputs retain their own policies.
+
+### Adopt a previous entity ID
+
+The `ha_growatt.adopt_history` action first previews a historical ID for an HA
+Growatt MQTT sensor. The old entity must be removed, with its statistics retained;
+disabling it does not release its ID. The action checks ownership, current data,
+compatible units and cumulative versus measurement statistics.
+
+```yaml
+action: ha_growatt.adopt_history
+data:
+  target_entity: sensor.new_inverter_generated_energy_total
+  source_entity_id: sensor.previous_solar_energy_total
+response_variable: preview
+```
+
+Compare both actual readings, the measured circuit and daily versus lifetime
+counters, then make a backup. To apply the rename, add `confirm: true` and
+`same_measurement: true`. The operation uses HA's entity registry; it does not
+delete or merge statistics. Existing references to the historical ID continue
+to work. Any statistics collected under the target's previous ID stay separate.
+HA may log that it cannot rename that statistic because the historical ID already
+exists: the older series is intentionally preserved. Renaming back is not a clean
+undo, because HA can then move the historical series with the entity.
+
+The companion's native diagnostics download excludes device identities, readings
+and network settings. Removing the companion leaves the app's measurements running.

@@ -34,6 +34,7 @@ class SupportServer:
         publisher = self.pipeline.ha
         features = self.pipeline.features
         stats = self.transport.stats
+        observations = asdict(self.pipeline.observations)
         warnings = []
         connected = bool(publisher and publisher._connected.is_set())
         if not connected:
@@ -50,20 +51,28 @@ class SupportServer:
                 "Packets are arriving but no fresh inverter reading has decoded. "
                 "Check the inverter family. New session-key encrypted loggers are not supported."
             )
-        if stats.observation_failures:
+        if observations["failed_measurements"]:
             warnings.append(
-                "Some packets could not be decoded. "
+                "Some measurement records could not be decoded. "
                 "Check the profile and download diagnostics for support."
             )
+        if stats.observation_failures:
+            warnings.append("A packet observer failed. Forwarding continues; download diagnostics.")
         if publisher and publisher.cache_error:
             warnings.append(
                 "Restart recovery is unavailable. Check free space and app data permissions; "
                 "fresh readings still work."
             )
-        if stats.fallback_connections:
+        if features and any(
+            self.transport.connection(identity) == "local" for identity in features.devices
+        ):
             warnings.append(
-                "Cloud fallback has been used. Local readings continue; "
-                "ShinePhone will have gaps until a new connection reaches Growatt."
+                "Cloud forwarding is unavailable. Local readings continue. "
+                + (
+                    "Automatic recovery checks the cloud before reconnecting the datalogger."
+                    if self.pipeline.settings.relay.cloud_recovery_seconds
+                    else "Automatic recovery is disabled; waiting for the datalogger to reconnect."
+                )
             )
         devices = []
         now = asyncio.get_running_loop().time()
@@ -78,10 +87,15 @@ class SupportServer:
                     "decode_errors": device.decode_errors,
                     "restored": device.readings == 0,
                     "family": self.pipeline.settings.selection.device_families.get(
-                        device.identity, "default"
+                        device.identity, self.pipeline.settings.selection.family
                     ),
                     "controls": self.pipeline.settings.runtime.control_models.get(
                         device.identity, "auto"
+                    ),
+                    **(
+                        {}
+                        if redacted
+                        else self.pipeline.settings.runtime.hardware.get(device.identity, {})
                     ),
                 }
             )
@@ -93,6 +107,8 @@ class SupportServer:
             "recovery_healthy": bool(publisher and publisher._store and not publisher.cache_error),
             "experimental_controls": self.pipeline.settings.runtime.experimental_controls,
             "transport": asdict(stats),
+            "observations": observations,
+            "capture_active": self.pipeline.capture.active,
             "output_failures": self.pipeline.failures,
             "dropped_readings": self.pipeline.dropped,
             "devices": devices,
@@ -118,6 +134,12 @@ class SupportServer:
                 "application/json",
                 json.dumps(self.status(redacted=True), indent=2).encode(),
             )
+        if method == "GET" and path == "/api/capture":
+            return (
+                200,
+                "application/json",
+                json.dumps(self.pipeline.capture.export(), indent=2).encode(),
+            )
         if (
             method != "POST"
             or headers.get("x-ha-growatt") != "1"
@@ -127,7 +149,44 @@ class SupportServer:
         data = json.loads(body)
         if not isinstance(data, dict):
             raise ValueError("Expected an object")
-        if path == "/api/profiles":
+        if path == "/api/capture/start":
+            self.pipeline.capture.start()
+            result = {
+                "message": "Recording packet summaries for ten minutes. "
+                "No payloads or readings are saved."
+            }
+        elif path == "/api/capture/stop":
+            self.pipeline.capture.stop()
+            result = {"message": "Capture stopped. The download is ready."}
+        elif path == "/api/hardware/read":
+            from .hardware import read_firmware
+
+            features = self.pipeline.features
+            identity = data.get("serial", "")
+            device = features.devices.get(identity) if features else None
+            if not device or not features.controls or self.supervisor is None:
+                raise ValueError(
+                    "Firmware reading needs a connected inverter with controls enabled"
+                )
+            async with self._profile_lock, device.lock:
+                firmware = await read_firmware(self.transport, identity)
+                updated = await self.supervisor.profile(
+                    identity,
+                    self.pipeline.settings.selection.device_families.get(
+                        identity, self.pipeline.settings.selection.family
+                    ),
+                    features.models.get(identity, "auto"),
+                    hardware={"firmware": firmware},
+                )
+                self.pipeline.settings = replace(
+                    self.pipeline.settings,
+                    runtime=replace(
+                        self.pipeline.settings.runtime, hardware=updated.runtime.hardware
+                    ),
+                )
+                features.hardware = updated.runtime.hardware
+            result = {"message": "Firmware read and saved.", "firmware": firmware}
+        elif path == "/api/profiles":
             identity = data.get("serial", "")
             validate_identity(identity)
             if self.supervisor is None:
@@ -137,28 +196,48 @@ class SupportServer:
             )
             async with self._profile_lock, device.lock if device else nullcontext():
                 updated = await self.supervisor.profile(
-                    identity, data.get("family", "default"), data.get("controls", "auto")
+                    identity,
+                    data.get("family", "default"),
+                    data.get("controls", "auto"),
+                    hardware={key: data[key] for key in ("model", "firmware") if key in data},
                 )
+                profile_changed = updated.selection.device_families.get(
+                    identity, updated.selection.family
+                ) != self.pipeline.settings.selection.device_families.get(
+                    identity, self.pipeline.settings.selection.family
+                ) or updated.runtime.control_models.get(
+                    identity, "auto"
+                ) != self.pipeline.settings.runtime.control_models.get(identity, "auto")
                 self.pipeline.settings = replace(
                     self.pipeline.settings,
                     selection=updated.selection,
                     runtime=replace(
                         self.pipeline.settings.runtime,
                         control_models=updated.runtime.control_models,
+                        hardware=updated.runtime.hardware,
                     ),
                 )
                 self.pipeline.decoder = self.pipeline.settings.decoder()
                 if self.pipeline.features:
                     self.pipeline.features.models = updated.runtime.control_models
-                if self.pipeline.features and identity in self.pipeline.features.devices:
+                    self.pipeline.features.hardware = updated.runtime.hardware
+                if (
+                    profile_changed
+                    and self.pipeline.features
+                    and identity in self.pipeline.features.devices
+                ):
                     device = self.pipeline.features.devices[identity]
                     device.profile = "pending"
                     device.values.clear()
                     device.schedules.clear()
                     device.refresh_at = 0
-                if self.pipeline.ha:
+                if profile_changed and self.pipeline.ha:
                     await self.pipeline.ha.forget(identity)
-            result = {"message": "Profile saved. Waiting for the next inverter reading."}
+            result = {
+                "message": "Profile saved. Waiting for the next inverter reading."
+                if profile_changed
+                else "Inverter details saved."
+            }
         elif path == "/api/migration":
             if self.supervisor is None or self.pipeline.ha is None:
                 raise ValueError("Migration preview needs the Home Assistant app and MQTT")
@@ -216,8 +295,10 @@ class SupportServer:
                         b'Check its connection and try again."}',
                     )
                 disposition = (
-                    'Content-Disposition: attachment; filename="ha-growatt-diagnostics.json"\r\n'
-                    if path == "/api/diagnostics"
+                    'Content-Disposition: attachment; filename="ha-growatt-'
+                    + ("capture" if path == "/api/capture" else "diagnostics")
+                    + '.json"\r\n'
+                    if path in {"/api/diagnostics", "/api/capture"}
                     else ""
                 )
                 writer.write(

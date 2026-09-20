@@ -4,7 +4,7 @@ HA Growatt reads Growatt datalogger traffic and publishes inverter and meter
 readings. It can forward the connection to Growatt, run as a local datalogger
 server, or listen passively to traffic on a Linux network interface.
 
-Version 0.2.1 includes Docker images and a Home Assistant app. Follow the
+Version 0.3.0 includes Docker images and a Home Assistant app. Follow the
 [migration instructions](docs/installation.md) when replacing an existing
 service so its configuration and sensor history are retained.
 
@@ -39,7 +39,9 @@ measurements after a quiet restart, keeping their original timestamps.
 
 In proxy mode, HA Growatt can answer the datalogger locally when Growatt is
 unreachable or stops replying. Readings continue to reach Home Assistant. That
-connection stays local; the next datalogger connection tries Growatt again.
+connection stays local until a protocol health check confirms the cloud is
+responding. HA Growatt then asks the datalogger to reconnect after local commands
+have finished. Failed checks back off; the next connection tries Growatt again.
 ShinePhone does not receive readings while the connection is local.
 
 Additional Home Assistant entities show whether readings are arriving, whether
@@ -55,7 +57,13 @@ Refresh settings and Sync datalogger time buttons are included.
 
 See [the feature guide](docs/home-assistant-features.md) for supported settings,
 options and testing limits. These additions use the existing app and MQTT
-integration.
+integration. Settings refresh is configurable, including manual-only operation.
+
+An optional **HA Growatt companion integration** adds daylight-aware repair
+notices, buffered-reading events and a guarded history-adoption action. Add this
+repository to HACS as an Integration, download it, restart Home Assistant and add
+HA Growatt under Devices & services. Keep the app running: the companion uses
+its MQTT status and creates no duplicate measurement sensors.
 
 Experimental battery schedules and additional model controls are disabled by
 default. The [hardware evidence](docs/hardware-support.md) separates manufacturer
@@ -85,8 +93,8 @@ Run these before publishing source:
 
 ```sh
 uv sync --locked
-uv run --locked ruff check src tests
-uv run --locked ruff format --check src tests
+uv run --locked ruff check src tests custom_components
+uv run --locked ruff format --check src tests custom_components
 uv run --locked pytest -q
 uv run --locked python -m build --no-isolation
 ```
@@ -95,6 +103,8 @@ Run the Python checks on 3.12, 3.13 and 3.14. Packaging changes also require
 container checks on amd64, arm64, arm/v7 and 386. A release requires native
 Home Assistant migration and restart checks, then fresh readings from both
 inverters in the installation being replaced.
+The companion's real MQTT, Repairs, reload, unload and history-adoption checks
+run through `tests/ha_reliability_probe.py` in a disposable Home Assistant instance.
 
 Inspect an extracted binary TCP stream without publishing anything:
 

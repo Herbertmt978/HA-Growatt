@@ -32,7 +32,7 @@ jobs:
           version: "0.11.29"
           python-version: ${{ matrix.python }}
       - run: uv sync --locked
-      - run: uv run --locked ruff check src tests
-      - run: uv run --locked ruff format --check src tests
+      - run: uv run --locked ruff check src tests custom_components
+      - run: uv run --locked ruff format --check src tests custom_components
       - run: uv run --locked pytest -q
       - run: uv run --locked python -m build --no-isolation

@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 from dataclasses import dataclass
 
+from .diagnostics import ObservationStats, SupportCapture
 from .extensions import ExtensionProcess, layout_context
 from .outputs import InfluxOutput, PVOutput, RawPublisher, send_http
-from .protocol import Frame, mask_payload
+from .protocol import Frame, ProtocolError, mask_payload
 from .publisher import Publisher
 from .settings import Settings
 from .telemetry import Telemetry
@@ -36,6 +38,8 @@ class Pipeline:
         self._extension = None
         self.ha = None
         self.features = None
+        self.observations = ObservationStats()
+        self.capture = SupportCapture()
         options = settings.runtime
         if options.home_assistant:
             ha = self.ha = ha_publisher(settings.mqtt)
@@ -44,6 +48,27 @@ class Pipeline:
             async def home_assistant(reading):
                 if not reading.telemetry.buffered:
                     await ha.publish(reading.telemetry)
+                elif options.buffered_events:
+                    telemetry = reading.telemetry
+                    identity = telemetry.device_id or telemetry.values.get("pvserial")
+                    if identity and telemetry.recorded_at:
+                        await ha._send(
+                            "ha_growatt/events/buffered",
+                            json.dumps(
+                                {
+                                    "schema": 1,
+                                    "inverter": identity,
+                                    "recorded_at": telemetry.recorded_at.isoformat(),
+                                    "profile": telemetry.profile,
+                                    "values": {
+                                        key: value
+                                        for key, value in telemetry.values.items()
+                                        if type(value) is int
+                                    },
+                                }
+                            ),
+                            False,
+                        )
 
             self._outputs["Home Assistant"] = home_assistant
         if options.raw_mqtt:
@@ -107,6 +132,8 @@ class Pipeline:
                     controls=self.settings.runtime.ha_controls,
                     experimental=self.settings.runtime.experimental_controls,
                     models=self.settings.runtime.control_models,
+                    hardware=self.settings.runtime.hardware,
+                    refresh_seconds=self.settings.runtime.settings_refresh_seconds,
                 )
 
     def start(self) -> None:
@@ -151,10 +178,29 @@ class Pipeline:
                 len(frame.to_bytes()),
             )
         if frame.function not in {3, 4, 27, 32, 80}:
+            self.capture.record(frame, "protocol")
             return
         if len(frame.to_bytes()) < self.settings.runtime.minimum_record_bytes:
+            self.capture.record(frame, "below_minimum_length")
             return
-        telemetry = self.decoder.decode(frame)
+        if frame.function == 3:
+            self.observations.announcements += 1
+        try:
+            telemetry = self.decoder.decode(frame)
+        except ProtocolError:
+            if frame.function == 3:
+                self.observations.announcement_warnings += 1
+                self.capture.record(frame, "announcement_not_measurement")
+            else:
+                self.observations.failed_measurements += 1
+                self.capture.record(frame, "measurement_decode_failed")
+            return
+        if frame.function != 3:
+            self.observations.measurements += 1
+            self.observations.incomplete_fields += telemetry.decode_errors
+        if telemetry.buffered:
+            self.observations.buffered_records += 1
+        self.capture.record(frame, "decoded", telemetry)
         if self.features and not telemetry.buffered and frame.function in {4, 80}:
             self.features.remember(telemetry)
         _LOG.debug(

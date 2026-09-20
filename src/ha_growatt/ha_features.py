@@ -32,7 +32,7 @@ class Device:
 
 
 def feature_discovery(
-    device: Device, controls: bool, *, model="auto", experimental=False
+    device: Device, controls: bool, *, model="auto", experimental=False, hardware=None
 ) -> dict[str, dict]:
     identity = device.identity
     validate_identity(identity)
@@ -44,6 +44,10 @@ def feature_discovery(
         "entity_category": "diagnostic",
         "expire_after": 30,
     }
+    if hardware:
+        for key, destination in (("model", "model"), ("firmware", "sw_version")):
+            if hardware.get(key):
+                common["device"][destination] = hardware[key]
     result = {}
 
     def add(component, key, name, **options):
@@ -177,12 +181,23 @@ def feature_discovery(
 
 class HomeAssistantFeatures:
     def __init__(
-        self, publisher, transport, pipeline, *, controls=True, experimental=False, models=None
+        self,
+        publisher,
+        transport,
+        pipeline,
+        *,
+        controls=True,
+        experimental=False,
+        models=None,
+        hardware=None,
+        refresh_seconds=300,
     ) -> None:
         self.publisher, self.transport, self.pipeline = publisher, transport, pipeline
         self.controls = controls
         self.experimental = experimental
         self.models = models or {}
+        self.hardware = hardware or {}
+        self.refresh_seconds = refresh_seconds
         self.devices: dict[str, Device] = {}
         for identity, snapshot in getattr(publisher, "snapshots", {}).items():
             self.devices[identity] = Device(
@@ -252,10 +267,21 @@ class HomeAssistantFeatures:
 
     async def publish_status(self, device: Device) -> None:
         model = self.models.get(device.identity, "auto")
-        fingerprint = (self.publisher.generation, device.profile, model, self.experimental)
+        hardware = self.hardware.get(device.identity, {})
+        fingerprint = (
+            self.publisher.generation,
+            device.profile,
+            model,
+            self.experimental,
+            tuple(sorted(hardware.items())),
+        )
         if self._announced.get(device.identity) != fingerprint:
             configs = feature_discovery(
-                device, self.controls, model=model, experimental=self.experimental
+                device,
+                self.controls,
+                model=model,
+                experimental=self.experimental,
+                hardware=hardware,
             )
             for topic, config in configs.items():
                 await self.publisher._send(topic, json.dumps(config), True)
@@ -298,6 +324,7 @@ class HomeAssistantFeatures:
             "settings": sorted(device.values),
             "schedules": sorted(device.schedules),
             "rejected_commands": self.rejected_commands,
+            "schema": 1,
         }
         await self.publisher._send(f"ha_growatt/{device.identity}/status", json.dumps(state), False)
         for key, value in device.values.items():
@@ -317,6 +344,8 @@ class HomeAssistantFeatures:
                     json.dumps(
                         {
                             "online": True,
+                            "schema": 1,
+                            "observations": asdict(self.pipeline.observations),
                             "connections": [
                                 identity
                                 for identity in self.devices
@@ -361,14 +390,14 @@ class HomeAssistantFeatures:
 
     async def _refresh_loop(self) -> None:
         while True:
-            if self.controls:
+            if self.controls and self.refresh_seconds:
                 for device in list(self.devices.values()):
                     now = asyncio.get_running_loop().time()
                     if (
                         now >= device.refresh_at
                         and self.transport.connection(device.identity) != "disconnected"
                     ):
-                        device.refresh_at = now + 300
+                        device.refresh_at = now + self.refresh_seconds
                         await self.refresh(device)
             await asyncio.sleep(2)
 

@@ -63,8 +63,12 @@ async function action(work) {
     $("message").textContent = error.message;
   }
 }
-async function refresh() {
-  invalidatePeriod();
+let refreshing = false;
+let displayedDevices = "";
+async function refresh(renderForms = true) {
+  if (refreshing) return;
+  refreshing = true;
+  try {
   const data = await api("api/status");
   $("checks").replaceChildren();
   for (const [label, value] of [
@@ -87,22 +91,40 @@ async function refresh() {
   $("warnings").replaceChildren(
     ...data.warnings.map((text) => node("li", text)),
   );
+  $("packet-summary").textContent = `${data.observations.measurements} measurements decoded; ${data.observations.failed_measurements} failed measurements; ${data.observations.incomplete_fields} incomplete fields; ${data.observations.announcement_warnings} announcement warnings.`;
+  $("capture-status").textContent = data.capture_active ? "Recording packet summaries (up to ten minutes)." : "Capture is stopped.";
+  $("version").textContent = `HA Growatt ${data.version}`;
+  const identities = JSON.stringify(data.devices.map((device) => device.identity));
+  if (!renderForms && identities !== displayedDevices &&
+      !$("devices").querySelector('[data-dirty="true"]')) renderForms = true;
+  const description = (device) => `${device.restored ? "Saved readings; waiting for fresh data" : device.recent ? "Recent readings" : "No recent readings"} · ${device.profile} · ${device.connection}`;
+  if (!renderForms) {
+    for (const card of $("devices").children) {
+      const device = data.devices.find((item) => item.identity === card.dataset.identity);
+      if (device) card.querySelector("p").textContent = description(device);
+    }
+    return;
+  }
+  displayedDevices = identities;
+  invalidatePeriod();
   $("devices").replaceChildren();
   const previous = $("schedule-device").value;
   $("schedule-device").replaceChildren();
   for (const device of data.devices) {
     const section = node("div");
     section.className = "device";
+    section.dataset.identity = device.identity;
     section.append(
       node("h3", device.identity),
       node(
         "p",
-        `${device.restored ? "Saved readings; waiting for fresh data" : device.recent ? "Recent readings" : "No recent readings"} · ${device.profile} · ${device.connection}`,
+        description(device),
       ),
     );
     const form = node("form"),
       fields = node("div");
     fields.className = "fields";
+    form.addEventListener("input", () => { form.dataset.dirty = "true"; });
     const [familyLabel, family] = select(
       "Reading profile",
       families,
@@ -114,7 +136,18 @@ async function refresh() {
       device.controls,
     );
     fields.append(familyLabel, modelLabel);
-    const save = node("button", "Save profile");
+    const hardware = {};
+    for (const [key, title] of [["model", "Exact inverter model"], ["firmware", "Firmware version"]]) {
+      const label = node("label", title), input = node("input");
+      input.type = "text";
+      input.maxLength = 80;
+      input.value = device[key] || "";
+      input.placeholder = "Unknown — leave blank";
+      label.append(input);
+      fields.append(label);
+      hardware[key] = input;
+    }
+    const save = node("button", "Save inverter details");
     form.append(fields, save);
     form.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -125,6 +158,8 @@ async function refresh() {
             serial: device.identity,
             family: family.value,
             controls: model.value,
+            model: hardware.model.value.trim(),
+            firmware: hardware.firmware.value.trim(),
           });
           $("message").textContent = response.message;
           await refresh();
@@ -134,6 +169,16 @@ async function refresh() {
       });
     });
     section.append(form);
+    const readFirmware = node("button", "Read firmware from inverter");
+    readFirmware.addEventListener("click", () => action(async () => {
+      readFirmware.disabled = true;
+      try {
+        const result = await api("api/hardware/read", { serial: device.identity });
+        hardware.firmware.value = result.firmware;
+        $("message").textContent = result.message;
+      } finally { readFirmware.disabled = false; }
+    }));
+    section.append(readFirmware);
     $("devices").append(section);
     if (
       ["sph", "spa"].includes(device.controls) &&
@@ -153,7 +198,9 @@ async function refresh() {
     );
   if ([...$("schedule-device").options].some((o) => o.value === previous))
     $("schedule-device").value = previous;
-  $("version").textContent = `HA Growatt ${data.version}`;
+  } finally {
+    refreshing = false;
+  }
 }
 function selection() {
   return {
@@ -253,5 +300,18 @@ $("migration").addEventListener("click", () =>
     }
   }),
 );
-$("refresh").addEventListener("click", () => action(refresh));
+$("refresh").addEventListener("click", () => action(() => refresh()));
+for (const operation of ["start", "stop"]) {
+  $("capture-" + operation).addEventListener("click", () => action(async () => {
+    const response = await api("api/capture/" + operation, {});
+    $("message").textContent = response.message;
+    await refresh(false);
+  }));
+}
+setInterval(() => {
+  if (!document.hidden) action(() => refresh(false));
+}, 10000);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) action(() => refresh(false));
+});
 action(refresh);

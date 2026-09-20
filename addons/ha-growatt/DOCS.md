@@ -34,6 +34,18 @@ control profile and `experimental_controls: true`. Read the
 and [hardware evidence](https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/hardware-support.md)
 before enabling them. A profile choice does not establish firmware compatibility.
 
+Cloud forwarding now recovers automatically after a valid cloud heartbeat and a
+quiet period between commands. `cloud_recovery_seconds` defaults to 300; zero
+disables probing. `settings_refresh_seconds` defaults to 300; zero makes settings
+reads manual. Buffered records can produce events through the optional HA Growatt
+companion integration, installed from this repository with HACS.
+
+The web UI refreshes checks automatically, separates announcement warnings from
+failed measurements and offers a bounded support capture without payloads. Enter
+the inverter's exact model and use **Read firmware from inverter** where supported.
+The companion adds native daylight-aware repair notices and guarded history
+adoption. It uses the existing MQTT connection and does not duplicate sensors.
+
 The app requests Supervisor access for its MQTT service settings and its own
 profile configuration. Home Assistant API access is used only to read registry,
 statistics and Energy information for the preview. It does not change HA history

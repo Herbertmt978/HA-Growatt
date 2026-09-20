@@ -507,4 +507,5 @@ async def quiet_restart(hass, mqtt):
     print(json.dumps(report), flush=True)
 
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

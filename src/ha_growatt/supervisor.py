@@ -38,12 +38,20 @@ class Supervisor:
         except (URLError, ValueError, OSError):
             raise ConnectionError("Home Assistant could not complete the request") from None
 
-    async def profile(self, identity: str, family: str, controls: str) -> Settings:
+    async def profile(
+        self, identity: str, family: str, controls: str, *, hardware=None
+    ) -> Settings:
         info = await asyncio.to_thread(self.request, "/addons/self/info")
         options = dict(info["options"])
+        previous = next(
+            (item for item in options.get("inverters", []) if item["serial"] == identity), {}
+        )
+        details = {key: previous[key] for key in ("model", "firmware") if key in previous}
+        if hardware is not None:
+            details.update(hardware)
         options["inverters"] = [
             item for item in options.get("inverters", []) if item["serial"] != identity
-        ] + [{"serial": identity, "family": family, "controls": controls}]
+        ] + [{"serial": identity, "family": family, "controls": controls, **details}]
         settings = Settings(*_settings_args(options))
         # Supervisor replaces the complete options object; it has no conditional
         # update endpoint. Refuse a change detected while preparing this save.

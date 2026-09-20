@@ -170,6 +170,33 @@ def test_connection_limit_and_shutdown():
     asyncio.run(scenario())
 
 
+def test_cancelled_session_cleanup_does_not_poison_final_shutdown():
+    from ha_growatt.relay import _close
+
+    async def scenario():
+        waiter = asyncio.get_running_loop().create_future()
+        waiting = asyncio.Event()
+
+        class Writer:
+            def close(self):
+                pass
+
+            async def wait_closed(self):
+                waiting.set()
+                await waiter
+
+        writer = Writer()
+        first = asyncio.create_task(_close(writer))
+        await waiting.wait()
+        first.cancel()
+        await asyncio.gather(first, return_exceptions=True)
+        assert not waiter.cancelled()
+        waiter.set_result(None)
+        await _close(writer)
+
+    asyncio.run(scenario())
+
+
 def test_frame_timeout_closes_incomplete_connection():
     async def scenario():
         async with echo_server() as port, Relay(settings(port, frame_seconds=0.05)) as relay:
