@@ -12,8 +12,7 @@ from .protocol import Frame, FrameBuffer, ProtocolError
 from .publisher import Publisher
 from .registers import parse_register_report
 from .relay import Relay, RelaySettings
-from .settings import load_settings
-from .telemetry import Decoder
+from .settings import ConfigurationError, load_settings
 
 
 def inspect_capture(path: Path) -> None:
@@ -60,7 +59,7 @@ async def _relay(arguments: argparse.Namespace) -> None:
 
 async def _run(path: Path) -> None:
     settings = load_settings(path)
-    decoder = Decoder(settings.wire_profile, include_all=settings.mqtt.include_all)
+    decoder = settings.decoder()
     publisher = Publisher(settings.mqtt)
 
     async def observe(direction, frame):
@@ -99,6 +98,8 @@ def main() -> None:
             asyncio.run(_run(arguments.config))
     except KeyboardInterrupt:
         pass
+    except ConfigurationError as error:
+        parser.exit(2, f"Configuration error: {error}\n")
     except (ProtocolError, ValueError, OSError) as error:
         parser.exit(2, f"{type(error).__name__}: operation could not be completed\n")
 

@@ -1,0 +1,311 @@
+[
+  {
+    "name": "proxy-0",
+    "ini": "[Generic]\nmode = proxy\nip = 127.0.0.1\nport = 15279\nblockcmd = True\ntime = server\nsendbuf = False\ninvtype = sph\nlayout_strict = False\nlayout_auto_family = True\n[Growatt]\nip = upstream.invalid\nport = 25279\n[MQTT]\nnomqtt = True\n[extension]\nextension = True\nextname = grottext.ha\nextvar = {\"ha_mqtt_host\":\"broker.invalid\",\"ha_mqtt_port\":2883,\"ha_mqtt_user\":\"synthetic-user\",\"ha_mqtt_password\":\"synthetic-password\",\"ha_mqtt_retain\":False,\"ha_entity_profile\":\"all\"}\n",
+    "environment": {},
+    "expected": {
+      "grottip": "127.0.0.1",
+      "grottport": 15279,
+      "growattip": "upstream.invalid",
+      "growattport": 25279,
+      "blockcmd": true,
+      "noipf": false,
+      "invtype": "sph",
+      "layout_strict": false,
+      "layout_auto_family": true,
+      "layout_min_score": 20,
+      "includeall": false,
+      "extvar": {
+        "ha_mqtt_host": "broker.invalid",
+        "ha_mqtt_port": 2883,
+        "ha_mqtt_user": "synthetic-user",
+        "ha_mqtt_password": "synthetic-password",
+        "ha_mqtt_retain": false,
+        "ha_entity_profile": "all"
+      },
+      "gtime": "server",
+      "sendbuf": false,
+      "nomqtt": true
+    }
+  },
+  {
+    "name": "proxy-1",
+    "ini": "[Generic]\nmode = proxy\nip = 127.0.0.1\nport = 15279\nblockcmd = True\ntime = server\nsendbuf = False\ninvtype = sph\nlayout_strict = False\nlayout_auto_family = True\n[Growatt]\nip = upstream.invalid\nport = 25279\n[MQTT]\nnomqtt = True\n[extension]\nextension = True\nextname = grottext.ha\nextvar = {\"ha_mqtt_host\":\"broker.invalid\",\"ha_mqtt_port\":2883,\"ha_mqtt_user\":\"synthetic-user\",\"ha_mqtt_password\":\"synthetic-password\",\"ha_mqtt_retain\":False,\"ha_entity_profile\":\"all\"}\n",
+    "environment": {
+      "ginvtype": "default"
+    },
+    "expected": {
+      "grottip": "127.0.0.1",
+      "grottport": 15279,
+      "growattip": "upstream.invalid",
+      "growattport": 25279,
+      "blockcmd": true,
+      "noipf": false,
+      "invtype": "default",
+      "layout_strict": false,
+      "layout_auto_family": true,
+      "layout_min_score": 20,
+      "includeall": false,
+      "extvar": {
+        "ha_mqtt_host": "broker.invalid",
+        "ha_mqtt_port": 2883,
+        "ha_mqtt_user": "synthetic-user",
+        "ha_mqtt_password": "synthetic-password",
+        "ha_mqtt_retain": false,
+        "ha_entity_profile": "all"
+      },
+      "gtime": "server",
+      "sendbuf": false,
+      "nomqtt": true
+    }
+  },
+  {
+    "name": "proxy-2",
+    "ini": "[Generic]\nmode = proxy\nip = 127.0.0.1\nport = 15279\nblockcmd = True\ntime = server\nsendbuf = False\ninvtype = sph\nlayout_strict = False\nlayout_auto_family = True\n[Growatt]\nip = upstream.invalid\nport = 25279\n[MQTT]\nnomqtt = True\n[extension]\nextension = True\nextname = grottext.ha\nextvar = {\"ha_mqtt_host\":\"broker.invalid\",\"ha_mqtt_port\":2883,\"ha_mqtt_user\":\"synthetic-user\",\"ha_mqtt_password\":\"synthetic-password\",\"ha_mqtt_retain\":False,\"ha_entity_profile\":\"all\"}\n",
+    "environment": {
+      "glayoutstrict": "True",
+      "glayoutautofamily": "False",
+      "glayoutminscore": "98"
+    },
+    "expected": {
+      "grottip": "127.0.0.1",
+      "grottport": 15279,
+      "growattip": "upstream.invalid",
+      "growattport": 25279,
+      "blockcmd": true,
+      "noipf": false,
+      "invtype": "sph",
+      "layout_strict": true,
+      "layout_auto_family": false,
+      "layout_min_score": 98,
+      "includeall": false,
+      "extvar": {
+        "ha_mqtt_host": "broker.invalid",
+        "ha_mqtt_port": 2883,
+        "ha_mqtt_user": "synthetic-user",
+        "ha_mqtt_password": "synthetic-password",
+        "ha_mqtt_retain": false,
+        "ha_entity_profile": "all"
+      },
+      "gtime": "server",
+      "sendbuf": false,
+      "nomqtt": true
+    }
+  },
+  {
+    "name": "proxy-3",
+    "ini": "[Generic]\nmode = proxy\nip = 127.0.0.1\nport = 15279\nblockcmd = True\ntime = server\nsendbuf = False\ninvtype = sph\nlayout_strict = False\nlayout_auto_family = True\n[Growatt]\nip = upstream.invalid\nport = 25279\n[MQTT]\nnomqtt = True\n[extension]\nextension = True\nextname = grottext.ha\nextvar = {\"ha_mqtt_host\":\"broker.invalid\",\"ha_mqtt_port\":2883,\"ha_mqtt_user\":\"synthetic-user\",\"ha_mqtt_password\":\"synthetic-password\",\"ha_mqtt_retain\":False,\"ha_entity_profile\":\"all\"}\n",
+    "environment": {
+      "ggrottip": "listener.invalid",
+      "ggrottport": "15280",
+      "ggrowattip": "cloud.invalid",
+      "ggrowattport": "5279"
+    },
+    "expected": {
+      "grottip": "listener.invalid",
+      "grottport": 15280,
+      "growattip": "cloud.invalid",
+      "growattport": 5279,
+      "blockcmd": true,
+      "noipf": false,
+      "invtype": "sph",
+      "layout_strict": false,
+      "layout_auto_family": true,
+      "layout_min_score": 20,
+      "includeall": false,
+      "extvar": {
+        "ha_mqtt_host": "broker.invalid",
+        "ha_mqtt_port": 2883,
+        "ha_mqtt_user": "synthetic-user",
+        "ha_mqtt_password": "synthetic-password",
+        "ha_mqtt_retain": false,
+        "ha_entity_profile": "all"
+      },
+      "gtime": "server",
+      "sendbuf": false,
+      "nomqtt": true
+    }
+  },
+  {
+    "name": "proxy-4",
+    "ini": "[Generic]\nmode = proxy\nip = 127.0.0.1\nport = 15279\nblockcmd = True\ntime = server\nsendbuf = False\ninvtype = sph\nlayout_strict = False\nlayout_auto_family = True\n[Growatt]\nip = upstream.invalid\nport = 25279\n[MQTT]\nnomqtt = True\n[extension]\nextension = True\nextname = grottext.ha\nextvar = {\"ha_mqtt_host\":\"broker.invalid\",\"ha_mqtt_port\":2883,\"ha_mqtt_user\":\"synthetic-user\",\"ha_mqtt_password\":\"synthetic-password\",\"ha_mqtt_retain\":False,\"ha_entity_profile\":\"all\"}\n",
+    "environment": {
+      "gblockcmd": "False",
+      "gnoipf": "True",
+      "gincludeall": "True"
+    },
+    "expected": {
+      "grottip": "127.0.0.1",
+      "grottport": 15279,
+      "growattip": "upstream.invalid",
+      "growattport": 25279,
+      "blockcmd": false,
+      "noipf": true,
+      "invtype": "sph",
+      "layout_strict": false,
+      "layout_auto_family": true,
+      "layout_min_score": 20,
+      "includeall": true,
+      "extvar": {
+        "ha_mqtt_host": "broker.invalid",
+        "ha_mqtt_port": 2883,
+        "ha_mqtt_user": "synthetic-user",
+        "ha_mqtt_password": "synthetic-password",
+        "ha_mqtt_retain": false,
+        "ha_entity_profile": "all"
+      },
+      "gtime": "server",
+      "sendbuf": false,
+      "nomqtt": true
+    }
+  },
+  {
+    "name": "proxy-5",
+    "ini": "[Generic]\nmode = proxy\nip = 127.0.0.1\nport = 15279\nblockcmd = True\ntime = server\nsendbuf = False\ninvtype = sph\nlayout_strict = False\nlayout_auto_family = True\n[Growatt]\nip = upstream.invalid\nport = 25279\n[MQTT]\nnomqtt = True\n[extension]\nextension = True\nextname = grottext.ha\nextvar = {\"ha_mqtt_host\":\"broker.invalid\",\"ha_mqtt_port\":2883,\"ha_mqtt_user\":\"synthetic-user\",\"ha_mqtt_password\":\"synthetic-password\",\"ha_mqtt_retain\":False,\"ha_entity_profile\":\"all\"}\n",
+    "environment": {
+      "gextvar": "{\"ha_mqtt_host\":\"override.invalid\",\"ha_mqtt_port\":1884,\"ha_mqtt_password\":\"override-synthetic\",\"ha_mqtt_retain\":true}"
+    },
+    "expected": {
+      "grottip": "127.0.0.1",
+      "grottport": 15279,
+      "growattip": "upstream.invalid",
+      "growattport": 25279,
+      "blockcmd": true,
+      "noipf": false,
+      "invtype": "sph",
+      "layout_strict": false,
+      "layout_auto_family": true,
+      "layout_min_score": 20,
+      "includeall": false,
+      "extvar": {
+        "ha_mqtt_host": "override.invalid",
+        "ha_mqtt_port": 1884,
+        "ha_mqtt_password": "override-synthetic",
+        "ha_mqtt_retain": true
+      },
+      "gtime": "server",
+      "sendbuf": false,
+      "nomqtt": true
+    }
+  },
+  {
+    "name": "proxy-6",
+    "ini": "[Generic]\nmode = proxy\nip = 127.0.0.1\nport = 15279\nblockcmd = True\ntime = server\nsendbuf = False\ninvtype = sph\nlayout_strict = False\nlayout_auto_family = True\n[Growatt]\nip = upstream.invalid\nport = 25279\n[MQTT]\nnomqtt = True\n[extension]\nextension = True\nextname = grottext.ha\nextvar = {\"ha_mqtt_host\":\"broker.invalid\",\"ha_mqtt_port\":2883,\"ha_mqtt_user\":\"synthetic-user\",\"ha_mqtt_password\":\"synthetic-password\",\"ha_mqtt_retain\":False,\"ha_entity_profile\":\"all\"}\n",
+    "environment": {
+      "ginvtype": "mod",
+      "glayoutstrict": "True"
+    },
+    "expected": {
+      "grottip": "127.0.0.1",
+      "grottport": 15279,
+      "growattip": "upstream.invalid",
+      "growattport": 25279,
+      "blockcmd": true,
+      "noipf": false,
+      "invtype": "mod",
+      "layout_strict": true,
+      "layout_auto_family": true,
+      "layout_min_score": 20,
+      "includeall": false,
+      "extvar": {
+        "ha_mqtt_host": "broker.invalid",
+        "ha_mqtt_port": 2883,
+        "ha_mqtt_user": "synthetic-user",
+        "ha_mqtt_password": "synthetic-password",
+        "ha_mqtt_retain": false,
+        "ha_entity_profile": "all"
+      },
+      "gtime": "server",
+      "sendbuf": false,
+      "nomqtt": true
+    }
+  },
+  {
+    "name": "proxy-7",
+    "ini": "[Generic]\nmode = proxy\nip = 127.0.0.1\nport = 15279\nblockcmd = True\ntime = server\nsendbuf = False\ninvtype = sph\nlayout_strict = False\nlayout_auto_family = True\n[Growatt]\nip = upstream.invalid\nport = 25279\n[MQTT]\nnomqtt = True\n[extension]\nextension = True\nextname = grottext.ha\nextvar = {\"ha_mqtt_host\":\"broker.invalid\",\"ha_mqtt_port\":2883,\"ha_mqtt_user\":\"synthetic-user\",\"ha_mqtt_password\":\"synthetic-password\",\"ha_mqtt_retain\":False,\"ha_entity_profile\":\"all\"}\n",
+    "environment": {
+      "ginvtype": "min"
+    },
+    "expected": {
+      "grottip": "127.0.0.1",
+      "grottport": 15279,
+      "growattip": "upstream.invalid",
+      "growattport": 25279,
+      "blockcmd": true,
+      "noipf": false,
+      "invtype": "min",
+      "layout_strict": false,
+      "layout_auto_family": true,
+      "layout_min_score": 20,
+      "includeall": false,
+      "extvar": {
+        "ha_mqtt_host": "broker.invalid",
+        "ha_mqtt_port": 2883,
+        "ha_mqtt_user": "synthetic-user",
+        "ha_mqtt_password": "synthetic-password",
+        "ha_mqtt_retain": false,
+        "ha_entity_profile": "all"
+      },
+      "gtime": "server",
+      "sendbuf": false,
+      "nomqtt": true
+    }
+  },
+  {
+    "name": "proxy-8",
+    "ini": "[Generic]\nmode = proxy\nip = 127.0.0.1\nport = 15279\nblockcmd = True\ntime = server\nsendbuf = False\ninvtype = sph\nlayout_strict = False\nlayout_auto_family = True\n[Growatt]\nip = upstream.invalid\nport = 25279\n[MQTT]\nnomqtt = True\n[extension]\nextension = True\nextname = grottext.ha\nextvar = {\"ha_mqtt_host\":\"broker.invalid\",\"ha_mqtt_port\":2883,\"ha_mqtt_user\":\"synthetic-user\",\"ha_mqtt_password\":\"synthetic-password\",\"ha_mqtt_retain\":False,\"ha_entity_profile\":\"all\"}\n",
+    "environment": {
+      "ginvtype": "tl3"
+    },
+    "expected": {
+      "grottip": "127.0.0.1",
+      "grottport": 15279,
+      "growattip": "upstream.invalid",
+      "growattport": 25279,
+      "blockcmd": true,
+      "noipf": false,
+      "invtype": "tl3",
+      "layout_strict": false,
+      "layout_auto_family": true,
+      "layout_min_score": 20,
+      "includeall": false,
+      "extvar": {
+        "ha_mqtt_host": "broker.invalid",
+        "ha_mqtt_port": 2883,
+        "ha_mqtt_user": "synthetic-user",
+        "ha_mqtt_password": "synthetic-password",
+        "ha_mqtt_retain": false,
+        "ha_entity_profile": "all"
+      },
+      "gtime": "server",
+      "sendbuf": false,
+      "nomqtt": true
+    }
+  },
+  {
+    "name": "proxy-9",
+    "ini": "[Generic]\nmode = proxy\nip = 127.0.0.1\nport = 15279\nblockcmd = True\ntime = server\nsendbuf = False\ninvtype = sph\nlayout_strict = False\nlayout_auto_family = True\n[Growatt]\nip = upstream.invalid\nport = 25279\n[MQTT]\nnomqtt = True\n[extension]\nextension = True\nextname = grottext.ha\nextvar = {\"ha_mqtt_host\":\"broker.invalid\",\"ha_mqtt_port\":2883,\"ha_mqtt_user\":\"synthetic-user\",\"ha_mqtt_password\":\"synthetic-password\",\"ha_mqtt_retain\":False,\"ha_entity_profile\":\"all\"}\n",
+    "environment": {
+      "gextvar": "{'ha_mqtt_host':'literal.invalid'}"
+    },
+    "expected": {
+      "grottip": "127.0.0.1",
+      "grottport": 15279,
+      "growattip": "upstream.invalid",
+      "growattport": 25279,
+      "blockcmd": true,
+      "noipf": false,
+      "invtype": "sph",
+      "layout_strict": false,
+      "layout_auto_family": true,
+      "layout_min_score": 20,
+      "includeall": false,
+      "extvar": {
+        "ha_mqtt_host": "literal.invalid"
+      },
+      "gtime": "server",
+      "sendbuf": false,
+      "nomqtt": true
+    }
+  }
+]

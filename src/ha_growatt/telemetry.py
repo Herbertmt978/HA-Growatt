@@ -18,6 +18,19 @@ class Telemetry:
     buffered: bool = False
 
 
+def default_profile(frame: Frame) -> str:
+    profile = {
+        (2, 215): "classic-2",
+        (5, 215): "classic-5",
+        (6, 255): "classic-6",
+        (6, 575): "extended-6",
+        (6, 829): "extended-6",
+    }.get((frame.protocol, len(frame.payload)))
+    if profile is None:
+        raise ProtocolError("No verified default profile matches this frame")
+    return profile
+
+
 class Decoder:
     """An explicit profile prevents silently guessing between overlapping layouts."""
 
@@ -32,15 +45,7 @@ class Decoder:
     def decode(self, frame: Frame) -> Telemetry:
         profile = self.profile
         if profile == "auto":
-            profile = {
-                (2, 215): "classic-2",
-                (5, 215): "classic-5",
-                (6, 255): "classic-6",
-                (6, 575): "extended-6",
-                (6, 829): "extended-6",
-            }.get((frame.protocol, len(frame.payload)))
-            if profile is None:
-                raise ProtocolError("No verified default profile matches this frame")
+            profile = default_profile(frame)
         schema = self._profiles[profile]
         if frame.protocol != schema["protocol"] or frame.function not in {3, 4, 80}:
             raise ProtocolError("Frame does not match the selected telemetry profile")

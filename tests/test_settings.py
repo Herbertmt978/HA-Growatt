@@ -2,6 +2,7 @@ import pytest
 
 from ha_growatt.publisher import MqttSettings
 from ha_growatt.relay import RelaySettings
+from ha_growatt.selection import FamilyDecoder
 from ha_growatt.settings import load_settings
 
 
@@ -23,6 +24,35 @@ include_all = true
     assert settings.relay.block_commands
     assert settings.mqtt.include_all
     assert settings.mqtt.entity_profile == "all"
+
+
+def test_auto_profile_uses_configured_family_selection(tmp_path):
+    path = tmp_path / "bridge.toml"
+    path.write_text("""wire_profile = "auto"
+[selection]
+family = "sph"
+strict = true
+automatic = false
+minimum_score = 98
+[relay]
+upstream_host = "upstream.invalid"
+[mqtt]
+host = "broker.invalid"
+""")
+    settings = load_settings(path)
+    decoder = settings.decoder()
+    assert isinstance(decoder, FamilyDecoder)
+    assert decoder.settings.family == "sph"
+    assert decoder.settings.strict
+    assert not decoder.settings.automatic
+    assert decoder.settings.minimum_score == 98
+
+
+def test_explicit_profile_cannot_silently_ignore_selection(tmp_path):
+    path = tmp_path / "bridge.toml"
+    path.write_text('wire_profile = "mod-6"\n[selection]\nfamily = "sph"')
+    with pytest.raises(ValueError, match="requires"):
+        load_settings(path)
 
 
 @pytest.mark.parametrize("extra", ["unexpected = true", '[mqtt]\npassword = "test-only"'])

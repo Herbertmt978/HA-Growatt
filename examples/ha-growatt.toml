@@ -1,6 +1,12 @@
 # Development only: use an isolated broker and datalogger.
-# auto recognises only the verified default frame sizes described in the docs.
+# auto chooses from the verified profiles described in the compatibility notes.
 wire_profile = "auto"
+
+[selection]
+family = "default"
+strict = false
+automatic = true
+minimum_score = 20
 
 [relay]
 listen_host = "127.0.0.1"

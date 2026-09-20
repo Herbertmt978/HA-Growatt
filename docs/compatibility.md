@@ -1,8 +1,7 @@
-# Compatibility and completion criteria
+# Compatibility
 
-The target is the behaviour of the existing maintained product at version 0.1.13.
-This file records the current implementation boundary; it does not reduce the
-requested scope of the replacement.
+The replacement must preserve the behaviour of the current service, version
+0.1.13. This page records what has been checked and what still needs work.
 
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
@@ -11,9 +10,9 @@ requested scope of the replacement.
 | Register reports | A saved protocol-6 capture passes framing, checksum and register-range parsing | Broader capture coverage and other envelope formats |
 | Standard discovery | All 64 retained records match identity, topic, units, statistics and template behaviour; 80 recovered late-day packets from one inverter match decoded reference values | Native Home Assistant migration/restart and fresh both-device daylight checks |
 | MQTT delivery | Configs precede state; QoS 1 acknowledgements, failures, reconnects and Home Assistant birth handling are tested, including the real Paho client over loopback | Native broker and Home Assistant qualification |
-| Default decoding | Known classic and extended sizes can coexist through `wire_profile = "auto"` | The existing plausibility-based family selection and strict/automatic settings |
+| Family selection | 1,320 recorded outcomes cover default, SPH, MOD, MIN and TL3 selection, strict/automatic switches and score thresholds; 78 profile scores also match | Other families, per-device family mappings and additional packet shapes |
 | Full discovery | Observed metadata and source mappings for eight profiles; 32/171/205 MOD counts, raw diagnostic identity and generic/MOD retained-topic reconciliation, with cleanup retry | Native Home Assistant profile-change and statistics qualification |
-| Configuration | Validated development TOML with a password environment variable | Existing INI/environment/add-on option compatibility, time policy and safe migration |
+| Configuration | TOML, supported proxy/HA INI settings and app options; ten recorded INI/environment cases check effective settings and override order | Other active options, time/buffered policy and native migration checks |
 | Other services | Not implemented | Server mode and its API, sniffer mode, native raw MQTT, PVOutput, InfluxDB and extension compatibility |
 | Packaging | Python project, development entry point and pinned Python check workflow | Hardened Docker images, Home Assistant app metadata, health checks and platform qualification |
 | Retirement | The previous repository remains available | Publish the verified replacement, document migration and archive the previous fork |
@@ -34,10 +33,16 @@ The decoder rejects an unverified size rather than producing guessed values.
 | `sph-6` | 6 | 575 or 829 | 68 |
 | `tl3-6` | 6 | 575 or 829 | 38 |
 
-`auto` selects only the four default profiles by protocol and verified length.
-It does not yet select a family from plausibility scores. A specifically selected
-family applies to the whole bridge, so mixed-family installations requiring
-different explicit profiles are not yet supported.
+With `wire_profile = "auto"`, the bridge scores the verified layouts for each
+packet. The `[selection]` table accepts `family`, `strict`, `automatic` and
+`minimum_score`. Defaults match the current proxy setup: `default`, `false`,
+`true` and `20`. A score of zero disables the minimum-score check. Explicit wire
+profiles continue to use that profile alone.
+
+Automatic selection can choose different supported families for different
+devices. Per-device family mappings and the remaining SPA, SPF, meter and custom
+layouts still need work; the current comparisons do not establish support for
+those devices.
 
 The standard discovery templates preserve the actual AC-power, frequency and
 communication-board temperature aliases used by the current installation.
@@ -59,10 +64,34 @@ permits other records unless an explicit cloud function block is configured.
 Offline decoding covers functions 3, 4 and 80; publishing announce and buffered
 records requires the pending time and buffered-record policy work.
 
-## Release acceptance
+## Configuration
+
+The bridge can read the existing proxy configuration when it uses Home Assistant
+discovery through `grottext.ha`, `nomqtt = True`, `time = server` and
+`sendbuf = False`. INI options are read first, then the existing `g*` environment
+variables override them. `gextvar` replaces the extension mapping as a whole.
+The loader reads JSON objects and Python dictionary literals without executing
+expressions. Broker passwords stay out of diagnostic representations.
+
+The supported settings cover listener and upstream addresses, command blocking,
+the destination-change exception, family selection, include-all fields and the
+Home Assistant broker, retention and entity-profile options. The old `extvar`
+password remains in that configuration; `HA_GROWATT_MQTT_PASSWORD` is used by the
+new TOML format.
+
+An app's `options.json` can supply the documented proxy and Home Assistant
+settings. Reading those options does not provide an installable app. Combining
+app options with additional container overrides still needs verification.
+
+The loader stops before opening connections when an enabled feature is not yet
+implemented, including native MQTT, other outputs, per-device family mappings,
+inverter timestamps or buffered publication. Keep the working service in place
+while those paths and the final migration are completed.
+
+## Before release
 
 Before a replacement release, finish the outstanding functionality above and
-maintain explicit compatibility cases for each supported path. Verify existing
+add compatibility cases for each supported path. Verify existing
 Home Assistant identities, units, statistics, full discovery changes, startup,
 reconnection and restoration. Exercise the final Docker and Home Assistant
 artifacts on the required platforms. Compare both physical inverter feeds with

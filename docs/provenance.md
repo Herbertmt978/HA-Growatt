@@ -24,6 +24,10 @@ Compatibility evidence is treated separately from implementation source:
   are excluded from the repository.
 - Command-policy fixtures record observed forwarding decisions for synthetic
   function codes and configuration requests. They contain no predecessor code.
+- Family-selection fixtures record scores, selected layouts and output checks
+  from controlled calls to the working version. Configuration fixtures record
+  effective settings for synthetic INI files and environment overrides.
+  The new selector and configuration loader were written from those observations.
 - Tests for transport, register envelopes, discovery and delivery were written
   for the new implementation. Passing them does not prove untested modes or
   hardware compatibility.
