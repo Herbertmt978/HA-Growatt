@@ -5,12 +5,13 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 
 from .controls import controls_for, read_setting, write_setting
 from .discovery import validate_identity
+from .schedules import Period, read_period, schedule_keys, write_period
 
 _LOG = logging.getLogger(__name__)
 
@@ -24,12 +25,15 @@ class Device:
     decode_errors: int = 0
     readings: int = 0
     values: dict[str, int] = field(default_factory=dict)
+    schedules: dict[str, Period] = field(default_factory=dict)
     command_result: str = "No command sent"
     refresh_at: float = 0
     lock: asyncio.Lock = field(default_factory=asyncio.Lock)
 
 
-def feature_discovery(device: Device, controls: bool) -> dict[str, dict]:
+def feature_discovery(
+    device: Device, controls: bool, *, model="auto", experimental=False
+) -> dict[str, dict]:
     identity = device.identity
     validate_identity(identity)
     root = f"ha_growatt/{identity}"
@@ -81,7 +85,7 @@ def feature_discovery(device: Device, controls: bool) -> dict[str, dict]:
                 payload_press="PRESS",
                 **availability,
             )
-        for control in controls_for(device.profile):
+        for control in controls_for(device.profile, model, experimental):
             component = "switch" if control.switch else "number"
             options = {
                 "command_topic": f"{root}/command/{control.key}",
@@ -97,15 +101,59 @@ def feature_discovery(device: Device, controls: bool) -> dict[str, dict]:
             if control.switch:
                 options.update(payload_on="1", payload_off="0")
             else:
-                options.update(min=0, max=100, step=1, mode="box", unit_of_measurement="%")
+                options.update(
+                    min=control.minimum, max=100, step=1, mode="box", unit_of_measurement="%"
+                )
             add(component, control.key, control.label, **options)
+        for key in schedule_keys(device.profile, model, experimental):
+            mode, slot = key.split("_")
+            label = (
+                "Battery-first charging" if mode == "charge" else "Grid-first discharging"
+            ) + f" {slot}"
+            for part in ("start", "end", "enabled"):
+                options = {
+                    "command_topic": f"{root}/command/{key}_{part}",
+                    "state_topic": f"{root}/period/{key}",
+                    "entity_category": "config",
+                    "retain": False,
+                    "availability_topic": status,
+                    "availability_template": "{{ 'online' if value_json.socket_connected and '"
+                    + key
+                    + "' in value_json.schedules else 'offline' }}",
+                }
+                if part == "enabled":
+                    options.update(
+                        payload_on="1",
+                        payload_off="0",
+                        optimistic=False,
+                        value_template="{{ '1' if value_json.enabled else '0' }}",
+                    )
+                else:
+                    options.update(
+                        min=5,
+                        max=5,
+                        mode="text",
+                        pattern=r"(?:[01][0-9]|2[0-3]):[0-5][0-9]",
+                        value_template="{{ value_json." + part + " }}",
+                    )
+                add(
+                    "switch" if part == "enabled" else "text",
+                    f"{key}_{part}",
+                    label + " " + part,
+                    **options,
+                )
     for topic, config in result.items():
         if not topic.startswith(("homeassistant/sensor/", "homeassistant/binary_sensor/")):
             config.pop("expire_after", None)
         if topic.startswith("homeassistant/button/"):
             config.pop("state_topic", None)
         control = topic.startswith(
-            ("homeassistant/number/", "homeassistant/switch/", "homeassistant/button/")
+            (
+                "homeassistant/number/",
+                "homeassistant/switch/",
+                "homeassistant/button/",
+                "homeassistant/text/",
+            )
         )
         condition = "value_json.online"
         if control:
@@ -128,10 +176,21 @@ def feature_discovery(device: Device, controls: bool) -> dict[str, dict]:
 
 
 class HomeAssistantFeatures:
-    def __init__(self, publisher, transport, pipeline, *, controls=True) -> None:
+    def __init__(
+        self, publisher, transport, pipeline, *, controls=True, experimental=False, models=None
+    ) -> None:
         self.publisher, self.transport, self.pipeline = publisher, transport, pipeline
         self.controls = controls
+        self.experimental = experimental
+        self.models = models or {}
         self.devices: dict[str, Device] = {}
+        for identity, snapshot in getattr(publisher, "snapshots", {}).items():
+            self.devices[identity] = Device(
+                identity,
+                snapshot.telemetry.profile,
+                float("-inf"),
+                snapshot.received_at.isoformat(),
+            )
         self._announced = {}
         self._topics = {}
         self._tasks = []
@@ -154,6 +213,7 @@ class HomeAssistantFeatures:
             self.devices[identity] = device
         if device.profile != telemetry.profile:
             device.values.clear()
+            device.schedules.clear()
             device.refresh_at = 0
             device.profile = telemetry.profile
         device.last_seen = now
@@ -191,20 +251,29 @@ class HomeAssistantFeatures:
                 )
 
     async def publish_status(self, device: Device) -> None:
-        fingerprint = (self.publisher.generation, device.profile)
+        model = self.models.get(device.identity, "auto")
+        fingerprint = (self.publisher.generation, device.profile, model, self.experimental)
         if self._announced.get(device.identity) != fingerprint:
-            configs = feature_discovery(device, self.controls)
+            configs = feature_discovery(
+                device, self.controls, model=model, experimental=self.experimental
+            )
             for topic, config in configs.items():
                 await self.publisher._send(topic, json.dumps(config), True)
             previous = self._topics.get(device.identity, set())
             # All feature keys are finite; clear controls left by a previous
             # profile or by a restart with controls disabled.
-            from .controls import CONTROLS
+            from .controls import CONTROLS, XH_CONTROLS
 
             known = {
                 f"homeassistant/{'switch' if c.switch else 'number'}/ha_growatt/"
                 f"{device.identity}_{c.key}/config"
-                for c in CONTROLS
+                for c in CONTROLS + XH_CONTROLS
+            }
+            known |= {
+                f"homeassistant/{'switch' if part == 'enabled' else 'text'}/ha_growatt/"
+                f"{device.identity}_{key}_{part}/config"
+                for key in schedule_keys("sph-6", "sph", True)
+                for part in ("start", "end", "enabled")
             }
             known |= {
                 f"homeassistant/button/ha_growatt/{device.identity}_{key}/config"
@@ -227,12 +296,17 @@ class HomeAssistantFeatures:
             "output_failures": self.pipeline.failures,
             "command_result": device.command_result,
             "settings": sorted(device.values),
+            "schedules": sorted(device.schedules),
             "rejected_commands": self.rejected_commands,
         }
         await self.publisher._send(f"ha_growatt/{device.identity}/status", json.dumps(state), False)
         for key, value in device.values.items():
             await self.publisher._send(
                 f"ha_growatt/{device.identity}/settings/{key}", str(value), False
+            )
+        for key, period in device.schedules.items():
+            await self.publisher._send(
+                f"ha_growatt/{device.identity}/period/{key}", json.dumps(asdict(period)), False
             )
 
     async def _statuses(self) -> None:
@@ -265,7 +339,8 @@ class HomeAssistantFeatures:
     async def refresh(self, device: Device) -> None:
         async with device.lock:
             profile = device.profile
-            for control in controls_for(profile):
+            model = self.models.get(device.identity, "auto")
+            for control in controls_for(profile, model, self.experimental):
                 try:
                     value = await read_setting(self.transport, device.identity, control)
                 except (ValueError, ConnectionError, TimeoutError):
@@ -274,6 +349,15 @@ class HomeAssistantFeatures:
                 if profile != device.profile:
                     return
                 device.values[control.key] = control.display(value)
+            for key in schedule_keys(profile, model, self.experimental):
+                try:
+                    period = await read_period(self.transport, device.identity, key)
+                except (ValueError, ConnectionError, TimeoutError):
+                    device.schedules.pop(key, None)
+                    continue
+                if profile != device.profile:
+                    return
+                device.schedules[key] = period
 
     async def _refresh_loop(self) -> None:
         while True:
@@ -298,6 +382,7 @@ class HomeAssistantFeatures:
         if device is None or not self.controls:
             return
         session = self.transport.session_key(device.identity)
+        profile = (device.profile, self.models.get(device.identity, "auto"))
         deadline = (
             received_at if received_at is not None else asyncio.get_running_loop().time()
         ) + 15
@@ -306,6 +391,7 @@ class HomeAssistantFeatures:
             if (
                 session is None
                 or self.transport.session_key(device.identity) != session
+                or profile != (device.profile, self.models.get(device.identity, "auto"))
                 or asyncio.get_running_loop().time() > deadline
             ):
                 raise ValueError("Command expired or the datalogger reconnected; nothing sent")
@@ -335,7 +421,38 @@ class HomeAssistantFeatures:
             else:
                 async with device.lock:
                     check_current()
-                    control = next((c for c in controls_for(device.profile) if c.key == key), None)
+                    model = self.models.get(device.identity, "auto")
+                    for period_key in schedule_keys(device.profile, model, self.experimental):
+                        for part in ("start", "end", "enabled"):
+                            if key == f"{period_key}_{part}":
+                                if period_key not in device.schedules:
+                                    raise ValueError("Read the period before changing it")
+                                current = await read_period(
+                                    self.transport, device.identity, period_key
+                                )
+                                if part == "enabled":
+                                    if payload not in {b"0", b"1"}:
+                                        raise ValueError("Use the enabled switch")
+                                    value = payload == b"1"
+                                else:
+                                    value = payload.decode("ascii")
+                                await self._write_period(
+                                    device,
+                                    period_key,
+                                    replace(current, **{part: value}),
+                                    current,
+                                    check_current,
+                                )
+                                await self.publish_status(device)
+                                return
+                    control = next(
+                        (
+                            c
+                            for c in controls_for(device.profile, model, self.experimental)
+                            if c.key == key
+                        ),
+                        None,
+                    )
                     if control is None or key not in device.values:
                         raise ValueError("This setting is not available on the connected inverter")
                     try:
@@ -372,6 +489,60 @@ class HomeAssistantFeatures:
             await self.publish_status(device)
         except (ConnectionError, TimeoutError):
             pass
+
+    async def _write_period(self, device, key, period, expected, check_current):
+        try:
+            device.schedules[key] = await write_period(
+                self.transport, device.identity, key, period, expected, before_send=check_current
+            )
+        except (ValueError, ConnectionError, TimeoutError):
+            device.schedules.pop(key, None)
+            device.refresh_at = 0
+            raise
+        device.command_result = "Period applied and verified"
+
+    async def schedule_action(self, data):
+        identity = data.get("serial")
+        device = self.devices.get(identity)
+        key = f"{data.get('mode')}_{data.get('slot')}"
+        if (
+            not self.controls
+            or device is None
+            or key
+            not in schedule_keys(
+                device.profile, self.models.get(identity, "auto"), self.experimental
+            )
+        ):
+            raise ValueError("This inverter has no enabled experimental schedule profile")
+        session = self.transport.session_key(identity)
+        profile = (device.profile, self.models.get(identity, "auto"))
+        deadline = asyncio.get_running_loop().time() + 30
+
+        def check_current():
+            if (
+                session is None
+                or self.transport.session_key(identity) != session
+                or profile != (device.profile, self.models.get(identity, "auto"))
+                or asyncio.get_running_loop().time() > deadline
+            ):
+                raise ValueError("The datalogger connection changed; read the period again")
+
+        async with device.lock:
+            check_current()
+            if data.get("action") == "read":
+                period = await read_period(self.transport, identity, key)
+                check_current()
+                device.schedules[key] = period
+            elif data.get("action") == "write":
+                period, expected = Period(**data["period"]), Period(**data["expected"])
+                await self._write_period(device, key, period, expected, check_current)
+            else:
+                raise ValueError("Choose read or write")
+        try:
+            await self.publish_status(device)
+        except (ConnectionError, TimeoutError):
+            pass
+        return {"period": asdict(period)}
 
     async def _control_loop(self) -> None:
         while True:

@@ -7,7 +7,10 @@ PYTHONPATH pointing at src, and writable /config. Never use a live HA config.
 import asyncio
 import json
 import logging
+import os
 import sqlite3
+from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import aiohttp
@@ -17,17 +20,21 @@ from homeassistant.helpers import entity_registry as er
 
 from ha_growatt.controls import response_body
 from ha_growatt.device_protocol import acknowledgement, logger_prefix
+from ha_growatt.migration import migration_preview
 from ha_growatt.pipeline import Pipeline
 from ha_growatt.protocol import Frame, read_frame
 from ha_growatt.publisher import MqttSettings, Publisher
 from ha_growatt.relay import Relay, RelaySettings
+from ha_growatt.runtime_options import RuntimeOptions
 from ha_growatt.selection import SelectionSettings
 from ha_growatt.settings import Settings
+from ha_growatt.support import SupportServer
 from ha_growatt.telemetry import Telemetry
 
 logging.basicConfig(level=logging.WARNING)
 IDENTITY = "QUALIFY001"
 CONFIG = Path("/config")
+BROKER = os.environ.get("GROWATT_PROBE_BROKER", "growatt-features-mqtt")
 BASE = Path(__file__).parent
 CONF = {
     "homeassistant": {
@@ -75,7 +82,7 @@ async def boot():
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             {
-                "broker": "growatt-features-mqtt",
+                "broker": BROKER,
                 "port": 1883,
                 "protocol": "5",
                 "username": "",
@@ -103,6 +110,8 @@ class SyntheticInverter:
     def __init__(self, logger="TESTLOG001"):
         self.logger = logger
         self.registers = {1070: 50, 1071: 20, 1090: 50, 1091: 90, 1092: 0}
+        for start in (1080, 1083, 1086, 1100, 1103, 1106):
+            self.registers.update({start: 23 * 256, start + 1: 5 * 256, start + 2: 0})
         self.tasks = set()
         self.writer = None
         self.writes = []
@@ -135,9 +144,11 @@ class SyntheticInverter:
                 body = response_body(request)
                 register = int.from_bytes(body[:2], "big")
                 if request.function == 5:
-                    assert body[:2] == body[2:]
-                    value = self.value if register == 3 else self.registers[register]
-                    reply = body + value.to_bytes(2, "big")
+                    end = int.from_bytes(body[2:], "big")
+                    reply = body + b"".join(
+                        (self.value if address == 3 else self.registers[address]).to_bytes(2, "big")
+                        for address in range(register, end + 1)
+                    )
                 elif request.function == 6:
                     value = int.from_bytes(body[2:], "big")
                     self.writes.append(value)
@@ -149,6 +160,15 @@ class SyntheticInverter:
                     reply = body[:2] + b"\0"
                 elif request.function == 24:
                     reply = b"\0\x1f\0"
+                elif request.function == 16:
+                    end = int.from_bytes(body[2:4], "big")
+                    assert len(body) == 4 + 2 * (end - register + 1)
+                    for index, address in enumerate(range(register, end + 1)):
+                        self.registers[address] = int.from_bytes(
+                            body[4 + index * 2 : 6 + index * 2], "big"
+                        )
+                    self.writes.append((register, end))
+                    reply = body[:4] + b"\0"
                 else:
                     raise AssertionError(f"Unexpected command {request.function}")
                 response = Frame(
@@ -166,7 +186,9 @@ class SyntheticInverter:
 
 async def main():
     hass = await boot()
-    mqtt = MqttSettings("growatt-features-mqtt")
+    mqtt = MqttSettings(BROKER, state_path=str(CONFIG / "reading-cache.json"))
+    if os.environ.get("GROWATT_PROBE_PHASE") == "quiet":
+        return await quiet_restart(hass, mqtt)
     case = next(
         case
         for case in json.loads((BASE / "fixtures/telemetry_cases.json").read_text())
@@ -191,7 +213,15 @@ async def main():
     selection = SelectionSettings(
         strict=True, device_families={IDENTITY: "mod", "QUALIFY002": "sph"}
     )
-    pipeline = Pipeline(Settings(relay_settings, mqtt, "auto", selection))
+    pipeline = Pipeline(
+        Settings(
+            relay_settings,
+            mqtt,
+            "auto",
+            selection,
+            RuntimeOptions(experimental_controls=True, control_models={"QUALIFY002": "sph"}),
+        )
+    )
     relay = Relay(relay_settings, pipeline.observe)
     pipeline.bind_transport(relay)
     pipeline.start()
@@ -241,7 +271,7 @@ async def main():
             await hass.services.async_call(
                 "number", "set_value", {"entity_id": number, "value": 30}, blocking=True
             )
-            await until(lambda: "did not apply" in hass.states.get(result).state)
+            await until(lambda: "different setting" in hass.states.get(result).state)
             assert "30" not in states_seen
             simulator.discard = False
             simulator.value = 85
@@ -288,6 +318,66 @@ async def main():
             assert storage.registers[1092] == 1
             ids = entities(hass)
             report["storage_switch_readback"] = "passed"
+
+            start_time = entities(hass)["ha_growatt_QUALIFY002_charge_1_start"]
+            period_enabled = entities(hass)["ha_growatt_QUALIFY002_charge_1_enabled"]
+            await until(
+                lambda: hass.states.get(start_time) and hass.states.get(start_time).state == "23:00"
+            )
+            await hass.services.async_call(
+                "text", "set_value", {"entity_id": start_time, "value": "22:30"}, blocking=True
+            )
+            await until(lambda: hass.states.get(start_time).state == "22:30")
+            assert storage.registers[1100] == 22 * 256 + 30
+            assert storage.registers[1101] == 5 * 256
+            await hass.services.async_call(
+                "switch", "turn_on", {"entity_id": period_enabled}, blocking=True
+            )
+            await until(lambda: hass.states.get(period_enabled).state == "on")
+            assert storage.registers[1102] == 1
+            assert storage.writes[-2:] == [(1100, 1102), (1100, 1102)]
+            report["native_text_and_switch_grouped_schedules"] = "passed"
+
+            page = SupportServer(
+                pipeline, relay, None, host="127.0.0.1", port=0, allowed_peer="127.0.0.1"
+            )
+            await page.start()
+            try:
+                port = page._server.sockets[0].getsockname()[1]
+                async with aiohttp.ClientSession() as client:
+                    async with client.get(f"http://127.0.0.1:{port}/api/diagnostics") as response:
+                        assert response.status == 200
+                        redacted = await response.text()
+                        assert IDENTITY not in redacted and "QUALIFY002" not in redacted
+                    async with client.get(f"http://127.0.0.1:{port}/") as response:
+                        assert "History and Energy" in await response.text()
+                report["native_ingress_routes_and_redaction"] = "passed"
+            finally:
+                await page.close()
+
+            inventory = {
+                "entities": [
+                    {
+                        "entity_id": entry.entity_id,
+                        "platform": entry.platform,
+                        "unique_id": entry.unique_id,
+                    }
+                    for entry in er.async_get(hass).entities.values()
+                ],
+                "states": [
+                    {"entity_id": state.entity_id, "attributes": dict(state.attributes)}
+                    for state in hass.states.async_all()
+                ],
+                "statistics": [],
+                "energy": {},
+            }
+            preview = migration_preview(pipeline.ha.snapshots, mqtt, inventory)
+            (CONFIG / "migration-preview.json").write_text(json.dumps(preview))
+            # The standard MOD profile has 32 sensors; SPH publishes 69.
+            assert preview["summary"]["preserved"] == 101 and preview["summary"]["review"] == 0, (
+                preview["summary"]
+            )
+            report["native_migration_preview"] = "passed"
 
             device = pipeline.features.devices[IDENTITY]
             device.last_seen -= 901
@@ -345,6 +435,75 @@ async def main():
         report["telemetry_history_metadata_preserved"] = "passed"
     history.write_text(json.dumps(metadata))
     (CONFIG / "feature-result.json").write_text(json.dumps(report))
+    print(json.dumps(report), flush=True)
+
+
+async def quiet_restart(hass, mqtt):
+    """Cold Core/app restart, including broker reset, without another device packet."""
+    settings = Settings(
+        RelaySettings("127.0.0.1", 9, listen_port=0),
+        mqtt,
+        "auto",
+        runtime=RuntimeOptions(experimental_controls=True, control_models={"QUALIFY002": "sph"}),
+    )
+    pipeline = Pipeline(settings)
+    relay = Relay(settings.relay, pipeline.observe)
+    pipeline.bind_transport(relay)
+    for identity, snapshot in list(pipeline.ha.snapshots.items()):
+        pipeline.ha.snapshots[identity] = replace(
+            snapshot, received_at=datetime.now(UTC) - timedelta(hours=12)
+        )
+    expected = pipeline.ha.snapshots[IDENTITY].received_at.isoformat(timespec="seconds")
+    pipeline.start()
+    try:
+        async with relay:
+            await until(lambda: f"grott_{IDENTITY}_pvpowerout" in entities(hass))
+            ids = entities(hass)
+            power = ids[f"grott_{IDENTITY}_pvpowerout"]
+            freshness = ids[f"grott_{IDENTITY}_grott_last_push"]
+            connected = ids[f"ha_growatt_{IDENTITY}_connected"]
+            control = ids[f"ha_growatt_{IDENTITY}_output_limit"]
+            await until(
+                lambda: (
+                    hass.states.get(power)
+                    and hass.states.get(power).state not in {"unknown", "unavailable"}
+                )
+            )
+            await until(
+                lambda: hass.states.get(freshness) and hass.states.get(freshness).state == expected
+            )
+            await until(
+                lambda: hass.states.get(connected) and hass.states.get(connected).state == "off"
+            )
+            assert hass.states.get(control).state == "unavailable"
+            assert relay.stats.device_frames == 0
+            original_ids = json.loads((CONFIG / "feature-identities.json").read_text())
+            assert all(ids[key] == value for key, value in original_ids.items())
+            entry = hass.config_entries.async_entries("mqtt")[0]
+            await hass.config_entries.async_reload(entry.entry_id)
+            await until(
+                lambda: (
+                    hass.states.get(power)
+                    and hass.states.get(power).state not in {"unknown", "unavailable"}
+                )
+            )
+            assert relay.stats.device_frames == 0
+    finally:
+        await pipeline.close()
+        await hass.async_stop()
+    with sqlite3.connect(CONFIG / "home-assistant_v2.db") as database:
+        actual = dict(database.execute("select entity_id, metadata_id from states_meta"))
+    assert all(
+        actual[key] == value
+        for key, value in json.loads((CONFIG / "feature-history.json").read_text()).items()
+    )
+    report = {
+        "quiet_core_app_broker_restart": "passed",
+        "original_timestamp_restored": "passed",
+        "stale_controls_unavailable": "passed",
+        "history_preserved_without_new_telemetry": "passed",
+    }
+    (CONFIG / "quiet-result.json").write_text(json.dumps(report))
     print(json.dumps(report), flush=True)
 
 

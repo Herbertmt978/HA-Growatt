@@ -1,6 +1,9 @@
 # Using the app
 
-Enter the MQTT host, port, username and password. With `ha_plugin` enabled,
+With Mosquitto installed, leave credentials empty and keep `mqtt_auto` enabled
+to use Home Assistant's MQTT service. Existing explicit broker settings are
+preserved. For another broker, turn `mqtt_auto` off and enter its host, port,
+username and password; enable `mqtt_tls` when required. With `ha_plugin` enabled,
 HA Growatt publishes discovery and readings to the official MQTT integration.
 Turn it off to use raw MQTT publication instead.
 
@@ -19,3 +22,19 @@ readings, existing entity history and Growatt cloud updates are verified.
 Diagnostic logging includes packet contents. Keep it disabled during normal
 operation and keep any support logs private. Normal overnight silence does not
 make the service health check fail.
+
+Open the web UI for connection checks, per-inverter profiles, a redacted
+diagnostics download and a read-only history/Energy preview. Restart recovery
+is enabled by default and preserves the last readings and their original
+timestamps when HA, the broker or the app restarts without a fresh upload.
+
+Experimental battery controls and schedules require an explicit matching
+control profile and `experimental_controls: true`. Read the
+[feature guide](https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/home-assistant-features.md)
+and [hardware evidence](https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/hardware-support.md)
+before enabling them. A profile choice does not establish firmware compatibility.
+
+The app requests Supervisor access for its MQTT service settings and its own
+profile configuration. Home Assistant API access is used only to read registry,
+statistics and Energy information for the preview. It does not change HA history
+or Energy settings. Ingress provides access through your existing HA login.

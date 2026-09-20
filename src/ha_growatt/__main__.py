@@ -98,7 +98,9 @@ async def _run(
     await _run_settings(settings, health_path)
 
 
-async def _run_settings(settings, health_path: Path | None = None) -> None:
+async def _run_settings(
+    settings, health_path: Path | None = None, *, supervisor=None, app=False
+) -> None:
     if settings.runtime.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     pipeline = Pipeline(settings, ha_publisher=Publisher)
@@ -115,11 +117,19 @@ async def _run_settings(settings, health_path: Path | None = None) -> None:
         transport = Relay(settings.relay, pipeline.observe)
     pipeline.bind_transport(transport)
     pipeline.start()
+    support = None
     try:
         async with transport:
+            if app:
+                from .support import SupportServer
+
+                support = SupportServer(pipeline, transport, supervisor)
+                await support.start()
             print(f"HA Growatt {settings.runtime.mode} service started.", flush=True)
             await _wait_for_shutdown(transport, settings.runtime.mode, health_path)
     finally:
+        if support:
+            await support.close()
         await pipeline.close()
 
 
@@ -175,13 +185,19 @@ def main() -> None:
         elif arguments.command == "app":
             if not hasattr(os, "geteuid"):
                 raise OSError("The app entry point requires Linux")
-            settings = load_settings(arguments.config)
+            from .supervisor import prepare_app
+
+            settings, supervisor = prepare_app(arguments.config)
             if os.geteuid() == 0:
                 os.setgroups([])
                 os.setgid(10001)
                 os.setuid(10001)
             logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-            asyncio.run(_run_settings(settings, Path("/tmp/ha-growatt.health")))
+            asyncio.run(
+                _run_settings(
+                    settings, Path("/tmp/ha-growatt.health"), supervisor=supervisor, app=True
+                )
+            )
         else:
             environment = dict(os.environ)
             for key, value in vars(arguments).items():

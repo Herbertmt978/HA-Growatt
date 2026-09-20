@@ -101,7 +101,12 @@ class Pipeline:
 
             if isinstance(transport, Relay):
                 self.features = HomeAssistantFeatures(
-                    self.ha, transport, self, controls=self.settings.runtime.ha_controls
+                    self.ha,
+                    transport,
+                    self,
+                    controls=self.settings.runtime.ha_controls,
+                    experimental=self.settings.runtime.experimental_controls,
+                    models=self.settings.runtime.control_models,
                 )
 
     def start(self) -> None:

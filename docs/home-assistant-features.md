@@ -1,6 +1,63 @@
 # Home Assistant features
 
-These additions are in development and are not part of the 0.1.1 release.
+These features are included in 0.2.0. Additional battery profiles and schedules
+are experimental and disabled by default; see the hardware evidence below.
+
+## Setup and support page
+
+Open **HA Growatt → Open web UI** in Home Assistant's Apps settings. The page
+shows whether the datalogger listener and MQTT connection are working, whether
+readings have arrived, and whether restart recovery is available. If packets
+arrive without usable readings, it suggests checking the inverter family rather
+than reporting that everything is connected successfully.
+
+With the Mosquitto app installed, leave the broker credentials empty and
+`mqtt_auto` enabled. HA Growatt obtains the MQTT service settings from Supervisor.
+Existing explicit credentials and external broker addresses are preserved.
+Disable `mqtt_auto` for a manually configured broker; use `mqtt_tls` for TLS.
+Automatic setup needs a running MQTT provider. If it is unavailable, the app log
+explains how to start it or enter manual settings.
+
+Each discovered inverter has a reading-profile selector and a separate control
+profile. Changes are saved in the app's `inverters` option and take effect on
+the next reading. Saved readings for that inverter are discarded when its
+profile changes. Existing HA entities and their history are not deleted.
+Avoid editing the app's configuration elsewhere while saving a profile: the
+Supervisor API replaces the complete options object. The app checks for changes
+before saving and refuses the save if it detects one.
+The same list can be edited in the app configuration before the first packet.
+
+**Download diagnostics** creates a JSON support file containing version, known
+profiles, connection status and counters. It excludes serials, credentials,
+addresses, measurement values and raw packets. The page uses authenticated HA
+ingress; it does not expose another port on the household network.
+
+## Restart recovery
+
+The app's `restore_readings` option is enabled by default. It saves the last
+live reading for each inverter in its private `/data/state` directory. Broker
+reconnection and Home Assistant's MQTT birth message cause discovery and saved
+measurements to be sent again, even if the inverter is asleep. A cold app
+restart loads the same file. The original Last data push timestamp is retained.
+
+Saved readings do not establish a live connection or restore control values.
+Connected remains off until fresh telemetry arrives; settings remain unavailable
+until a current connection returns a valid setting read. Buffered historical
+records never replace these snapshots. The file is bounded and replaced
+atomically. If it cannot be read or written, diagnostics explain the recovery
+problem while fresh telemetry continues.
+
+Snapshots are scoped to the MQTT endpoint, account and discovery profile. A
+change to those settings waits for new readings rather than replaying data into
+a different installation. Password rotation alone does not discard readings.
+They are included in normal app backups. Disabling recovery stops replay; it
+does not erase already retained MQTT messages if `mqtt_retain` was separately
+enabled.
+
+Standalone installations can set `mqtt.state_path` in TOML or `ha_state_path`
+in the Home Assistant extension options in INI. Use a private writable path on
+a persistent volume. Recovery is opt-in outside the app so existing filesystem
+and publication behaviour remain unchanged.
 
 These features work in proxy mode through the existing MQTT integration.
 They add entities to the existing inverter devices. Measurement names, unique
@@ -68,8 +125,49 @@ them does not itself select battery-first or grid-first operation.
 
 SPF, meters, custom layouts and unknown profiles do not receive these write
 controls. The SPH/SPA battery register block is not offered on MIN/MOD profiles.
-Charge schedules, grid codes, protection limits and arbitrary register writes
-are not exposed by MQTT.
+Grid codes, protection limits and arbitrary register writes are not exposed by MQTT.
+
+## Battery schedules and additional models
+
+Select the matching control profile, then enable `experimental_controls` in the
+app configuration and restart it. SPH/SPA expose three battery-first charge
+periods and three grid-first discharge periods. Each period has start/end text
+entities accepting `HH:MM` and an enabled switch for HA automations. The app page
+also edits the whole period at once: read it first, change it and save it.
+
+An enabled period must have different start and end times; crossing midnight is
+allowed. Times follow the inverter's clock. The complete three-register period
+is read and written as a group. Saving from the app also checks that the period
+has not changed since it was loaded. If a write cannot be confirmed, the control
+becomes unavailable until settings are refreshed. Only confirmation reads are
+retried, up to three attempts; writes are sent once.
+
+Explicit MIN TL-XH and MOD/MID TL3-XH profiles add their documented battery
+registers separately from the SPH/SPA block. Read the
+[hardware evidence and limits](hardware-support.md) before selecting one.
+Community reports inform these choices; protocol tests do not establish
+compatibility with every firmware version. These controls stay disabled in a
+normal installation unless experimental controls are enabled.
+
+## History and Energy preview
+
+Choose **Check existing entities** on the app page. It reads HA's entity and
+device registries, current metadata, statistics inventory and Energy settings.
+Exact MQTT unique IDs with matching available metadata are marked preserved,
+including any entity names you changed yourself. Different-integration matches
+are shown as candidates for review. Missing metadata and conflicting units or
+state classes are flagged.
+
+The preview highlights the inverter's total generated energy as a solar Energy
+Dashboard candidate. Do not also select its individual PV totals for the same
+production. It shows existing Energy selections and whether statistics already
+exist. A suitable unit and state class do not by themselves prove the reading is
+physically correct: compare the values before selecting a new source.
+
+Nothing is renamed, removed or transferred by this check. For another
+integration's identity, take a backup and follow HA's entity/history migration
+procedure only after checking the proposed mapping. Unmatched sensors need a
+manual comparison. Preview requires HA Core and its recorder to be available.
 
 HA Growatt reads settings on first contact and every five minutes. **Refresh
 settings** requests a read immediately. No periodic task writes settings back
@@ -99,7 +197,11 @@ use; existing measurement entities remain unchanged.
 INI installations use the same keys in `[Generic]`, with environment overrides
 `HA_GROWATT_CLOUD_FALLBACK`, `HA_GROWATT_HA_FEATURES` and
 `HA_GROWATT_HA_CONTROLS`. TOML uses `relay.cloud_fallback`,
-`runtime.ha_features` and `runtime.ha_controls`.
+`runtime.ha_features` and `runtime.ha_controls`. Experimental controls use
+`runtime.experimental_controls` and an inverter-to-model `runtime.control_models`
+mapping in TOML; INI uses `experimental_controls` and `control_models` in
+`[Generic]`. Environment overrides are `HA_GROWATT_EXPERIMENTAL_CONTROLS` and
+`HA_GROWATT_CONTROL_MODELS`.
 
 The additional topics are under `ha_growatt/`; existing telemetry topics retain
 their historical names. Run one feature publisher per MQTT namespace. Server

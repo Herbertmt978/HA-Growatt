@@ -152,6 +152,7 @@ def test_feature_state_has_no_raw_packets_addresses_or_credentials():
             "output_failures",
             "command_result",
             "settings",
+            "schedules",
             "rejected_commands",
         }
 

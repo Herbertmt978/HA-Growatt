@@ -42,8 +42,9 @@ Compatibility evidence is treated separately from implementation source:
 
 The MIT licence applies to this project's implementation. Installed dependencies
 retain their own licence notices. Runtime dependencies are
-[Eclipse Paho MQTT](https://github.com/eclipse-paho/paho.mqtt.python) and
-[Python tzdata](https://github.com/python/tzdata).
+[Eclipse Paho MQTT](https://github.com/eclipse-paho/paho.mqtt.python),
+[Python tzdata](https://github.com/python/tzdata) and
+[websockets](https://github.com/python-websockets/websockets).
 
 The app icon depicts a solar inverter and uses the
 [Growatt wordmark](https://en.growatt.com/) to identify the supported hardware.

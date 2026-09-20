@@ -124,7 +124,7 @@ def test_ha_command_readback_result_and_no_optimistic_value():
         inverter.discard = True
         await features.execute("ha_growatt/INVERT0001/command/output_limit", b"30")
         assert not device.values
-        assert "did not apply" in device.command_result
+        assert "different setting" in device.command_result
         # An unavailable setting does not accept another write until refreshed.
         count = len(inverter.requests)
         await features.execute("ha_growatt/INVERT0001/command/output_limit", b"25")

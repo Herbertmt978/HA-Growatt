@@ -82,12 +82,13 @@ def _mqtt(options: dict) -> MqttSettings:
         "ha_mqtt_password",
         "ha_mqtt_retain",
         "ha_entity_profile",
+        "ha_state_path",
     }
     if set(options) - allowed:
         raise ValueError("The Home Assistant extension contains an unsupported option")
     if any(
         not isinstance(options.get(key, ""), str)
-        for key in ("ha_mqtt_host", "ha_mqtt_user", "ha_mqtt_password")
+        for key in ("ha_mqtt_host", "ha_mqtt_user", "ha_mqtt_password", "ha_state_path")
     ):
         raise ValueError("MQTT host and credentials must be text")
     return MqttSettings(
@@ -97,11 +98,18 @@ def _mqtt(options: dict) -> MqttSettings:
         password=options.get("ha_mqtt_password", ""),
         retain_state=_boolean(options.get("ha_mqtt_retain", False)),
         entity_profile=options.get("ha_entity_profile", "v0_1_9_standard"),
+        state_path=options.get("ha_state_path", ""),
     )
 
 
 def _addon(path: Path) -> tuple[RelaySettings, MqttSettings, SelectionSettings, RuntimeOptions]:
     options = json.loads(path.read_text(encoding="utf-8"))
+    return addon_options(options)
+
+
+def addon_options(
+    options: dict,
+) -> tuple[RelaySettings, MqttSettings, SelectionSettings, RuntimeOptions]:
     if not isinstance(options, dict):
         raise ValueError("Home Assistant app options must be an object")
     allowed = {
@@ -123,6 +131,11 @@ def _addon(path: Path) -> tuple[RelaySettings, MqttSettings, SelectionSettings, 
         "cloud_fallback",
         "ha_features",
         "ha_controls",
+        "mqtt_auto",
+        "mqtt_tls",
+        "restore_readings",
+        "inverters",
+        "experimental_controls",
     }
     if set(options) - allowed:
         raise ValueError("The Home Assistant app contains an unsupported option")
@@ -139,6 +152,24 @@ def _addon(path: Path) -> tuple[RelaySettings, MqttSettings, SelectionSettings, 
             "ha_entity_profile": options.get("ha_entity_profile", "v0_1_9_standard"),
         }
     )
+    from dataclasses import replace
+
+    mqtt = replace(mqtt, tls=_boolean(options.get("mqtt_tls", False)))
+    inverters = options.get("inverters", [])
+    if not isinstance(inverters, list) or len(inverters) > 128:
+        raise ValueError("Inverters must be a list of up to 128 profiles")
+    from .discovery import validate_identity
+
+    families = {}
+    models = {}
+    for item in inverters:
+        if not isinstance(item, dict) or set(item) - {"serial", "family", "controls"}:
+            raise ValueError("Invalid inverter profile")
+        validate_identity(item.get("serial", ""))
+        if item["serial"] in families:
+            raise ValueError("Each inverter must have only one profile")
+        families[item["serial"]] = item.get("family", "default")
+        models[item["serial"]] = item.get("controls", "auto")
     return (
         RelaySettings(
             "server.growatt.com",
@@ -151,11 +182,14 @@ def _addon(path: Path) -> tuple[RelaySettings, MqttSettings, SelectionSettings, 
             family=options.get("invtype", "default"),
             strict=_boolean(options.get("layout_strict", False)),
             automatic=_boolean(options.get("layout_auto_family", True)),
+            device_families=families,
         ),
         RuntimeOptions(
             home_assistant=ha_enabled,
             ha_features=_boolean(options.get("ha_features", True)),
             ha_controls=_boolean(options.get("ha_controls", True)),
+            experimental_controls=_boolean(options.get("experimental_controls", False)),
+            control_models=models,
             raw_mqtt=None if ha_enabled else RawMqttSettings(mqtt),
             policy=PublicationPolicy(
                 options.get("time", "server"), _boolean(options.get("sendbuf", False))
@@ -199,6 +233,8 @@ def load_legacy_options(
         "decrypt",
         "includeall",
         "invtypemap",
+        "experimental_controls",
+        "control_models",
         "timezone",
         "layouts_directory",
         "sniff_interface",
@@ -307,6 +343,12 @@ def load_legacy_options(
         home_assistant=ha,
         ha_features=_boolean(get("Generic", "ha_features", "HA_GROWATT_HA_FEATURES", True)),
         ha_controls=_boolean(get("Generic", "ha_controls", "HA_GROWATT_HA_CONTROLS", True)),
+        experimental_controls=_boolean(
+            get("Generic", "experimental_controls", "HA_GROWATT_EXPERIMENTAL_CONTROLS", False)
+        ),
+        control_models=_mapping(
+            get("Generic", "control_models", "HA_GROWATT_CONTROL_MODELS", "{}")
+        ),
         policy=PublicationPolicy(
             get("Generic", "time", "gtime", "auto"),
             _boolean(get("Generic", "sendbuf", "gsendbuf", True)),

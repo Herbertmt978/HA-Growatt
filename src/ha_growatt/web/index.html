@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>HA Growatt</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">HOME ASSISTANT APP</p>
+        <h1>HA Growatt</h1>
+        <p>Readings, connection checks and inverter settings.</p>
+      </header>
+      <p id="message" role="status" aria-live="polite"></p>
+      <section aria-labelledby="connection-title">
+        <h2 id="connection-title">Connection checks</h2>
+        <div id="checks" class="checks"></div>
+        <ul id="warnings"></ul>
+        <button id="refresh">Refresh checks</button>
+      </section>
+      <section aria-labelledby="devices-title">
+        <h2 id="devices-title">Your inverters</h2>
+        <p>
+          Use Automatic unless the readings need a specific family. Match a
+          battery control profile to the model printed on the inverter.
+        </p>
+        <div id="devices"></div>
+      </section>
+      <section aria-labelledby="schedule-title">
+        <h2 id="schedule-title">Battery schedules</h2>
+        <p>
+          SPH/SPA schedules are experimental. Enable experimental controls in
+          the app configuration, select the matching control profile above, then
+          read a slot before changing it. Times use the inverter’s clock and may
+          cross midnight.
+        </p>
+        <form id="schedule">
+          <div class="fields">
+            <label
+              >Inverter<select id="schedule-device" required></select></label
+            ><label
+              >Operation<select id="schedule-mode">
+                <option value="charge">Battery-first charging</option>
+                <option value="discharge">Grid-first discharging</option>
+              </select></label
+            ><label
+              >Period<select id="schedule-slot">
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+              </select></label
+            >
+          </div>
+          <button id="read-slot" type="button">Read this period</button>
+          <div class="fields">
+            <label>Start<input id="start" type="time" required /></label
+            ><label>End<input id="end" type="time" required /></label
+            ><label class="checkbox"
+              ><input id="enabled" type="checkbox" />Enabled</label
+            >
+          </div>
+          <button id="save-slot" disabled>Save period</button>
+          <p id="schedule-result" role="status"></p>
+        </form>
+      </section>
+      <section aria-labelledby="migration-title">
+        <h2 id="migration-title">History and Energy</h2>
+        <p>
+          Preview which existing identities will be preserved and check energy
+          sensor metadata. This does not rename entities, move history or change
+          your Energy dashboard.
+        </p>
+        <button id="migration">Check existing entities</button>
+        <p id="migration-summary" role="status"></p>
+        <div class="table-wrap">
+          <table id="migration-table" hidden>
+            <thead>
+              <tr>
+                <th>Measurement</th>
+                <th>Existing entity</th>
+                <th>History</th>
+                <th>Energy</th>
+                <th>Check</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+      <section aria-labelledby="support-title">
+        <h2 id="support-title">Help with a problem</h2>
+        <p>
+          The diagnostics file contains app version, profiles, connection status
+          and error counters. It excludes serial numbers, network addresses,
+          credentials, readings and raw packets.
+        </p>
+        <a
+          class="button"
+          href="api/diagnostics"
+          download="ha-growatt-diagnostics.json"
+          >Download diagnostics</a
+        >
+        <p>
+          <a
+            href="https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/home-assistant-features.md"
+            target="_blank"
+            rel="noreferrer"
+            >Read the feature and troubleshooting guide</a
+          >
+        </p>
+      </section>
+      <footer id="version"></footer>
+    </main>
+  </body>
+</html>

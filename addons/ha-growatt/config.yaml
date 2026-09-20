@@ -1,5 +1,5 @@
 name: HA Growatt
-version: 0.1.1
+version: 0.2.0
 slug: ha_growatt
 description: Growatt readings through MQTT with Home Assistant discovery
 url: https://github.com/Herbertmt978/HA-Growatt
@@ -8,6 +8,14 @@ startup: services
 boot: auto
 init: false
 tmpfs: true
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:solar-power
+panel_admin: true
+hassio_api: true
+homeassistant_api: true
+services:
+  - mqtt:want
 ports:
   5279/tcp: 5279
 ports_description:
@@ -31,6 +39,11 @@ options:
   mqtt_user: ""
   mqtt_password: ""
   mqtt_retain: false
+  mqtt_auto: true
+  mqtt_tls: false
+  restore_readings: true
+  experimental_controls: false
+  inverters: []
 schema:
   mode: list(proxy)
   blockcmd: bool
@@ -50,3 +63,11 @@ schema:
   mqtt_user: str
   mqtt_password: password
   mqtt_retain: bool
+  mqtt_auto: bool
+  mqtt_tls: bool
+  restore_readings: bool
+  experimental_controls: bool
+  inverters:
+    - serial: str
+      family: list(default|sph|spf|spa|mod|min|tl3|max)
+      controls: list(auto|sph|spa|min_tl_xh|mod_tl3_xh)

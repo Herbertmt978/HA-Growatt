@@ -1,5 +1,6 @@
 """Documented holding registers, scoped to observed inverter families."""
 
+import asyncio
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -30,9 +31,10 @@ class Control:
     register: int
     profiles: frozenset[str]
     switch: bool = False
+    minimum: int = 0
 
     def validate(self, value: int) -> None:
-        if type(value) is not int or not 0 <= value <= (1 if self.switch else 100):
+        if type(value) is not int or not self.minimum <= value <= (1 if self.switch else 100):
             raise ValueError("Setting is outside its documented range")
 
     def display(self, value: int) -> int:
@@ -56,8 +58,30 @@ CONTROLS = (
 )
 
 
-def controls_for(profile: str) -> tuple[Control, ...]:
-    return tuple(control for control in CONTROLS if profile in control.profiles)
+XH_CONTROLS = (
+    Control(
+        "xh_charge_rate", "Battery charge power", 3047, frozenset({"min-6", "mod-6"}), minimum=1
+    ),
+    Control("xh_charge_soc", "Battery charge limit", 3048, frozenset({"min-6", "mod-6"})),
+    Control(
+        "xh_ac_charge", "Allow grid charging", 3049, frozenset({"min-6", "mod-6"}), switch=True
+    ),
+    Control(
+        "xh_discharge_soc", "Battery discharge reserve", 3067, frozenset({"mod-6"}), minimum=10
+    ),
+)
+
+
+def controls_for(
+    profile: str, model: str = "auto", experimental: bool = False
+) -> tuple[Control, ...]:
+    result = tuple(control for control in CONTROLS if profile in control.profiles)
+    if experimental and (
+        (profile == "min-6" and model == "min_tl_xh")
+        or (profile == "mod-6" and model == "mod_tl3_xh")
+    ):
+        result += tuple(control for control in XH_CONTROLS if profile in control.profiles)
+    return result
 
 
 def response_body(frame: Frame) -> bytes:
@@ -92,7 +116,27 @@ async def write_setting(
     # Devices reply with either an echoed word or a one-byte result.
     if body not in {address + value.to_bytes(2, "big"), address + b"\0"}:
         raise ValueError("The inverter rejected the setting")
-    applied = await read_setting(transport, identity, control)
-    if applied != value:
-        raise ValueError("The inverter did not apply the setting")
-    return applied
+    return await confirm_read(
+        lambda: read_setting(transport, identity, control), value, before_send=before_send
+    )
+
+
+async def confirm_read(read, expected, *, before_send=None):
+    """Flash writes can briefly block reads. Repeat only confirmation reads."""
+    last_error = None
+    for attempt in range(3):
+        if attempt:
+            await asyncio.sleep(2)
+        if before_send:
+            before_send()
+        try:
+            actual = await read()
+        except TimeoutError as error:
+            last_error = error
+            continue
+        if actual == expected:
+            return actual
+        last_error = ValueError(
+            "The inverter read back a different setting; refresh before changing it again"
+        )
+    raise last_error

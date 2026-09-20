@@ -93,6 +93,8 @@ def _load_settings(path: Path, environment: dict[str, str] | None = None) -> Set
             "home_assistant",
             "ha_features",
             "ha_controls",
+            "experimental_controls",
+            "control_models",
             "minimum_record_bytes",
             "layouts_directory",
             "sniff_interface",

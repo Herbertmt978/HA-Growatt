@@ -4,7 +4,7 @@ HA Growatt reads Growatt datalogger traffic and publishes inverter and meter
 readings. It can forward the connection to Growatt, run as a local datalogger
 server, or listen passively to traffic on a Linux network interface.
 
-Version 0.1.1 includes Docker images and a Home Assistant app. Follow the
+Version 0.2.0 includes Docker images and a Home Assistant app. Follow the
 [migration instructions](docs/installation.md) when replacing an existing
 service so its configuration and sensor history are retained.
 
@@ -32,7 +32,10 @@ describes the behaviour checked and the limits of physical hardware testing.
 
 ## Cloud fallback and Home Assistant controls
 
-These additions are in development and are not part of the 0.1.1 release.
+The app includes a web UI with connection checks, per-inverter profiles,
+redacted diagnostics and a read-only history/Energy preview. It can use Home
+Assistant's MQTT service automatically. Private saved readings restore the last
+measurements after a quiet restart, keeping their original timestamps.
 
 In proxy mode, HA Growatt can answer the datalogger locally when Growatt is
 unreachable or stops replying. Readings continue to reach Home Assistant. That
@@ -53,6 +56,10 @@ Refresh settings and Sync datalogger time buttons are included.
 See [the feature guide](docs/home-assistant-features.md) for supported settings,
 options and testing limits. These additions use the existing app and MQTT
 integration.
+
+Experimental battery schedules and additional model controls are disabled by
+default. The [hardware evidence](docs/hardware-support.md) separates manufacturer
+documentation, community field results and our own installation checks.
 
 ## Run from Python
 

@@ -13,6 +13,7 @@ from datetime import UTC, datetime
 import paho.mqtt.client as mqtt
 
 from .discovery import discovery_messages, lineage_topics, state_message, state_topic
+from .recovery import MAX_DEVICES, ReadingStore, Snapshot
 from .telemetry import Telemetry
 
 _LOG = logging.getLogger(__name__)
@@ -30,8 +31,11 @@ class MqttSettings:
     entity_profile: str = "v0_1_9_standard"
     include_all: bool = False
     client_id: str = ""
+    state_path: str = ""
 
     def __post_init__(self) -> None:
+        if not isinstance(self.state_path, str):
+            raise ValueError("Reading cache path must be text")
         if (
             not isinstance(self.host, str)
             or not self.host
@@ -66,6 +70,38 @@ class Publisher:
         self._pending_cleanup: dict[str, set[str]] = {}
         self._publish_lock = asyncio.Lock()
         self._started = False
+        self.snapshots: dict[str, Snapshot] = {}
+        self.cache_error = False
+        self._store = None
+        self._restore_task = None
+        self._loop = None
+        self._restore_requested = asyncio.Event()
+        if settings.state_path:
+            self._store = ReadingStore(
+                settings.state_path,
+                (
+                    settings.host,
+                    settings.port,
+                    settings.username,
+                    settings.tls,
+                    settings.entity_profile,
+                    settings.include_all,
+                ),
+            )
+            try:
+                self.snapshots = self._store.load()
+                for identity, snapshot in self.snapshots.items():
+                    discovery_messages(
+                        identity,
+                        profile=settings.entity_profile,
+                        wire_profile=snapshot.telemetry.profile,
+                        include_all=settings.include_all,
+                        sensor_metadata=snapshot.telemetry.sensor_metadata,
+                    )
+            except (OSError, ValueError, KeyError, TypeError):
+                self.snapshots.clear()
+                self.cache_error = True
+                _LOG.warning("Saved readings could not be restored; waiting for fresh telemetry")
         self.command_callback = None
         self._feature_status = False
         self._client.on_connect = self._on_connect
@@ -85,6 +121,7 @@ class Publisher:
         with self._lock:
             self._generation += 1
         self._connected.set()
+        self._request_restore()
         client.subscribe("homeassistant/status", qos=1)
         if self.command_callback is not None:
             client.subscribe("ha_growatt/+/command/+", qos=0)
@@ -100,6 +137,7 @@ class Publisher:
         if message.topic == "homeassistant/status" and message.payload == b"online":
             with self._lock:
                 self._generation += 1
+            self._request_restore()
         elif self.command_callback is not None:
             self.command_callback(message)
 
@@ -112,6 +150,9 @@ class Publisher:
         if self._started:
             raise RuntimeError("MQTT publisher is already running")
         self._started = True
+        if self._store:
+            self._loop = asyncio.get_running_loop()
+            self._restore_task = asyncio.create_task(self._restore_loop())
         self._feature_status = self.command_callback is not None
         if self._feature_status:
             self._client.will_set(
@@ -119,6 +160,22 @@ class Publisher:
             )
         self._client.connect_async(self.settings.host, self.settings.port, keepalive=60)
         self._client.loop_start()
+
+    def _request_restore(self) -> None:
+        if self._loop is not None and not self._loop.is_closed():
+            self._loop.call_soon_threadsafe(self._restore_requested.set)
+
+    async def _restore_loop(self) -> None:
+        while True:
+            await self._restore_requested.wait()
+            self._restore_requested.clear()
+            try:
+                async with self._publish_lock:
+                    for identity, snapshot in list(self.snapshots.items()):
+                        await self._publish_snapshot(identity, snapshot)
+            except (ConnectionError, TimeoutError):
+                await asyncio.sleep(2)
+                self._restore_requested.set()
 
     async def _send(self, topic: str, payload: str, retain: bool, *, qos: int = 1) -> None:
         if not self._connected.is_set():
@@ -136,6 +193,19 @@ class Publisher:
         identity = telemetry.device_id or telemetry.values.get("pvserial")
         if not isinstance(identity, str):
             raise ValueError("Telemetry requires an inverter identity")
+        if telemetry.buffered:
+            return
+        snapshot = Snapshot(telemetry, datetime.now(UTC))
+        async with self._publish_lock:
+            if identity in self.snapshots or len(self.snapshots) < MAX_DEVICES:
+                self.snapshots[identity] = snapshot
+            if self._store:
+                try:
+                    await asyncio.to_thread(self._store.save, dict(self.snapshots))
+                    self.cache_error = False
+                except (OSError, ValueError):
+                    self.cache_error = True
+                    _LOG.warning("Readings are live, but restart recovery could not be saved")
         if not self._connected.is_set():
             connected = await asyncio.to_thread(
                 self._connected.wait, self.settings.delivery_seconds
@@ -143,44 +213,59 @@ class Publisher:
             if not connected:
                 raise ConnectionError("MQTT did not connect before the delivery deadline")
         async with self._publish_lock:
-            with self._lock:
-                generation = self._generation
-            fingerprint = (generation, telemetry.profile)
-            if self._announced.get(identity) != fingerprint:
-                configs = discovery_messages(
-                    identity,
-                    profile=self.settings.entity_profile,
-                    wire_profile=telemetry.profile,
-                    include_all=self.settings.include_all,
-                    sensor_metadata=telemetry.sensor_metadata,
-                )
-                for topic, config in configs.items():
-                    await self._send(topic, json.dumps(config, separators=(",", ":")), True)
-                previous = self._topics.get(identity, set())
-                if telemetry.profile in {
-                    "mod-6",
-                    "extended-6",
-                    "custom:T06NNNNXMOD",
-                    "custom:T06NNNNX",
-                }:
-                    previous = previous | lineage_topics(identity)
-                pending = self._pending_cleanup.setdefault(identity, set())
-                pending.update(previous - configs.keys())
-                pending.difference_update(configs)
-                self._topics[identity] = set(configs)
-                self._announced[identity] = fingerprint
-            pending = self._pending_cleanup.get(identity, set())
-            for topic in sorted(pending):
-                try:
-                    await self._send(topic, "", True)
-                except (ConnectionError, TimeoutError):
-                    _LOG.warning("Discovery cleanup incomplete; retrying on the next packet")
-                    break
-                pending.remove(topic)
-            payload = state_message(telemetry.values, datetime.now(UTC), identity)
-            await self._send(state_topic(identity), payload, self.settings.retain_state)
+            await self._publish_snapshot(identity, snapshot)
+
+    async def _publish_snapshot(self, identity: str, snapshot: Snapshot) -> None:
+        telemetry = snapshot.telemetry
+        with self._lock:
+            generation = self._generation
+        fingerprint = (generation, telemetry.profile)
+        if self._announced.get(identity) != fingerprint:
+            configs = discovery_messages(
+                identity,
+                profile=self.settings.entity_profile,
+                wire_profile=telemetry.profile,
+                include_all=self.settings.include_all,
+                sensor_metadata=telemetry.sensor_metadata,
+            )
+            for topic, config in configs.items():
+                await self._send(topic, json.dumps(config, separators=(",", ":")), True)
+            previous = self._topics.get(identity, set())
+            if telemetry.profile in {
+                "mod-6",
+                "extended-6",
+                "custom:T06NNNNXMOD",
+                "custom:T06NNNNX",
+            }:
+                previous = previous | lineage_topics(identity)
+            pending = self._pending_cleanup.setdefault(identity, set())
+            pending.update(previous - configs.keys())
+            pending.difference_update(configs)
+            self._topics[identity] = set(configs)
+            self._announced[identity] = fingerprint
+        pending = self._pending_cleanup.get(identity, set())
+        for topic in sorted(pending):
+            try:
+                await self._send(topic, "", True)
+            except (ConnectionError, TimeoutError):
+                _LOG.warning("Discovery cleanup incomplete; retrying on the next packet")
+                break
+            pending.remove(topic)
+        payload = state_message(telemetry.values, snapshot.received_at, identity)
+        await self._send(state_topic(identity), payload, self.settings.retain_state)
+
+    async def forget(self, identity: str) -> None:
+        async with self._publish_lock:
+            self.snapshots.pop(identity, None)
+            self._announced.pop(identity, None)
+            if self._store:
+                await asyncio.to_thread(self._store.save, dict(self.snapshots))
 
     async def close(self) -> None:
+        self._loop = None
+        if self._restore_task:
+            self._restore_task.cancel()
+            await asyncio.gather(self._restore_task, return_exceptions=True)
         if self._feature_status and self._connected.is_set():
             try:
                 await self._send(
