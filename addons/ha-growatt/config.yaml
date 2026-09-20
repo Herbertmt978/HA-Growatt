@@ -15,6 +15,9 @@ ports_description:
 options:
   mode: proxy
   blockcmd: true
+  cloud_fallback: true
+  ha_features: true
+  ha_controls: true
   time: server
   sendbuf: false
   invtype: default
@@ -31,6 +34,9 @@ options:
 schema:
   mode: list(proxy)
   blockcmd: bool
+  cloud_fallback: bool
+  ha_features: bool
+  ha_controls: bool
   time: list(auto|server)
   sendbuf: bool
   invtype: list(default|sph|spf|spa|mod|min|tl3|max)

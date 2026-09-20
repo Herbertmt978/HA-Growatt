@@ -91,6 +91,8 @@ def _load_settings(path: Path, environment: dict[str, str] | None = None) -> Set
         if set(runtime_options) - {
             "mode",
             "home_assistant",
+            "ha_features",
+            "ha_controls",
             "minimum_record_bytes",
             "layouts_directory",
             "sniff_interface",

@@ -113,6 +113,7 @@ async def _run_settings(settings, health_path: Path | None = None) -> None:
         transport = Sniffer(settings.relay, pipeline.observe, settings.runtime.sniff_interface)
     else:
         transport = Relay(settings.relay, pipeline.observe)
+    pipeline.bind_transport(transport)
     pipeline.start()
     try:
         async with transport:

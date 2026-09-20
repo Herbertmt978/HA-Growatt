@@ -1,5 +1,9 @@
 # HA Growatt
 
+The app also provides cloud-failure fallback, connection diagnostics and supported
+inverter settings. See the [feature guide](https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/home-assistant-features.md)
+for the available controls and their limits.
+
 Receive Growatt inverter readings in Home Assistant through MQTT while
 forwarding datalogger traffic to Growatt.
 

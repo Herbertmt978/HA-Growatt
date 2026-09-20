@@ -120,6 +120,9 @@ def _addon(path: Path) -> tuple[RelaySettings, MqttSettings, SelectionSettings, 
         "mqtt_user",
         "mqtt_password",
         "mqtt_retain",
+        "cloud_fallback",
+        "ha_features",
+        "ha_controls",
     }
     if set(options) - allowed:
         raise ValueError("The Home Assistant app contains an unsupported option")
@@ -141,6 +144,7 @@ def _addon(path: Path) -> tuple[RelaySettings, MqttSettings, SelectionSettings, 
             "server.growatt.com",
             listen_host="0.0.0.0",
             block_commands=_boolean(options.get("blockcmd", True)),
+            cloud_fallback=_boolean(options.get("cloud_fallback", True)),
         ),
         mqtt,
         SelectionSettings(
@@ -150,6 +154,8 @@ def _addon(path: Path) -> tuple[RelaySettings, MqttSettings, SelectionSettings, 
         ),
         RuntimeOptions(
             home_assistant=ha_enabled,
+            ha_features=_boolean(options.get("ha_features", True)),
+            ha_controls=_boolean(options.get("ha_controls", True)),
             raw_mqtt=None if ha_enabled else RawMqttSettings(mqtt),
             policy=PublicationPolicy(
                 options.get("time", "server"), _boolean(options.get("sendbuf", False))
@@ -199,6 +205,9 @@ def load_legacy_options(
         "api_host",
         "api_port",
         "trace",
+        "cloud_fallback",
+        "ha_features",
+        "ha_controls",
     }
     if config.has_section("Generic") and set(config.options("Generic")) - generic_options:
         raise ValueError("The INI configuration contains an unsupported Generic option")
@@ -214,6 +223,9 @@ def load_legacy_options(
         listen_port=_integer(get("Generic", "port", "ggrottport", 5279)),
         block_commands=_boolean(get("Generic", "blockcmd", "gblockcmd", False)),
         allow_destination_change=_boolean(get("Generic", "noipf", "gnoipf", False)),
+        cloud_fallback=_boolean(
+            get("Generic", "cloud_fallback", "HA_GROWATT_CLOUD_FALLBACK", True)
+        ),
     )
     whitelist = path.parent / "recwl.txt"
     if not whitelist.is_file():
@@ -293,6 +305,8 @@ def load_legacy_options(
     runtime = RuntimeOptions(
         mode=get("Generic", "mode", "gmode", "proxy"),
         home_assistant=ha,
+        ha_features=_boolean(get("Generic", "ha_features", "HA_GROWATT_HA_FEATURES", True)),
+        ha_controls=_boolean(get("Generic", "ha_controls", "HA_GROWATT_HA_CONTROLS", True)),
         policy=PublicationPolicy(
             get("Generic", "time", "gtime", "auto"),
             _boolean(get("Generic", "sendbuf", "gsendbuf", True)),
