@@ -65,6 +65,9 @@ repository to HACS as an Integration, download it, restart Home Assistant and ad
 HA Growatt under Devices & services. Keep the app running: the companion uses
 its MQTT status and creates no duplicate measurement sensors.
 
+Companion version 0.3.1 adds the inverter icon to Devices & services. The app
+and standalone service remain at version 0.3.0.
+
 Experimental battery schedules and additional model controls are disabled by
 default. The [hardware evidence](docs/hardware-support.md) separates manufacturer
 documentation, community field results and our own installation checks.
