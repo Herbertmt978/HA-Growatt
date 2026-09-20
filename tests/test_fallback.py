@@ -154,3 +154,48 @@ def test_fallback_can_be_disabled_and_other_sessions_stay_independent():
                     await writer.wait_closed()
 
     asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("protocol", [2, 5, 6])
+@pytest.mark.parametrize("reads_clock", [False, True])
+def test_acknowledged_announce_does_not_require_cloud_clock_write(protocol, reads_clock):
+    async def scenario():
+        async with cloud() as (port, clients):
+            settings = RelaySettings("127.0.0.1", port, listen_port=0, cloud_response_seconds=0.03)
+            async with Relay(settings) as relay:
+                reader, writer = await asyncio.open_connection(*relay.addresses[0][:2])
+                cloud_reader, cloud_writer = await clients.get()
+                announce = report(protocol, 3)
+                writer.write(announce.to_bytes())
+                assert await receive(cloud_reader) == announce
+                ack = Frame(7, protocol, 1, 3, b"\0")
+                cloud_writer.write(ack.to_bytes())
+                assert await receive(reader) == ack
+                if reads_clock:
+                    request = Frame(
+                        1, protocol, 1, 25, logger_prefix("LOGGER0001", protocol) + b"\0\x1f\0\x1f"
+                    )
+                    cloud_writer.write(request.to_bytes())
+                    assert await receive(reader) == request
+                # Growatt can query settings for longer than the ACK deadline,
+                # and need not set a datalogger clock which is already correct.
+                with pytest.raises(TimeoutError):
+                    await read_frame(reader, 0.12)
+                reading = report(protocol, sequence=8)
+                writer.write(reading.to_bytes())
+                assert await receive(cloud_reader) == reading
+                ack = Frame(8, protocol, 1, 4, b"\0")
+                cloud_writer.write(ack.to_bytes())
+                assert await receive(reader) == ack
+                assert relay.connection("INVERT0001") == "cloud"
+                assert relay.stats.fallback_connections == 0
+                # A real disconnection still provides the outstanding clock
+                # locally, even when the announcement was acknowledged.
+                cloud_writer.close()
+                await cloud_writer.wait_closed()
+                assert (await receive(reader)).function == 24
+                assert relay.connection("INVERT0001") == "local"
+                writer.close()
+                await writer.wait_closed()
+
+    asyncio.run(scenario())

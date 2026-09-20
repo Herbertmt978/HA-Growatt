@@ -117,7 +117,6 @@ class RelaySession:
     next_sequence: int = 65535
     last_command: float = 0
     clock_needed: bool = False
-    clock_since: float = 0
 
     def sequence(self) -> int:
         used = self.local_sequences | self.cloud_sequences
@@ -272,7 +271,6 @@ class Relay:
             session.logger, session.protocol = logger, frame.protocol
             if frame.function == 3:
                 session.clock_needed = True
-                session.clock_since = asyncio.get_running_loop().time()
             width = 30 if frame.protocol == 6 else 10
             if frame.function in {3, 4, 80} and len(frame.payload) >= width + 10:
                 identity = frame.payload[width : width + 10].decode("ascii").rstrip("\x00 ")
@@ -337,10 +335,6 @@ class Relay:
             if session.awaiting_cloud:
                 _, sent = next(iter(session.awaiting_cloud.values()))
                 if asyncio.get_running_loop().time() - sent >= self.settings.cloud_response_seconds:
-                    await self._fallback(session)
-            if session.cloud and session.clock_needed:
-                elapsed = asyncio.get_running_loop().time() - session.clock_since
-                if elapsed >= self.settings.cloud_response_seconds:
                     await self._fallback(session)
 
     async def _cloud_frames(self, reader, session: RelaySession) -> None:

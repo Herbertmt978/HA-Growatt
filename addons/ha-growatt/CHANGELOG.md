@@ -1,3 +1,10 @@
+# 0.2.1
+
+Keep forwarding when Growatt acknowledges the connection but takes longer to
+check the datalogger clock. A missing clock-setting command no longer causes
+a false cloud outage. Genuine missing acknowledgements and disconnections
+still switch to local fallback.
+
 # 0.2.0
 
 Readings recover after Home Assistant, MQTT or app restarts, including when the
