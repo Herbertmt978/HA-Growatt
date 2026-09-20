@@ -122,7 +122,11 @@ class CustomLayout:
                     ),
                     {},
                 )
-                sensors[field.name] = known | {"source": field.name, "divisor": field.divisor}
+                sensors[field.name] = known | {
+                    "source": field.name,
+                    "divisor": field.divisor,
+                    "numeric": field.kind in {"num", "numx"},
+                }
             except (ValueError, IndexError, UnicodeError):
                 errors += 1
         if self.device:

@@ -242,18 +242,21 @@
       "recortype1": {
         "divisor": 1,
         "source": "recortype1",
-        "label": "recortype1"
+        "label": "recortype1",
+        "numeric": true
       },
       "recortype2": {
         "divisor": 1,
         "source": "recortype2",
-        "label": "recortype2"
+        "label": "recortype2",
+        "numeric": true
       },
       "pvstatus": {
         "divisor": 1,
         "source": "pvstatus",
         "label": "State",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "numeric": true
       },
       "pvpowerin": {
         "unit": "W",
@@ -436,42 +439,50 @@
       "isof": {
         "divisor": 1,
         "source": "isof",
-        "label": "isof"
+        "label": "isof",
+        "numeric": true
       },
       "gfcif": {
         "divisor": 1,
         "source": "gfcif",
-        "label": "gfcif"
+        "label": "gfcif",
+        "numeric": true
       },
       "dcif": {
         "divisor": 1,
         "source": "dcif",
-        "label": "dcif"
+        "label": "dcif",
+        "numeric": true
       },
       "vpvfault": {
         "divisor": 1,
         "source": "vpvfault",
-        "label": "vpvfault"
+        "label": "vpvfault",
+        "numeric": true
       },
       "vacfault": {
         "divisor": 1,
         "source": "vacfault",
-        "label": "vacfault"
+        "label": "vacfault",
+        "numeric": true
       },
       "facfault": {
         "divisor": 1,
         "source": "facfault",
-        "label": "facfault"
+        "label": "facfault",
+        "numeric": true
       },
       "tmpfault": {
         "divisor": 1,
         "source": "tmpfault",
-        "label": "tmpfault"
+        "label": "tmpfault",
+        "numeric": true
       },
       "faultcode": {
         "divisor": 1,
         "source": "faultcode",
-        "label": "faultcode"
+        "label": "faultcode",
+        "numeric": true
       },
       "pvipmtemperature": {
         "unit": "\u00b0C",
@@ -802,18 +813,21 @@
       "recortype1": {
         "divisor": 1,
         "source": "recortype1",
-        "label": "recortype1"
+        "label": "recortype1",
+        "numeric": true
       },
       "recortype2": {
         "divisor": 1,
         "source": "recortype2",
-        "label": "recortype2"
+        "label": "recortype2",
+        "numeric": true
       },
       "pvstatus": {
         "divisor": 1,
         "source": "pvstatus",
         "label": "State",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "numeric": true
       },
       "pvpowerin": {
         "unit": "W",
@@ -996,42 +1010,50 @@
       "isof": {
         "divisor": 1,
         "source": "isof",
-        "label": "isof"
+        "label": "isof",
+        "numeric": true
       },
       "gfcif": {
         "divisor": 1,
         "source": "gfcif",
-        "label": "gfcif"
+        "label": "gfcif",
+        "numeric": true
       },
       "dcif": {
         "divisor": 1,
         "source": "dcif",
-        "label": "dcif"
+        "label": "dcif",
+        "numeric": true
       },
       "vpvfault": {
         "divisor": 1,
         "source": "vpvfault",
-        "label": "vpvfault"
+        "label": "vpvfault",
+        "numeric": true
       },
       "vacfault": {
         "divisor": 1,
         "source": "vacfault",
-        "label": "vacfault"
+        "label": "vacfault",
+        "numeric": true
       },
       "facfault": {
         "divisor": 1,
         "source": "facfault",
-        "label": "facfault"
+        "label": "facfault",
+        "numeric": true
       },
       "tmpfault": {
         "divisor": 1,
         "source": "tmpfault",
-        "label": "tmpfault"
+        "label": "tmpfault",
+        "numeric": true
       },
       "faultcode": {
         "divisor": 1,
         "source": "faultcode",
-        "label": "faultcode"
+        "label": "faultcode",
+        "numeric": true
       },
       "pvipmtemperature": {
         "unit": "\u00b0C",
@@ -1099,17 +1121,20 @@
       "rac": {
         "divisor": 1,
         "source": "rac",
-        "label": "rac"
+        "label": "rac",
+        "numeric": true
       },
       "eractoday": {
         "divisor": 1,
         "source": "eractoday",
-        "label": "eractoday"
+        "label": "eractoday",
+        "numeric": true
       },
       "eractotal": {
         "divisor": 1,
         "source": "eractotal",
-        "label": "eractotal"
+        "label": "eractotal",
+        "numeric": true
       }
     },
     "verified_payload_lengths": [
@@ -1377,18 +1402,21 @@
       "recortype1": {
         "divisor": 1,
         "source": "recortype1",
-        "label": "recortype1"
+        "label": "recortype1",
+        "numeric": true
       },
       "recortype2": {
         "divisor": 1,
         "source": "recortype2",
-        "label": "recortype2"
+        "label": "recortype2",
+        "numeric": true
       },
       "pvstatus": {
         "divisor": 1,
         "source": "pvstatus",
         "label": "State",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "numeric": true
       },
       "pvpowerin": {
         "unit": "W",
@@ -1571,42 +1599,50 @@
       "isof": {
         "divisor": 1,
         "source": "isof",
-        "label": "isof"
+        "label": "isof",
+        "numeric": true
       },
       "gfcif": {
         "divisor": 1,
         "source": "gfcif",
-        "label": "gfcif"
+        "label": "gfcif",
+        "numeric": true
       },
       "dcif": {
         "divisor": 1,
         "source": "dcif",
-        "label": "dcif"
+        "label": "dcif",
+        "numeric": true
       },
       "vpvfault": {
         "divisor": 1,
         "source": "vpvfault",
-        "label": "vpvfault"
+        "label": "vpvfault",
+        "numeric": true
       },
       "vacfault": {
         "divisor": 1,
         "source": "vacfault",
-        "label": "vacfault"
+        "label": "vacfault",
+        "numeric": true
       },
       "facfault": {
         "divisor": 1,
         "source": "facfault",
-        "label": "facfault"
+        "label": "facfault",
+        "numeric": true
       },
       "tmpfault": {
         "divisor": 1,
         "source": "tmpfault",
-        "label": "tmpfault"
+        "label": "tmpfault",
+        "numeric": true
       },
       "faultcode": {
         "divisor": 1,
         "source": "faultcode",
-        "label": "faultcode"
+        "label": "faultcode",
+        "numeric": true
       },
       "pvipmtemperature": {
         "unit": "\u00b0C",
@@ -1674,17 +1710,20 @@
       "rac": {
         "divisor": 1,
         "source": "rac",
-        "label": "rac"
+        "label": "rac",
+        "numeric": true
       },
       "eractoday": {
         "divisor": 1,
         "source": "eractoday",
-        "label": "eractoday"
+        "label": "eractoday",
+        "numeric": true
       },
       "eractotal": {
         "divisor": 1,
         "source": "eractotal",
-        "label": "eractotal"
+        "label": "eractotal",
+        "numeric": true
       }
     },
     "verified_payload_lengths": [
@@ -1887,7 +1926,8 @@
         "divisor": 1,
         "source": "pvstatus",
         "label": "State",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "numeric": true
       },
       "pvpowerin": {
         "unit": "W",
@@ -2124,13 +2164,15 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "recortype1",
-        "label": "recortype1"
+        "label": "recortype1",
+        "numeric": true
       },
       "recortype2": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "recortype2",
-        "label": "recortype2"
+        "label": "recortype2",
+        "numeric": true
       },
       "pbusvolt": {
         "entity_category": "diagnostic",
@@ -3221,7 +3263,8 @@
         "divisor": 1,
         "source": "pvstatus",
         "label": "State",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "numeric": true
       },
       "pvpowerin": {
         "unit": "W",
@@ -3458,13 +3501,15 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "group1start",
-        "label": "group1start"
+        "label": "group1start",
+        "numeric": true
       },
       "group1end": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "group1end",
-        "label": "group1end"
+        "label": "group1end",
+        "numeric": true
       },
       "pv3voltage": {
         "entity_category": "diagnostic",
@@ -3636,19 +3681,22 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3085",
-        "label": "reserved3085"
+        "label": "reserved3085",
+        "numeric": true
       },
       "deratingmode": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "deratingmode",
-        "label": "deratingmode"
+        "label": "deratingmode",
+        "numeric": true
       },
       "iso": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "iso",
-        "label": "iso"
+        "label": "iso",
+        "numeric": true
       },
       "dcir": {
         "entity_category": "diagnostic",
@@ -3672,7 +3720,8 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "gfci",
-        "label": "gfci"
+        "label": "gfci",
+        "numeric": true
       },
       "busvoltage": {
         "entity_category": "diagnostic",
@@ -3714,13 +3763,15 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "ipf",
-        "label": "ipf"
+        "label": "ipf",
+        "numeric": true
       },
       "realoppercent": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "realoppercent",
-        "label": "realoppercent"
+        "label": "realoppercent",
+        "numeric": true
       },
       "opfullwatt": {
         "entity_category": "diagnostic",
@@ -3732,103 +3783,120 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "standbyflag",
-        "label": "standbyflag"
+        "label": "standbyflag",
+        "numeric": true
       },
       "faultmaincode": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "faultmaincode",
-        "label": "faultmaincode"
+        "label": "faultmaincode",
+        "numeric": true
       },
       "warnmaincode": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "warnmaincode",
-        "label": "warnmaincode"
+        "label": "warnmaincode",
+        "numeric": true
       },
       "faultsubcode": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "faultsubcode",
-        "label": "faultsubcode"
+        "label": "faultsubcode",
+        "numeric": true
       },
       "warnsubcode": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "warnsubcode",
-        "label": "warnsubcode"
+        "label": "warnsubcode",
+        "numeric": true
       },
       "reserved3109": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3109",
-        "label": "reserved3109"
+        "label": "reserved3109",
+        "numeric": true
       },
       "reserved3110": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3110",
-        "label": "reserved3110"
+        "label": "reserved3110",
+        "numeric": true
       },
       "uwpresentfftvaxxxlue_channela": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "uwpresentfftvaxxxlue_channela",
-        "label": "uwpresentfftvaxxxlue_channela"
+        "label": "uwpresentfftvaxxxlue_channela",
+        "numeric": true
       },
       "bafcistatus": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bafcistatus",
-        "label": "bafcistatus"
+        "label": "bafcistatus",
+        "numeric": true
       },
       "uwstrength_channela": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "uwstrength_channela",
-        "label": "uwstrength_channela"
+        "label": "uwstrength_channela",
+        "numeric": true
       },
       "uwselfcheckvalue_channela": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "uwselfcheckvalue_channela",
-        "label": "uwselfcheckvalue_channela"
+        "label": "uwselfcheckvalue_channela",
+        "numeric": true
       },
       "invstartdelaytime": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "invstartdelaytime",
-        "label": "invstartdelaytime"
+        "label": "invstartdelaytime",
+        "numeric": true
       },
       "reserved3116": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3116",
-        "label": "reserved3116"
+        "label": "reserved3116",
+        "numeric": true
       },
       "reserved3117": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3117",
-        "label": "reserved3117"
+        "label": "reserved3117",
+        "numeric": true
       },
       "bdconoffstate": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bdconoffstate",
-        "label": "bdconoffstate"
+        "label": "bdconoffstate",
+        "numeric": true
       },
       "drycontactstate": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "drycontactstate",
-        "label": "drycontactstate"
+        "label": "drycontactstate",
+        "numeric": true
       },
       "reserved3120": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3120",
-        "label": "reserved3120"
+        "label": "reserved3120",
+        "numeric": true
       },
       "pself": {
         "entity_category": "diagnostic",
@@ -3882,7 +3950,8 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "esystotal",
-        "label": "esystotal"
+        "label": "esystotal",
+        "numeric": true
       },
       "eselftoday": {
         "entity_category": "diagnostic",
@@ -3900,13 +3969,15 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3143",
-        "label": "reserved3143"
+        "label": "reserved3143",
+        "numeric": true
       },
       "priority": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "priority",
-        "label": "priority"
+        "label": "priority",
+        "numeric": true
       },
       "epsfac": {
         "entity_category": "diagnostic",
@@ -3990,43 +4061,50 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "dcv",
-        "label": "dcv"
+        "label": "dcv",
+        "numeric": true
       },
       "reserved3163": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3163",
-        "label": "reserved3163"
+        "label": "reserved3163",
+        "numeric": true
       },
       "newbdcflag": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "newbdcflag",
-        "label": "newbdcflag"
+        "label": "newbdcflag",
+        "numeric": true
       },
       "bdcderatingmode": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bdcderatingmode",
-        "label": "bdcderatingmode"
+        "label": "bdcderatingmode",
+        "numeric": true
       },
       "sysstatemode": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "sysstatemode",
-        "label": "sysstatemode"
+        "label": "sysstatemode",
+        "numeric": true
       },
       "faultcode": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "faultcode",
-        "label": "faultcode"
+        "label": "faultcode",
+        "numeric": true
       },
       "warncode": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "warncode",
-        "label": "warncode"
+        "label": "warncode",
+        "numeric": true
       },
       "vbat": {
         "unit": "V",
@@ -4047,7 +4125,8 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "soc",
-        "label": "soc"
+        "label": "soc",
+        "numeric": true
       },
       "vbus1": {
         "entity_category": "diagnostic",
@@ -4101,7 +4180,8 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "pchrxxxl",
-        "label": "pchrxxxl"
+        "label": "pchrxxxl",
+        "numeric": true
       },
       "edischrtotalstor": {
         "entity_category": "diagnostic",
@@ -4119,13 +4199,15 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3186",
-        "label": "reserved3186"
+        "label": "reserved3186",
+        "numeric": true
       },
       "bdc1flag": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bdc1flag",
-        "label": "bdc1flag"
+        "label": "bdc1flag",
+        "numeric": true
       },
       "vbus2low": {
         "entity_category": "diagnostic",
@@ -4137,19 +4219,22 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmsmaxvoltcellno",
-        "label": "bmsmaxvoltcellno"
+        "label": "bmsmaxvoltcellno",
+        "numeric": true
       },
       "bmsminvoltcellno": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmsminvoltcellno",
-        "label": "bmsminvoltcellno"
+        "label": "bmsminvoltcellno",
+        "numeric": true
       },
       "bmsbatteryavgtemp": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmsbatteryavgtemp",
-        "label": "bmsbatteryavgtemp"
+        "label": "bmsbatteryavgtemp",
+        "numeric": true
       },
       "bmsmaxcelltemp": {
         "entity_category": "diagnostic",
@@ -4167,133 +4252,155 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmsmaxcelltemp2",
-        "label": "bmsmaxcelltemp2"
+        "label": "bmsmaxcelltemp2",
+        "numeric": true
       },
       "bmsbatteryavgtemp3": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmsbatteryavgtemp3",
-        "label": "bmsbatteryavgtemp3"
+        "label": "bmsbatteryavgtemp3",
+        "numeric": true
       },
       "bmsmaxsoc": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmsmaxsoc",
-        "label": "bmsmaxsoc"
+        "label": "bmsmaxsoc",
+        "numeric": true
       },
       "bmsminsoc": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmsminsoc",
-        "label": "bmsminsoc"
+        "label": "bmsminsoc",
+        "numeric": true
       },
       "parallelbatterynum": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "parallelbatterynum",
-        "label": "parallelbatterynum"
+        "label": "parallelbatterynum",
+        "numeric": true
       },
       "bmsderatereason": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmsderatereason",
-        "label": "bmsderatereason"
+        "label": "bmsderatereason",
+        "numeric": true
       },
       "bmsgaugefcc_ah": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmsgaugefcc_ah",
-        "label": "bmsgaugefcc_ah"
+        "label": "bmsgaugefcc_ah",
+        "numeric": true
       },
       "bmsgaugerm_ah": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmsgaugerm_ah",
-        "label": "bmsgaugerm_ah"
+        "label": "bmsgaugerm_ah",
+        "numeric": true
       },
       "bmserror": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmserror",
-        "label": "bmserror"
+        "label": "bmserror",
+        "numeric": true
       },
       "bmswarn": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmswarn",
-        "label": "bmswarn"
+        "label": "bmswarn",
+        "numeric": true
       },
       "bmsfault": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmsfault",
-        "label": "bmsfault"
+        "label": "bmsfault",
+        "numeric": true
       },
       "bmsfault2": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmsfault2",
-        "label": "bmsfault2"
+        "label": "bmsfault2",
+        "numeric": true
       },
       "reserved3206": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3206",
-        "label": "reserved3206"
+        "label": "reserved3206",
+        "numeric": true
       },
       "reserved3207": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3207",
-        "label": "reserved3207"
+        "label": "reserved3207",
+        "numeric": true
       },
       "reserved3208": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3208",
-        "label": "reserved3208"
+        "label": "reserved3208",
+        "numeric": true
       },
       "reserved3209": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3209",
-        "label": "reserved3209"
+        "label": "reserved3209",
+        "numeric": true
       },
       "batisostatus": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "batisostatus",
-        "label": "batisostatus"
+        "label": "batisostatus",
+        "numeric": true
       },
       "battneedchargerequestflag": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "battneedchargerequestflag",
-        "label": "battneedchargerequestflag"
+        "label": "battneedchargerequestflag",
+        "numeric": true
       },
       "bmsstatus": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmsstatus",
-        "label": "bmsstatus"
+        "label": "bmsstatus",
+        "numeric": true
       },
       "bmserror2": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmserror2",
-        "label": "bmserror2"
+        "label": "bmserror2",
+        "numeric": true
       },
       "bmswarn2": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmswarn2",
-        "label": "bmswarn2"
+        "label": "bmswarn2",
+        "numeric": true
       },
       "bmssoc": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmssoc",
-        "label": "bmssoc"
+        "label": "bmssoc",
+        "numeric": true
       },
       "bmsbatteryvolt": {
         "entity_category": "diagnostic",
@@ -4329,13 +4436,15 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmscyclecnt",
-        "label": "bmscyclecnt"
+        "label": "bmscyclecnt",
+        "numeric": true
       },
       "bmssoh": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmssoh",
-        "label": "bmssoh"
+        "label": "bmssoh",
+        "numeric": true
       },
       "bmschargevoltlimit": {
         "entity_category": "diagnostic",
@@ -4347,49 +4456,57 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmsdischargevoltlimit",
-        "label": "bmsdischargevoltlimit"
+        "label": "bmsdischargevoltlimit",
+        "numeric": true
       },
       "bmswarn3": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmswarn3",
-        "label": "bmswarn3"
+        "label": "bmswarn3",
+        "numeric": true
       },
       "bmserror3": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmserror3",
-        "label": "bmserror3"
+        "label": "bmserror3",
+        "numeric": true
       },
       "reserved3227": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3227",
-        "label": "reserved3227"
+        "label": "reserved3227",
+        "numeric": true
       },
       "reserved3228": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3228",
-        "label": "reserved3228"
+        "label": "reserved3228",
+        "numeric": true
       },
       "reserved3229": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3229",
-        "label": "reserved3229"
+        "label": "reserved3229",
+        "numeric": true
       },
       "bmssinglevoltmax": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmssinglevoltmax",
-        "label": "bmssinglevoltmax"
+        "label": "bmssinglevoltmax",
+        "numeric": true
       },
       "bmssinglevoltmin": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "bmssinglevoltmin",
-        "label": "bmssinglevoltmin"
+        "label": "bmssinglevoltmin",
+        "numeric": true
       },
       "batloadvolt": {
         "entity_category": "diagnostic",
@@ -4401,103 +4518,120 @@
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "reserved3233",
-        "label": "reserved3233"
+        "label": "reserved3233",
+        "numeric": true
       },
       "debugdata1": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata1",
-        "label": "debugdata1"
+        "label": "debugdata1",
+        "numeric": true
       },
       "debugdata2": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata2",
-        "label": "debugdata2"
+        "label": "debugdata2",
+        "numeric": true
       },
       "debugdata3": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata3",
-        "label": "debugdata3"
+        "label": "debugdata3",
+        "numeric": true
       },
       "debugdata4": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata4",
-        "label": "debugdata4"
+        "label": "debugdata4",
+        "numeric": true
       },
       "debugdata5": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata5",
-        "label": "debugdata5"
+        "label": "debugdata5",
+        "numeric": true
       },
       "debugdata6": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata6",
-        "label": "debugdata6"
+        "label": "debugdata6",
+        "numeric": true
       },
       "debugdata7": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata7",
-        "label": "debugdata7"
+        "label": "debugdata7",
+        "numeric": true
       },
       "debugdata8": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata8",
-        "label": "debugdata8"
+        "label": "debugdata8",
+        "numeric": true
       },
       "debugdata9": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata9",
-        "label": "debugdata9"
+        "label": "debugdata9",
+        "numeric": true
       },
       "debugdata10": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata10",
-        "label": "debugdata10"
+        "label": "debugdata10",
+        "numeric": true
       },
       "debugdata11": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata11",
-        "label": "debugdata11"
+        "label": "debugdata11",
+        "numeric": true
       },
       "debugdata12": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata12",
-        "label": "debugdata12"
+        "label": "debugdata12",
+        "numeric": true
       },
       "debugdata13": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata13",
-        "label": "debugdata13"
+        "label": "debugdata13",
+        "numeric": true
       },
       "debugdata14": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata14",
-        "label": "debugdata14"
+        "label": "debugdata14",
+        "numeric": true
       },
       "debugdata15": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata15",
-        "label": "debugdata15"
+        "label": "debugdata15",
+        "numeric": true
       },
       "debugdata16": {
         "entity_category": "diagnostic",
         "divisor": 1,
         "source": "debugdata16",
-        "label": "debugdata16"
+        "label": "debugdata16",
+        "numeric": true
       }
     },
     "verified_payload_lengths": [
@@ -5299,18 +5433,21 @@
       "group1start": {
         "divisor": 1,
         "source": "group1start",
-        "label": "group1start"
+        "label": "group1start",
+        "numeric": true
       },
       "group1end": {
         "divisor": 1,
         "source": "group1end",
-        "label": "group1end"
+        "label": "group1end",
+        "numeric": true
       },
       "pvstatus": {
         "divisor": 1,
         "source": "pvstatus",
         "label": "State",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "numeric": true
       },
       "pvpowerin": {
         "unit": "W",
@@ -5630,12 +5767,14 @@
       "deratingmode": {
         "divisor": 1,
         "source": "deratingmode",
-        "label": "deratingmode"
+        "label": "deratingmode",
+        "numeric": true
       },
       "iso": {
         "divisor": 1,
         "source": "iso",
-        "label": "iso"
+        "label": "iso",
+        "numeric": true
       },
       "dcir": {
         "divisor": 10,
@@ -5655,7 +5794,8 @@
       "gfci": {
         "divisor": 1,
         "source": "gfci",
-        "label": "gfci"
+        "label": "gfci",
+        "numeric": true
       },
       "pvtemperature": {
         "unit": "\u00b0C",
@@ -5701,12 +5841,14 @@
       "ipf": {
         "divisor": 1,
         "source": "ipf",
-        "label": "ipf"
+        "label": "ipf",
+        "numeric": true
       },
       "realoppercent": {
         "divisor": 1,
         "source": "realoppercent",
-        "label": "realoppercent"
+        "label": "realoppercent",
+        "numeric": true
       },
       "opfullwatt": {
         "divisor": 10,
@@ -5716,82 +5858,98 @@
       "standbyflag": {
         "divisor": 1,
         "source": "standbyflag",
-        "label": "standbyflag"
+        "label": "standbyflag",
+        "numeric": true
       },
       "faultcode": {
         "divisor": 1,
         "source": "faultcode",
-        "label": "faultcode"
+        "label": "faultcode",
+        "numeric": true
       },
       "warningcode": {
         "divisor": 1,
         "source": "warningcode",
-        "label": "warningcode"
+        "label": "warningcode",
+        "numeric": true
       },
       "systemfaultword0": {
         "divisor": 1,
         "source": "systemfaultword0",
-        "label": "systemfaultword0"
+        "label": "systemfaultword0",
+        "numeric": true
       },
       "systemfaultword1": {
         "divisor": 1,
         "source": "systemfaultword1",
-        "label": "System fault register 1"
+        "label": "System fault register 1",
+        "numeric": true
       },
       "systemfaultword2": {
         "divisor": 1,
         "source": "systemfaultword2",
-        "label": "System fault register 2"
+        "label": "System fault register 2",
+        "numeric": true
       },
       "systemfaultword3": {
         "divisor": 1,
         "source": "systemfaultword3",
-        "label": "System fault register 3"
+        "label": "System fault register 3",
+        "numeric": true
       },
       "systemfaultword4": {
         "divisor": 1,
         "source": "systemfaultword4",
-        "label": "System fault register 4"
+        "label": "System fault register 4",
+        "numeric": true
       },
       "systemfaultword5": {
         "divisor": 1,
         "source": "systemfaultword5",
-        "label": "System fault register 5"
+        "label": "System fault register 5",
+        "numeric": true
       },
       "systemfaultword6": {
         "divisor": 1,
         "source": "systemfaultword6",
-        "label": "System fault register 6"
+        "label": "System fault register 6",
+        "numeric": true
       },
       "systemfaultword7": {
         "divisor": 1,
         "source": "systemfaultword7",
-        "label": "System fault register 7"
+        "label": "System fault register 7",
+        "numeric": true
       },
       "invstartdelaytime": {
         "divisor": 1,
         "source": "invstartdelaytime",
-        "label": "invstartdelaytime"
+        "label": "invstartdelaytime",
+        "numeric": true
       },
       "bdconoffstate": {
         "divisor": 1,
         "source": "bdconoffstate",
-        "label": "bdconoffstate"
+        "label": "bdconoffstate",
+        "numeric": true
       },
       "drycontactstate": {
         "divisor": 1,
         "source": "drycontactstate",
-        "label": "drycontactstate"
+        "label": "drycontactstate",
+        "numeric": true
       },
       "group2start": {
         "divisor": 1,
         "source": "group2start",
-        "label": "group2start"
+        "label": "group2start",
+        "numeric": true
       },
       "group2end": {
         "divisor": 1,
         "source": "group2end",
-        "label": "group2end"
+        "label": "group2end",
+        "numeric": true
       },
       "edischrtoday": {
         "divisor": 10,
@@ -5826,7 +5984,8 @@
       "priority": {
         "divisor": 1,
         "source": "priority",
-        "label": "priority"
+        "label": "priority",
+        "numeric": true
       },
       "epsfac": {
         "divisor": 100,
@@ -5896,22 +6055,26 @@
       "dcv": {
         "divisor": 1,
         "source": "dcv",
-        "label": "dcv"
+        "label": "dcv",
+        "numeric": true
       },
       "bdc1_sysstatemode": {
         "divisor": 1,
         "source": "bdc1_sysstatemode",
-        "label": "bdc1_sysstatemode"
+        "label": "bdc1_sysstatemode",
+        "numeric": true
       },
       "bdc1_faultcode": {
         "divisor": 1,
         "source": "bdc1_faultcode",
-        "label": "bdc1_faultcode"
+        "label": "bdc1_faultcode",
+        "numeric": true
       },
       "bdc1_warncode": {
         "divisor": 1,
         "source": "bdc1_warncode",
-        "label": "bdc1_warncode"
+        "label": "bdc1_warncode",
+        "numeric": true
       },
       "bdc1_vbat": {
         "divisor": 100,
@@ -5926,7 +6089,8 @@
       "bdc1_soc": {
         "divisor": 1,
         "source": "bdc1_soc",
-        "label": "bdc1_soc"
+        "label": "bdc1_soc",
+        "numeric": true
       },
       "bdc1_vbus1": {
         "divisor": 10,
@@ -5981,22 +6145,26 @@
       "bdc1_flag": {
         "divisor": 1,
         "source": "bdc1_flag",
-        "label": "bdc1_flag"
+        "label": "bdc1_flag",
+        "numeric": true
       },
       "bdc2_sysstatemode": {
         "divisor": 1,
         "source": "bdc2_sysstatemode",
-        "label": "bdc2_sysstatemode"
+        "label": "bdc2_sysstatemode",
+        "numeric": true
       },
       "bdc2_faultcode": {
         "divisor": 1,
         "source": "bdc2_faultcode",
-        "label": "bdc2_faultcode"
+        "label": "bdc2_faultcode",
+        "numeric": true
       },
       "bdc2_warncode": {
         "divisor": 1,
         "source": "bdc2_warncode",
-        "label": "bdc2_warncode"
+        "label": "bdc2_warncode",
+        "numeric": true
       },
       "bdc2_vbat": {
         "divisor": 100,
@@ -6011,7 +6179,8 @@
       "bdc2_soc": {
         "divisor": 1,
         "source": "bdc2_soc",
-        "label": "bdc2_soc"
+        "label": "bdc2_soc",
+        "numeric": true
       },
       "bdc2_vbus1": {
         "divisor": 10,
@@ -6066,27 +6235,32 @@
       "bdc2_flag": {
         "divisor": 1,
         "source": "bdc2_flag",
-        "label": "bdc2_flag"
+        "label": "bdc2_flag",
+        "numeric": true
       },
       "bms_status": {
         "divisor": 1,
         "source": "bms_status",
-        "label": "bms_status"
+        "label": "bms_status",
+        "numeric": true
       },
       "bms_error": {
         "divisor": 1,
         "source": "bms_error",
-        "label": "bms_error"
+        "label": "bms_error",
+        "numeric": true
       },
       "bms_warninfo": {
         "divisor": 1,
         "source": "bms_warninfo",
-        "label": "bms_warninfo"
+        "label": "bms_warninfo",
+        "numeric": true
       },
       "bms_soc": {
         "divisor": 1,
         "source": "bms_soc",
-        "label": "bms_soc"
+        "label": "bms_soc",
+        "numeric": true
       },
       "bms_batteryvolt": {
         "divisor": 100,
@@ -6116,12 +6290,14 @@
       "bms_cyclecnt": {
         "divisor": 1,
         "source": "bms_cyclecnt",
-        "label": "bms_cyclecnt"
+        "label": "bms_cyclecnt",
+        "numeric": true
       },
       "bms_soh": {
         "divisor": 1,
         "source": "bms_soh",
-        "label": "bms_soh"
+        "label": "bms_soh",
+        "numeric": true
       },
       "bms_constantvolt": {
         "divisor": 100,
@@ -6131,32 +6307,38 @@
       "bms_bms_info": {
         "divisor": 1,
         "source": "bms_bms_info",
-        "label": "bms_bms_info"
+        "label": "bms_bms_info",
+        "numeric": true
       },
       "bms_packinfo": {
         "divisor": 1,
         "source": "bms_packinfo",
-        "label": "bms_packinfo"
+        "label": "bms_packinfo",
+        "numeric": true
       },
       "bms_usingcap": {
         "divisor": 1,
         "source": "bms_usingcap",
-        "label": "bms_usingcap"
+        "label": "bms_usingcap",
+        "numeric": true
       },
       "bms_fw": {
         "divisor": 1,
         "source": "bms_fw",
-        "label": "bms_fw"
+        "label": "bms_fw",
+        "numeric": true
       },
       "bms_mcuversion": {
         "divisor": 1,
         "source": "bms_mcuversion",
-        "label": "bms_mcuversion"
+        "label": "bms_mcuversion",
+        "numeric": true
       },
       "bms_commtype": {
         "divisor": 1,
         "source": "bms_commtype",
-        "label": "bms_commtype"
+        "label": "bms_commtype",
+        "numeric": true
       }
     },
     "verified_payload_lengths": [
@@ -6616,18 +6798,21 @@
       "recortype1": {
         "divisor": 1,
         "source": "recortype1",
-        "label": "recortype1"
+        "label": "recortype1",
+        "numeric": true
       },
       "recortype2": {
         "divisor": 1,
         "source": "recortype2",
-        "label": "recortype2"
+        "label": "recortype2",
+        "numeric": true
       },
       "pvstatus": {
         "divisor": 1,
         "source": "pvstatus",
         "label": "State",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "numeric": true
       },
       "pvpowerin": {
         "unit": "W",
@@ -6902,7 +7087,8 @@
       "deratingmode": {
         "divisor": 1,
         "source": "deratingmode",
-        "label": "deratingmode"
+        "label": "deratingmode",
+        "numeric": true
       },
       "eacharge_today": {
         "unit": "kWh",
@@ -6926,52 +7112,75 @@
         "divisor": 1,
         "source": "batterytype",
         "label": "Batteries type",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "choices": [
+          [
+            0,
+            "Lithium"
+          ],
+          [
+            "1",
+            "Lead-acid"
+          ],
+          [
+            "2",
+            "Other"
+          ]
+        ]
       },
       "uwsysworkmode": {
         "divisor": 1,
         "source": "uwsysworkmode",
-        "label": "uwsysworkmode"
+        "label": "uwsysworkmode",
+        "numeric": true
       },
       "systemfaultword0": {
         "divisor": 1,
         "source": "systemfaultword0",
-        "label": "systemfaultword0"
+        "label": "systemfaultword0",
+        "numeric": true
       },
       "systemfaultword1": {
         "divisor": 1,
         "source": "systemfaultword1",
-        "label": "System fault register 1"
+        "label": "System fault register 1",
+        "numeric": true
       },
       "systemfaultword2": {
         "divisor": 1,
         "source": "systemfaultword2",
-        "label": "System fault register 2"
+        "label": "System fault register 2",
+        "numeric": true
       },
       "systemfaultword3": {
         "divisor": 1,
         "source": "systemfaultword3",
-        "label": "System fault register 3"
+        "label": "System fault register 3",
+        "numeric": true
       },
       "systemfaultword4": {
         "divisor": 1,
         "source": "systemfaultword4",
-        "label": "System fault register 4"
+        "label": "System fault register 4",
+        "numeric": true
       },
       "systemfaultword5": {
         "divisor": 1,
         "source": "systemfaultword5",
-        "label": "System fault register 5"
+        "label": "System fault register 5",
+        "numeric": true
       },
       "systemfaultword6": {
         "divisor": 1,
         "source": "systemfaultword6",
-        "label": "System fault register 6"
+        "label": "System fault register 6",
+        "numeric": true
       },
       "systemfaultword7": {
         "divisor": 1,
         "source": "systemfaultword7",
-        "label": "System fault register 7"
+        "label": "System fault register 7",
+        "numeric": true
       },
       "pdischarge1": {
         "divisor": 10,
@@ -7002,7 +7211,8 @@
         "divisor": 1,
         "source": "SOC",
         "label": "Battery charge",
-        "icon": "mdi:battery-charging-60"
+        "icon": "mdi:battery-charging-60",
+        "numeric": true
       },
       "pactouserr": {
         "unit": "W",
@@ -7442,18 +7652,21 @@
       "recortype1": {
         "divisor": 1,
         "source": "recortype1",
-        "label": "recortype1"
+        "label": "recortype1",
+        "numeric": true
       },
       "recortype2": {
         "divisor": 1,
         "source": "recortype2",
-        "label": "recortype2"
+        "label": "recortype2",
+        "numeric": true
       },
       "pvstatus": {
         "divisor": 1,
         "source": "pvstatus",
         "label": "State",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "numeric": true
       },
       "pvpowerin": {
         "unit": "W",
@@ -7737,12 +7950,14 @@
       "pbusvolt": {
         "divisor": 1,
         "source": "pbusvolt",
-        "label": "pbusvolt"
+        "label": "pbusvolt",
+        "numeric": true
       },
       "nbusvolt": {
         "divisor": 1,
         "source": "nbusvolt",
-        "label": "nbusvolt"
+        "label": "nbusvolt",
+        "numeric": true
       }
     },
     "verified_payload_lengths": [
@@ -7946,18 +8161,21 @@
       "recortype1": {
         "divisor": 1,
         "source": "recortype1",
-        "label": "recortype1"
+        "label": "recortype1",
+        "numeric": true
       },
       "recortype2": {
         "divisor": 1,
         "source": "recortype2",
-        "label": "recortype2"
+        "label": "recortype2",
+        "numeric": true
       },
       "pvstatus": {
         "divisor": 1,
         "source": "pvstatus",
         "label": "State",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "numeric": true
       },
       "pvpowerin": {
         "unit": "W",
@@ -8655,18 +8873,21 @@
       "recortype1": {
         "divisor": 1,
         "source": "recortype1",
-        "label": "recortype1"
+        "label": "recortype1",
+        "numeric": true
       },
       "recortype2": {
         "divisor": 1,
         "source": "recortype2",
-        "label": "recortype2"
+        "label": "recortype2",
+        "numeric": true
       },
       "pvstatus": {
         "divisor": 1,
         "source": "pvstatus",
         "label": "State",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "numeric": true
       },
       "pvpowerin": {
         "unit": "W",
@@ -8941,7 +9162,8 @@
       "deratingmode": {
         "divisor": 1,
         "source": "deratingmode",
-        "label": "deratingmode"
+        "label": "deratingmode",
+        "numeric": true
       },
       "eacharge_today": {
         "unit": "kWh",
@@ -8965,52 +9187,75 @@
         "divisor": 1,
         "source": "batterytype",
         "label": "Batteries type",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "choices": [
+          [
+            0,
+            "Lithium"
+          ],
+          [
+            "1",
+            "Lead-acid"
+          ],
+          [
+            "2",
+            "Other"
+          ]
+        ]
       },
       "uwsysworkmode": {
         "divisor": 1,
         "source": "uwsysworkmode",
-        "label": "uwsysworkmode"
+        "label": "uwsysworkmode",
+        "numeric": true
       },
       "systemfaultword0": {
         "divisor": 1,
         "source": "systemfaultword0",
-        "label": "systemfaultword0"
+        "label": "systemfaultword0",
+        "numeric": true
       },
       "systemfaultword1": {
         "divisor": 1,
         "source": "systemfaultword1",
-        "label": "System fault register 1"
+        "label": "System fault register 1",
+        "numeric": true
       },
       "systemfaultword2": {
         "divisor": 1,
         "source": "systemfaultword2",
-        "label": "System fault register 2"
+        "label": "System fault register 2",
+        "numeric": true
       },
       "systemfaultword3": {
         "divisor": 1,
         "source": "systemfaultword3",
-        "label": "System fault register 3"
+        "label": "System fault register 3",
+        "numeric": true
       },
       "systemfaultword4": {
         "divisor": 1,
         "source": "systemfaultword4",
-        "label": "System fault register 4"
+        "label": "System fault register 4",
+        "numeric": true
       },
       "systemfaultword5": {
         "divisor": 1,
         "source": "systemfaultword5",
-        "label": "System fault register 5"
+        "label": "System fault register 5",
+        "numeric": true
       },
       "systemfaultword6": {
         "divisor": 1,
         "source": "systemfaultword6",
-        "label": "System fault register 6"
+        "label": "System fault register 6",
+        "numeric": true
       },
       "systemfaultword7": {
         "divisor": 1,
         "source": "systemfaultword7",
-        "label": "System fault register 7"
+        "label": "System fault register 7",
+        "numeric": true
       },
       "pdischarge1": {
         "divisor": 10,
@@ -9041,7 +9286,8 @@
         "divisor": 1,
         "source": "SOC",
         "label": "Battery charge",
-        "icon": "mdi:battery-charging-60"
+        "icon": "mdi:battery-charging-60",
+        "numeric": true
       },
       "pactouserr": {
         "unit": "W",
@@ -9553,18 +9799,21 @@
       "recortype1": {
         "divisor": 1,
         "source": "recortype1",
-        "label": "recortype1"
+        "label": "recortype1",
+        "numeric": true
       },
       "recortype2": {
         "divisor": 1,
         "source": "recortype2",
-        "label": "recortype2"
+        "label": "recortype2",
+        "numeric": true
       },
       "pvstatus": {
         "divisor": 1,
         "source": "pvstatus",
         "label": "State",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "numeric": true
       },
       "vpv1": {
         "unit": "V",
@@ -9656,7 +9905,8 @@
       "batterySoc": {
         "divisor": 1,
         "source": "batterySoc",
-        "label": "batterySoc"
+        "label": "batterySoc",
+        "numeric": true
       },
       "bus_volt": {
         "divisor": 10,
@@ -9739,27 +9989,32 @@
       "faultBit": {
         "divisor": 1,
         "source": "faultBit",
-        "label": "faultBit"
+        "label": "faultBit",
+        "numeric": true
       },
       "warningBit": {
         "divisor": 1,
         "source": "warningBit",
-        "label": "warningBit"
+        "label": "warningBit",
+        "numeric": true
       },
       "faultValue": {
         "divisor": 1,
         "source": "faultValue",
-        "label": "faultValue"
+        "label": "faultValue",
+        "numeric": true
       },
       "warningValue": {
         "divisor": 1,
         "source": "warningValue",
-        "label": "warningValue"
+        "label": "warningValue",
+        "numeric": true
       },
       "constantPowerOK": {
         "divisor": 1,
         "source": "constantPowerOK",
-        "label": "constantPowerOK"
+        "label": "constantPowerOK",
+        "numeric": true
       },
       "epv1tod": {
         "divisor": 10,
@@ -9876,7 +10131,8 @@
       "invfanspeed": {
         "divisor": 1,
         "source": "invfanspeed",
-        "label": "invfanspeed"
+        "label": "invfanspeed",
+        "numeric": true
       }
     }
   },
@@ -10179,18 +10435,21 @@
       "recortype1": {
         "divisor": 1,
         "source": "recortype1",
-        "label": "recortype1"
+        "label": "recortype1",
+        "numeric": true
       },
       "recortype2": {
         "divisor": 1,
         "source": "recortype2",
-        "label": "recortype2"
+        "label": "recortype2",
+        "numeric": true
       },
       "pvstatus": {
         "divisor": 1,
         "source": "pvstatus",
         "label": "State",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "numeric": true
       },
       "vpv1": {
         "unit": "V",
@@ -10282,7 +10541,8 @@
       "batterySoc": {
         "divisor": 1,
         "source": "batterySoc",
-        "label": "batterySoc"
+        "label": "batterySoc",
+        "numeric": true
       },
       "bus_volt": {
         "divisor": 10,
@@ -10365,27 +10625,32 @@
       "faultBit": {
         "divisor": 1,
         "source": "faultBit",
-        "label": "faultBit"
+        "label": "faultBit",
+        "numeric": true
       },
       "warningBit": {
         "divisor": 1,
         "source": "warningBit",
-        "label": "warningBit"
+        "label": "warningBit",
+        "numeric": true
       },
       "faultValue": {
         "divisor": 1,
         "source": "faultValue",
-        "label": "faultValue"
+        "label": "faultValue",
+        "numeric": true
       },
       "warningValue": {
         "divisor": 1,
         "source": "warningValue",
-        "label": "warningValue"
+        "label": "warningValue",
+        "numeric": true
       },
       "constantPowerOK": {
         "divisor": 1,
         "source": "constantPowerOK",
-        "label": "constantPowerOK"
+        "label": "constantPowerOK",
+        "numeric": true
       },
       "epvtoday": {
         "unit": "kWh",
@@ -10477,7 +10742,8 @@
       "invfanspeed": {
         "divisor": 1,
         "source": "invfanspeed",
-        "label": "invfanspeed"
+        "label": "invfanspeed",
+        "numeric": true
       },
       "eopDischrToday": {
         "divisor": 10,
@@ -11195,63 +11461,75 @@
       "group1start": {
         "divisor": 1,
         "source": "group1start",
-        "label": "group1start"
+        "label": "group1start",
+        "numeric": true
       },
       "group1end": {
         "divisor": 1,
         "source": "group1end",
-        "label": "group1end"
+        "label": "group1end",
+        "numeric": true
       },
       "pvstatus": {
         "divisor": 1,
         "source": "pvstatus",
         "label": "State",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "numeric": true
       },
       "uwsysworkmode": {
         "divisor": 1,
         "source": "uwsysworkmode",
-        "label": "uwsysworkmode"
+        "label": "uwsysworkmode",
+        "numeric": true
       },
       "systemfaultword0": {
         "divisor": 1,
         "source": "systemfaultword0",
-        "label": "systemfaultword0"
+        "label": "systemfaultword0",
+        "numeric": true
       },
       "systemfaultword1": {
         "divisor": 1,
         "source": "systemfaultword1",
-        "label": "System fault register 1"
+        "label": "System fault register 1",
+        "numeric": true
       },
       "systemfaultword2": {
         "divisor": 1,
         "source": "systemfaultword2",
-        "label": "System fault register 2"
+        "label": "System fault register 2",
+        "numeric": true
       },
       "systemfaultword3": {
         "divisor": 1,
         "source": "systemfaultword3",
-        "label": "System fault register 3"
+        "label": "System fault register 3",
+        "numeric": true
       },
       "systemfaultword4": {
         "divisor": 1,
         "source": "systemfaultword4",
-        "label": "System fault register 4"
+        "label": "System fault register 4",
+        "numeric": true
       },
       "systemfaultword5": {
         "divisor": 1,
         "source": "systemfaultword5",
-        "label": "System fault register 5"
+        "label": "System fault register 5",
+        "numeric": true
       },
       "systemfaultword6": {
         "divisor": 1,
         "source": "systemfaultword6",
-        "label": "System fault register 6"
+        "label": "System fault register 6",
+        "numeric": true
       },
       "systemfaultword7": {
         "divisor": 1,
         "source": "systemfaultword7",
-        "label": "System fault register 7"
+        "label": "System fault register 7",
+        "numeric": true
       },
       "pdischarge1": {
         "divisor": 10,
@@ -11278,7 +11556,8 @@
         "divisor": 1,
         "source": "SOC",
         "label": "Battery charge",
-        "icon": "mdi:battery-charging-60"
+        "icon": "mdi:battery-charging-60",
+        "numeric": true
       },
       "pactouserr": {
         "unit": "W",
@@ -11528,7 +11807,8 @@
       "loadpercent": {
         "divisor": 1,
         "source": "loadpercent",
-        "label": "loadpercent"
+        "label": "loadpercent",
+        "numeric": true
       },
       "pf": {
         "divisor": 10,
@@ -11538,27 +11818,32 @@
       "bmsstatusold": {
         "divisor": 1,
         "source": "bmsstatusold",
-        "label": "bmsstatusold"
+        "label": "bmsstatusold",
+        "numeric": true
       },
       "bmsstatus": {
         "divisor": 1,
         "source": "bmsstatus",
-        "label": "bmsstatus"
+        "label": "bmsstatus",
+        "numeric": true
       },
       "bmserrorold": {
         "divisor": 1,
         "source": "bmserrorold",
-        "label": "bmserrorold"
+        "label": "bmserrorold",
+        "numeric": true
       },
       "bmserror": {
         "divisor": 1,
         "source": "bmserror",
-        "label": "bmserror"
+        "label": "bmserror",
+        "numeric": true
       },
       "bmssoc": {
         "divisor": 1,
         "source": "bmssoc",
-        "label": "bmssoc"
+        "label": "bmssoc",
+        "numeric": true
       },
       "bmsbatteryvolt": {
         "divisor": 100,
@@ -11583,32 +11868,38 @@
       "bmsgaugerm": {
         "divisor": 1,
         "source": "bmsgaugerm",
-        "label": "bmsgaugerm"
+        "label": "bmsgaugerm",
+        "numeric": true
       },
       "bmsgaugefcc": {
         "divisor": 1,
         "source": "bmsgaugefcc",
-        "label": "bmsgaugefcc"
+        "label": "bmsgaugefcc",
+        "numeric": true
       },
       "bmsfw": {
         "divisor": 1,
         "source": "bmsfw",
-        "label": "bmsfw"
+        "label": "bmsfw",
+        "numeric": true
       },
       "bmsdeltavolt": {
         "divisor": 1,
         "source": "bmsdeltavolt",
-        "label": "bmsdeltavolt"
+        "label": "bmsdeltavolt",
+        "numeric": true
       },
       "bmscyclecnt": {
         "divisor": 1,
         "source": "bmscyclecnt",
-        "label": "bmscyclecnt"
+        "label": "bmscyclecnt",
+        "numeric": true
       },
       "bmssoh": {
         "divisor": 1,
         "source": "bmssoh",
-        "label": "bmssoh"
+        "label": "bmssoh",
+        "numeric": true
       },
       "bmsconstantvolt": {
         "divisor": 100,
@@ -11618,17 +11909,20 @@
       "bmswarninfoold": {
         "divisor": 1,
         "source": "bmswarninfoold",
-        "label": "bmswarninfoold"
+        "label": "bmswarninfoold",
+        "numeric": true
       },
       "bmswarninfo": {
         "divisor": 1,
         "source": "bmswarninfo",
-        "label": "bmswarninfo"
+        "label": "bmswarninfo",
+        "numeric": true
       },
       "bmsgaugeiccurr": {
         "divisor": 1,
         "source": "bmsgaugeiccurr",
-        "label": "bmsgaugeiccurr"
+        "label": "bmsgaugeiccurr",
+        "numeric": true
       },
       "bmsmcuversion": {
         "divisor": 100,
@@ -11638,32 +11932,38 @@
       "bmsgaugeversion": {
         "divisor": 1,
         "source": "bmsgaugeversion",
-        "label": "bmsgaugeversion"
+        "label": "bmsgaugeversion",
+        "numeric": true
       },
       "bmswgaugefrversionl": {
         "divisor": 1,
         "source": "bmswgaugefrversionl",
-        "label": "bmswgaugefrversionl"
+        "label": "bmswgaugefrversionl",
+        "numeric": true
       },
       "bmswgaugefrversionh": {
         "divisor": 1,
         "source": "bmswgaugefrversionh",
-        "label": "bmswgaugefrversionh"
+        "label": "bmswgaugefrversionh",
+        "numeric": true
       },
       "bmsbmsinfo": {
         "divisor": 1,
         "source": "bmsbmsinfo",
-        "label": "bmsbmsinfo"
+        "label": "bmsbmsinfo",
+        "numeric": true
       },
       "bmspackinfo": {
         "divisor": 1,
         "source": "bmspackinfo",
-        "label": "bmspackinfo"
+        "label": "bmspackinfo",
+        "numeric": true
       },
       "bmsusingcap": {
         "divisor": 1,
         "source": "bmsusingcap",
-        "label": "bmsusingcap"
+        "label": "bmsusingcap",
+        "numeric": true
       },
       "bmscell1volt": {
         "divisor": 100,
@@ -11753,22 +12053,26 @@
       "group2start": {
         "divisor": 1,
         "source": "group2start",
-        "label": "group2start"
+        "label": "group2start",
+        "numeric": true
       },
       "group2end": {
         "divisor": 1,
         "source": "group2end",
-        "label": "group2end"
+        "label": "group2end",
+        "numeric": true
       },
       "acchargeenergytoday": {
         "divisor": 1,
         "source": "acchargeenergytoday",
-        "label": "acchargeenergytoday"
+        "label": "acchargeenergytoday",
+        "numeric": true
       },
       "acchargeenergytotal": {
         "divisor": 1,
         "source": "acchargeenergytotal",
-        "label": "acchargeenergytotal"
+        "label": "acchargeenergytotal",
+        "numeric": true
       },
       "acchargepower": {
         "divisor": 10,
@@ -11808,17 +12112,20 @@
       "group3start": {
         "divisor": 1,
         "source": "group3start",
-        "label": "group3start"
+        "label": "group3start",
+        "numeric": true
       },
       "group3end": {
         "divisor": 1,
         "source": "group3end",
-        "label": "group3end"
+        "label": "group3end",
+        "numeric": true
       },
       "inverterstatus": {
         "divisor": 1,
         "source": "inverterstatus",
-        "label": "inverterstatus"
+        "label": "inverterstatus",
+        "numeric": true
       },
       "pacs": {
         "divisor": 10,
@@ -11898,12 +12205,14 @@
       "remotectrlen": {
         "divisor": 1,
         "source": "remotectrlen",
-        "label": "remotectrlen"
+        "label": "remotectrlen",
+        "numeric": true
       },
       "remotectrlpower": {
         "divisor": 1,
         "source": "remotectrlpower",
-        "label": "remotectrlpower"
+        "label": "remotectrlpower",
+        "numeric": true
       },
       "eacchargetoday": {
         "divisor": 10,
@@ -11918,18 +12227,34 @@
       "priority": {
         "divisor": 1,
         "source": "priority",
-        "label": "priority"
+        "label": "priority",
+        "numeric": true
       },
       "batterytype": {
         "divisor": 1,
         "source": "batterytype",
         "label": "Batteries type",
-        "icon": "mdi:power-settings"
+        "icon": "mdi:power-settings",
+        "choices": [
+          [
+            0,
+            "Lithium"
+          ],
+          [
+            "1",
+            "Lead-acid"
+          ],
+          [
+            "2",
+            "Other"
+          ]
+        ]
       },
       "autoproofreadcmd": {
         "divisor": 1,
         "source": "autoproofreadcmd",
-        "label": "autoproofreadcmd"
+        "label": "autoproofreadcmd",
+        "numeric": true
       }
     }
   },

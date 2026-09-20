@@ -4,7 +4,7 @@ HA Growatt reads Growatt datalogger traffic and publishes inverter and meter
 readings. It can forward the connection to Growatt, run as a local datalogger
 server, or listen passively to traffic on a Linux network interface.
 
-Version 0.1.0 includes Docker images and a Home Assistant app. Follow the
+Version 0.1.1 includes Docker images and a Home Assistant app. Follow the
 [migration instructions](docs/installation.md) when replacing an existing
 service so its configuration and sensor history are retained.
 

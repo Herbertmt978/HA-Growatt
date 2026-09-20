@@ -140,3 +140,57 @@ def test_full_mod_discovery_exposes_actual_ac_power_without_changing_its_scale()
         .render(value_json={"pac": 12500, "pvpowerout": 999})
         == "99.9"
     )
+
+
+@pytest.mark.parametrize(
+    "case",
+    json.loads((Path(__file__).parent / "fixtures/discovery_renderings.json").read_text()),
+    ids=lambda case: f"{case['profile']}-{case['include_all']}",
+)
+def test_observed_sensor_strings_preserve_unitless_numbers(case):
+    fixtures = Path(__file__).parent / "fixtures"
+    packets = []
+    for name in ("telemetry_cases.json", "extra_telemetry_cases.json", "csv_meter_cases.json"):
+        packets.extend(json.loads((fixtures / name).read_text()))
+    packet = next(
+        packet
+        for packet in packets
+        if packet.get("profile", "meter-log-6") == case["profile"]
+        and (case["profile"] == "meter-log-6" or packet["include_all"] == case["include_all"])
+    )
+    configs = discovery_messages(
+        "INVERT0001", wire_profile=case["profile"], profile="all", include_all=case["include_all"]
+    )
+    for key, expected in case["expected"].items():
+        config = configs[f"homeassistant/sensor/grott/INVERT0001_{key}/config"]
+        actual = (
+            Environment()
+            .from_string(config["value_template"])
+            .render(value_json=packet["expected"])
+        )
+        assert actual == expected, key
+
+
+@pytest.mark.parametrize("state", [0, 1, 2])
+def test_standard_state_keeps_decimal_string(state):
+    config = discovery_messages("INVERT0001")[
+        "homeassistant/sensor/grott/INVERT0001_pvstatus/config"
+    ]
+    assert Environment().from_string(config["value_template"]).render(
+        value_json={"pvstatus": state}
+    ) == str(float(state))
+
+
+@pytest.mark.parametrize(
+    "case", json.loads((Path(__file__).parent / "fixtures/battery_labels.json").read_text())
+)
+def test_battery_type_preserves_observed_labels_and_value_types(case):
+    config = discovery_messages("INVERT0001", profile="all", wire_profile=case["profile"])[
+        "homeassistant/sensor/grott/INVERT0001_batterytype/config"
+    ]
+    assert (
+        Environment()
+        .from_string(config["value_template"])
+        .render(value_json={"batterytype": case["value"]})
+        == case["expected"]
+    )

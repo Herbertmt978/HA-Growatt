@@ -1,5 +1,5 @@
 name: HA Growatt
-version: 0.1.0
+version: 0.1.1
 slug: ha_growatt
 description: Growatt readings through MQTT with Home Assistant discovery
 url: https://github.com/Herbertmt978/HA-Growatt

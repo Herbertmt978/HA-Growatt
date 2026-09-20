@@ -33,6 +33,9 @@ Compatibility evidence is treated separately from implementation source:
 - Server command and acknowledgement fixtures record loopback observations for
   protocols 2, 5 and 6. Optional output fixtures record synthetic MQTT, PVOutput,
   InfluxDB, CSV and HTTP results. No production account is used by those tests.
+- Rendered sensor strings and battery-label cases are recorded from synthetic
+  values. The discovery generator uses observed number-format flags and label
+  mappings; the fixtures contain outputs, not predecessor templates.
 - Tests for transport, register envelopes, discovery and delivery were written
   for the new implementation. Passing them does not prove untested modes or
   hardware compatibility.

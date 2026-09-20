@@ -24,13 +24,15 @@ class Sensor:
     source: str | None = None
     entity_category: str | None = None
     icon: str | None = None
+    numeric: bool = False
+    choices: tuple[tuple[int | str, str], ...] | None = None
 
 
 def _standard_sensors() -> tuple[Sensor, ...]:
     result = [
         Sensor("datalogserial", "Datalogger serial"),
         Sensor("pvserial", "Serial"),
-        Sensor("pvstatus", "State"),
+        Sensor("pvstatus", "State", numeric=True),
         Sensor("pvpowerin", "PV Input (Actual)", 10, "W", "power", "measurement"),
     ]
     for index in (1, 2):
@@ -133,9 +135,20 @@ def discovery_messages(
     result = {}
     for sensor in sensors:
         template = "{{ value_json[" + json.dumps(sensor.source or sensor.key) + "]"
-        if sensor.divisor != 1:
+        if sensor.numeric or sensor.divisor != 1:
             template += f" | float / {sensor.divisor}"
         template += " }}"
+        if sensor.choices:
+            choices = ", ".join(
+                json.dumps(value) + ": " + json.dumps(label) for value, label in sensor.choices
+            )
+            template = (
+                "{{ {"
+                + choices
+                + "}.get(value_json["
+                + json.dumps(sensor.source or sensor.key)
+                + '], "Unknown") }}'
+            )
         aliases = {
             "pvpowerout": 'value_json.get("pac", value_json.get("pvpowerout") '
             'if "pvfrequentie" in value_json else none)',
