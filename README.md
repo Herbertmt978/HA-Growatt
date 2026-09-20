@@ -30,6 +30,30 @@ See [configuration](docs/configuration.md), [installation](docs/installation.md)
 and the [compatibility record](docs/compatibility.md). The compatibility record
 describes the behaviour checked and the limits of physical hardware testing.
 
+## Cloud fallback and Home Assistant controls
+
+These additions are in development and are not part of the 0.1.1 release.
+
+In proxy mode, HA Growatt can answer the datalogger locally when Growatt is
+unreachable or stops replying. Readings continue to reach Home Assistant. That
+connection stays local; the next datalogger connection tries Growatt again.
+ShinePhone does not receive readings while the connection is local.
+
+Additional Home Assistant entities show whether readings are arriving, whether
+the current connection uses the cloud or local fallback, and decoding and
+delivery diagnostics. Existing measurement sensors keep their identifiers and
+their last readings overnight.
+
+Supported inverter families also get an output power limit. SPH/SPA families
+get documented battery-first charging and grid-first discharge settings. Each
+setting must respond to a read before it becomes available. Writes are checked
+by reading the setting back; a missing reply is not treated as success.
+Refresh settings and Sync datalogger time buttons are included.
+
+See [the feature guide](docs/home-assistant-features.md) for supported settings,
+options and testing limits. These additions use the existing app and MQTT
+integration.
+
 ## Run from Python
 
 Python 3.12 or later is required. From a checkout with

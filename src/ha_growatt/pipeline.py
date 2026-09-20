@@ -34,9 +34,11 @@ class Pipeline:
         self.failures = 0
         self.dropped = 0
         self._extension = None
+        self.ha = None
+        self.features = None
         options = settings.runtime
         if options.home_assistant:
-            ha = ha_publisher(settings.mqtt)
+            ha = self.ha = ha_publisher(settings.mqtt)
             self._publishers.append(ha)
 
             async def home_assistant(reading):
@@ -92,7 +94,19 @@ class Pipeline:
 
             self._outputs["extension"] = custom
 
+    def bind_transport(self, transport) -> None:
+        if self.ha is not None and self.settings.runtime.ha_features:
+            from .ha_features import HomeAssistantFeatures
+            from .relay import Relay
+
+            if isinstance(transport, Relay):
+                self.features = HomeAssistantFeatures(
+                    self.ha, transport, self, controls=self.settings.runtime.ha_controls
+                )
+
     def start(self) -> None:
+        if self.features:
+            self.features.start()
         for publisher in self._publishers:
             publisher.start()
         for name, output in self._outputs.items():
@@ -136,6 +150,8 @@ class Pipeline:
         if len(frame.to_bytes()) < self.settings.runtime.minimum_record_bytes:
             return
         telemetry = self.decoder.decode(frame)
+        if self.features and not telemetry.buffered and frame.function in {4, 80}:
+            self.features.remember(telemetry)
         _LOG.debug(
             "Decoded %s fields using %s; incomplete fields=%s",
             len(telemetry.values),
@@ -151,6 +167,8 @@ class Pipeline:
             queue.put_nowait(reading)
 
     async def close(self) -> None:
+        if self.features:
+            await self.features.close()
         try:
             async with asyncio.timeout(10):
                 await asyncio.gather(*(queue.join() for queue in self._queues.values()))

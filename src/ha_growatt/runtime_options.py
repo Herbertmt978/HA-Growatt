@@ -10,6 +10,8 @@ from .outputs import InfluxSettings, PublicationPolicy, PVOutputSettings, RawMqt
 class RuntimeOptions:
     mode: str = "proxy"
     home_assistant: bool = True
+    ha_features: bool = True
+    ha_controls: bool = True
     policy: PublicationPolicy = PublicationPolicy("server", False)
     raw_mqtt: RawMqttSettings | None = None
     pvoutput: PVOutputSettings | None = None
@@ -31,6 +33,8 @@ class RuntimeOptions:
     decrypt: bool = True
 
     def __post_init__(self) -> None:
+        if type(self.ha_features) is not bool or type(self.ha_controls) is not bool:
+            raise ValueError("Home Assistant feature switches must be booleans")
         if self.mode not in {"proxy", "sniff", "server"}:
             raise ValueError("Mode must be proxy, sniff or server")
         if type(self.minimum_record_bytes) is not int or self.minimum_record_bytes < 8:

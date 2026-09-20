@@ -66,6 +66,8 @@ class Publisher:
         self._pending_cleanup: dict[str, set[str]] = {}
         self._publish_lock = asyncio.Lock()
         self._started = False
+        self.command_callback = None
+        self._feature_status = False
         self._client.on_connect = self._on_connect
         self._client.on_disconnect = self._on_disconnect
         self._client.on_message = self._on_message
@@ -84,6 +86,12 @@ class Publisher:
             self._generation += 1
         self._connected.set()
         client.subscribe("homeassistant/status", qos=1)
+        if self.command_callback is not None:
+            client.subscribe("ha_growatt/+/command/+", qos=0)
+        if self._feature_status:
+            client.publish(
+                "ha_growatt/service/status", '{"online":true,"connections":[]}', qos=1, retain=True
+            )
 
     def _on_disconnect(self, client, userdata, flags, reason_code, properties) -> None:
         self._connected.clear()
@@ -92,11 +100,23 @@ class Publisher:
         if message.topic == "homeassistant/status" and message.payload == b"online":
             with self._lock:
                 self._generation += 1
+        elif self.command_callback is not None:
+            self.command_callback(message)
+
+    @property
+    def generation(self) -> int:
+        with self._lock:
+            return self._generation
 
     def start(self) -> None:
         if self._started:
             raise RuntimeError("MQTT publisher is already running")
         self._started = True
+        self._feature_status = self.command_callback is not None
+        if self._feature_status:
+            self._client.will_set(
+                "ha_growatt/service/status", '{"online":false,"connections":[]}', qos=1, retain=True
+            )
         self._client.connect_async(self.settings.host, self.settings.port, keepalive=60)
         self._client.loop_start()
 
@@ -161,6 +181,13 @@ class Publisher:
             await self._send(state_topic(identity), payload, self.settings.retain_state)
 
     async def close(self) -> None:
+        if self._feature_status and self._connected.is_set():
+            try:
+                await self._send(
+                    "ha_growatt/service/status", '{"online":false,"connections":[]}', True
+                )
+            except (ConnectionError, TimeoutError):
+                pass
         self._client.disconnect()
         await asyncio.to_thread(self._client.loop_stop)
         self._connected.clear()

@@ -1,5 +1,9 @@
 # Configuration
 
+Cloud fallback and additional Home Assistant status/control options are described
+in the [feature guide](home-assistant-features.md). They are available in proxy
+mode and preserve the existing telemetry interfaces.
+
 `ha-growatt run --config PATH` reads an INI file, a Home Assistant `options.json`
 file or a TOML file. INI settings cover all service and output modes. The TOML
 format covers the Home Assistant service; use INI for the optional destinations.
