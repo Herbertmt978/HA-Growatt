@@ -18,7 +18,7 @@ An unlisted model is unverified, not necessarily unsupported. Start with
 | --- | --- | --- |
 | [MIN 2500TL-XH and one unidentified inverter](#verified-installation) | Verified installation | HA Growatt 0.3.2 |
 | [SPA3000TL BL](#spa3000tl-bl) | Community report — mixed results | FezVrasta/growatt-datalogger, reports through 0.10.0 |
-| [MID 25KTL3-XH](#mid25ktl3-xh) | Community report — different connection | 0xAHA/Growatt_ModbusTCP |
+| [MID 25KTL3-XH](#mid25ktl3-xh) | Community report — different connection | 0xAHA/Growatt_ModbusTCP, field reports on 1.3.0 through 1.5.1 |
 | [MIN TL-XH](#min-tl-xh) | Documented — hardware verification needed | Growatt protocol documentation; HA Growatt protocol tests |
 | [SPH with session-key encrypted Shine traffic](#encrypted-shine) | Known limitation | FezVrasta/growatt-datalogger and Grott field report |
 | [5500MTL-S](#5500mtl-s) | Community report — unresolved controls | johanmeijer/grott |
@@ -79,21 +79,21 @@ An unlisted model is unverified, not necessarily unsupported. Start with
 
 **Evidence:** Community report — different connection
 
-**Software or source project:** 0xAHA/Growatt_ModbusTCP
+**Software or source project:** 0xAHA/Growatt_ModbusTCP, field reports on 1.3.0 through 1.5.1
 
-**Firmware:** Exact firmware not qualified here; reported protocol 2.02
+**Firmware:** DN1.0; reported protocol 2.02
 
-**Datalogger:** Modbus gateway, not HA Growatt's datalogger proxy
+**Datalogger:** Waveshare RS485 TO ETH (B) gateway; separate ShineWiFi used for cloud uploads
 
 **Connection:** Direct Modbus TCP/RTU
 
 **Readings:** Model-specific register evidence; not a HA Growatt telemetry test.
 
-**Controls:** Reporter confirmed battery charge limit at 3048 and discharge reserve at 3067; SPH register writes were rejected.
+**Controls:** Reporter measured charging stopping at register 3048 target and discharge changing at register 3067 under Load Priority, on DN1.0. Changes took roughly two minutes. SPH registers 1071/1091 did not control this device.
 
 **Profile guidance:** MOD/MID TL3-XH experimental controls, only after confirming the exact model and successful reads.
 
-**Limits:** Direct Modbus success does not establish support through a Shine datalogger. HA Growatt does not provide a direct Modbus client.
+**Limits:** Direct Modbus results do not establish support through a Shine datalogger. HA Growatt has no direct Modbus client. Raising the reported discharge threshold above current charge also caused charging on this firmware; do not assume it only stops discharge.
 
 - [MID hardware measurements](https://github.com/0xAHA/Growatt_ModbusTCP/issues/362)
 

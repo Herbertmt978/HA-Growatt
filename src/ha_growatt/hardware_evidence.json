@@ -51,15 +51,15 @@
     {
       "id": "mid25ktl3-xh",
       "model": "MID 25KTL3-XH",
-      "firmware": "Exact firmware not qualified here; reported protocol 2.02",
-      "datalogger": "Modbus gateway, not HA Growatt's datalogger proxy",
+      "firmware": "DN1.0; reported protocol 2.02",
+      "datalogger": "Waveshare RS485 TO ETH (B) gateway; separate ShineWiFi used for cloud uploads",
       "connection": "Direct Modbus TCP/RTU",
-      "project": "0xAHA/Growatt_ModbusTCP",
+      "project": "0xAHA/Growatt_ModbusTCP, field reports on 1.3.0 through 1.5.1",
       "level": "Community report — different connection",
       "telemetry": "Model-specific register evidence; not a HA Growatt telemetry test.",
-      "controls": "Reporter confirmed battery charge limit at 3048 and discharge reserve at 3067; SPH register writes were rejected.",
+      "controls": "Reporter measured charging stopping at register 3048 target and discharge changing at register 3067 under Load Priority, on DN1.0. Changes took roughly two minutes. SPH registers 1071/1091 did not control this device.",
       "profile": "MOD/MID TL3-XH experimental controls, only after confirming the exact model and successful reads.",
-      "limits": "Direct Modbus success does not establish support through a Shine datalogger. HA Growatt does not provide a direct Modbus client.",
+      "limits": "Direct Modbus results do not establish support through a Shine datalogger. HA Growatt has no direct Modbus client. Raising the reported discharge threshold above current charge also caused charging on this firmware; do not assume it only stops discharge.",
       "sources": [
         {
           "label": "MID hardware measurements",
