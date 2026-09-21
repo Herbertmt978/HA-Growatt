@@ -1,3 +1,21 @@
+# 0.4.0
+
+The app now includes a setup guide for the broker, datalogger connection, first
+readings, inverter profiles and Home Assistant entities. It checks the published
+TCP port and waits for fresh readings from every expected inverter. Saved
+readings after a restart do not complete setup, and changing a reading profile
+requires a new reading and another review.
+
+Browse the hardware catalogue in the app or the compatibility matrix in the
+repository. Both distinguish checks on our installation from community reports
+and protocol documentation. A hardware report form makes it easier to share
+results from other installations.
+
+Existing MQTT identities and history are preserved. Experimental battery controls stay
+off by default; the matrix does not qualify additional
+models or firmware for control. Update the app to use the new guide. The HACS
+companion has no behaviour changes in this release.
+
 # 0.3.2
 
 Keep status messages running when an inverter setting disappears during a

@@ -1,5 +1,6 @@
 include LICENSE README.md uv.lock
 include docs/compatibility.md docs/protocol.md docs/provenance.md
+include docs/guided-setup.md docs/hardware-matrix.md
 include examples/ha-growatt.toml
 recursive-include tests *.py *.json
 recursive-include custom_components *.py *.json *.yaml

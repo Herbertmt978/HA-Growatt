@@ -350,7 +350,19 @@ async def main():
                         redacted = await response.text()
                         assert IDENTITY not in redacted and "QUALIFY002" not in redacted
                     async with client.get(f"http://127.0.0.1:{port}/") as response:
-                        assert "History and Energy" in await response.text()
+                        html = await response.text()
+                        assert "History and Energy" in html and "Set up HA Growatt" in html
+                    async with client.get(f"http://127.0.0.1:{port}/api/status") as response:
+                        installation = (await response.json())["installation"]
+                        assert installation["broker"] and installation["discovery"]
+                        assert installation["fresh_inverters"] >= 2
+                        assert installation["all_seen_inverters_fresh"]
+                    async with client.get(f"http://127.0.0.1:{port}/api/installation") as response:
+                        assert await response.json() == {"host_port": None}
+                    async with client.get(f"http://127.0.0.1:{port}/api/compatibility") as response:
+                        catalogue = await response.json()
+                        assert catalogue["entries"] and catalogue["notice"]
+                report["native_guided_installation_checks"] = "passed"
                 report["native_ingress_routes_and_redaction"] = "passed"
             finally:
                 await page.close()
@@ -477,6 +489,10 @@ async def quiet_restart(hass, mqtt):
             )
             assert hass.states.get(control).state == "unavailable"
             assert relay.stats.device_frames == 0
+            setup = SupportServer(pipeline, relay, None).status()["installation"]
+            assert setup["inverters_seen"] >= 2
+            assert setup["fresh_inverters"] == 0
+            assert not setup["all_seen_inverters_fresh"]
             original_ids = json.loads((CONFIG / "feature-identities.json").read_text())
             assert all(ids[key] == value for key, value in original_ids.items())
             entry = hass.config_entries.async_entries("mqtt")[0]
@@ -502,6 +518,7 @@ async def quiet_restart(hass, mqtt):
         "original_timestamp_restored": "passed",
         "stale_controls_unavailable": "passed",
         "history_preserved_without_new_telemetry": "passed",
+        "guided_setup_waits_for_fresh_readings_after_restart": "passed",
     }
     (CONFIG / "quiet-result.json").write_text(json.dumps(report))
     print(json.dumps(report), flush=True)

@@ -50,3 +50,13 @@ The app icon depicts a solar inverter and uses the
 [Growatt wordmark](https://en.growatt.com/) to identify the supported hardware.
 The Growatt name and wordmark belong to Growatt. HA Growatt is an independent
 project.
+
+The guided installation follows useful patterns reviewed in
+[FezVrasta's configuration flow](https://github.com/FezVrasta/growatt-datalogger/blob/main/custom_components/growatt_datalogger/config_flow.py):
+discover devices before offering individual profiles, preserve existing options
+and check connection readiness. Hardware evidence also uses the model-specific
+reporting approach in [Growatt ModbusTCP](https://github.com/0xAHA/Growatt_ModbusTCP).
+These projects provide a head start on behaviour and evidence, rather than code
+to import into the app's different transport and web UI. No upstream implementation
+was copied for this feature. The matrix links each external report and records
+its connection and qualification limits.

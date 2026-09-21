@@ -1,0 +1,128 @@
+{
+  "checked": "2026-09-21",
+  "notice": "Results apply only to the hardware, firmware, connection and software listed. Reports from another project do not verify HA Growatt. A successful read does not prove a control works.",
+  "entries": [
+    {
+      "id": "verified-installation",
+      "model": "MIN 2500TL-XH and one unidentified inverter",
+      "firmware": "GH1.0 and AL1.0 observed across the pair; model-to-feed mapping unconfirmed",
+      "datalogger": "Model and firmware unconfirmed",
+      "connection": "Growatt datalogger TCP proxy",
+      "project": "HA Growatt 0.3.2",
+      "level": "Verified installation",
+      "telemetry": "Fresh readings, cloud forwarding, MQTT discovery, restart and history preservation verified.",
+      "controls": "Not physically qualified; no battery qualification.",
+      "profile": "Retain the installation's working Automatic selection.",
+      "limits": "The owner identified one inverter as a MIN 2500TL-XH on 21 September 2026. The two feeds jointly preserve 64 measurement entities. Exact model-to-feed mapping, second model and datalogger variants remain unconfirmed. No battery control was physically qualified.",
+      "sources": [
+        {
+          "label": "HA Growatt compatibility checks",
+          "url": "https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/compatibility.md"
+        },
+        {
+          "label": "Verified 0.3.2 release",
+          "url": "https://github.com/Herbertmt978/HA-Growatt/releases/tag/v0.3.2"
+        }
+      ]
+    },
+    {
+      "id": "spa3000tl-bl",
+      "model": "SPA3000TL BL",
+      "firmware": "Not qualified here",
+      "datalogger": "Shine datalogger; exact variant not qualified here",
+      "connection": "Growatt datalogger TCP",
+      "project": "FezVrasta/growatt-datalogger, reports through 0.10.0",
+      "level": "Community report — mixed results",
+      "telemetry": "Settings readback reported; this AC-coupled storage model has no direct PV input.",
+      "controls": "ShinePhone-to-HA refresh confirmed by reporter. HA writes had confirmation problems; 0.10.0 adds a fix, with no later reporter confirmation in the checked thread.",
+      "profile": "SPA readings; SPA battery controls only with experimental controls enabled.",
+      "limits": "Not tested with HA Growatt. A closed issue is not physical confirmation of the final fix.",
+      "sources": [
+        {
+          "label": "SPA control field report",
+          "url": "https://github.com/FezVrasta/growatt-datalogger/issues/2"
+        },
+        {
+          "label": "SPA solar-data discussion",
+          "url": "https://github.com/FezVrasta/growatt-datalogger/issues/5"
+        }
+      ]
+    },
+    {
+      "id": "mid25ktl3-xh",
+      "model": "MID 25KTL3-XH",
+      "firmware": "DN1.0; reported protocol 2.02",
+      "datalogger": "Waveshare RS485 TO ETH (B) gateway; separate ShineWiFi used for cloud uploads",
+      "connection": "Direct Modbus TCP/RTU",
+      "project": "0xAHA/Growatt_ModbusTCP, field reports on 1.3.0 through 1.5.1",
+      "level": "Community report — different connection",
+      "telemetry": "Model-specific register evidence; not a HA Growatt telemetry test.",
+      "controls": "Reporter measured charging stopping at register 3048 target and discharge changing at register 3067 under Load Priority, on DN1.0. Changes took roughly two minutes. SPH registers 1071/1091 did not control this device.",
+      "profile": "MOD/MID TL3-XH experimental controls, only after confirming the exact model and successful reads.",
+      "limits": "Direct Modbus results do not establish support through a Shine datalogger. HA Growatt has no direct Modbus client. Raising the reported discharge threshold above current charge also caused charging on this firmware; do not assume it only stops discharge.",
+      "sources": [
+        {
+          "label": "MID hardware measurements",
+          "url": "https://github.com/0xAHA/Growatt_ModbusTCP/issues/362"
+        }
+      ]
+    },
+    {
+      "id": "min-tl-xh",
+      "model": "MIN TL-XH",
+      "firmware": "Not hardware-qualified",
+      "datalogger": "Not hardware-qualified",
+      "connection": "Documented Modbus registers",
+      "project": "Growatt protocol documentation; HA Growatt protocol tests",
+      "level": "Documented — hardware verification needed",
+      "telemetry": "MIN protocol-6 layout implemented; this does not qualify every MIN model.",
+      "controls": "Charge power 3047, charge limit 3048 and grid charging 3049 are implemented as experimental controls.",
+      "profile": "MIN readings; MIN TL-XH battery controls only for matching hardware.",
+      "limits": "No SPH schedules. Reads, write confirmation and physical battery behaviour require separate verification.",
+      "sources": [
+        {
+          "label": "Control register evidence",
+          "url": "https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/hardware-support.md"
+        }
+      ]
+    },
+    {
+      "id": "encrypted-shine",
+      "model": "SPH with session-key encrypted Shine traffic",
+      "firmware": "Exact affected versions not established",
+      "datalogger": "ShineWiFi; session-key handshake reported",
+      "connection": "Encrypted datalogger TCP",
+      "project": "FezVrasta/growatt-datalogger and Grott field report",
+      "level": "Known limitation",
+      "telemetry": "Session-key encrypted telemetry is unsupported by HA Growatt.",
+      "controls": "Not available without a supported decoded connection.",
+      "profile": "No profile change decrypts this traffic.",
+      "limits": "Do not assume every ShineWiFi or every newer firmware is affected. Identify the actual protocol from diagnostics.",
+      "sources": [
+        {
+          "label": "Open encrypted-session report",
+          "url": "https://github.com/FezVrasta/growatt-datalogger/issues/3"
+        }
+      ]
+    },
+    {
+      "id": "5500mtl-s",
+      "model": "5500MTL-S",
+      "firmware": "Not qualified here",
+      "datalogger": "Not qualified here",
+      "connection": "Grott register access report",
+      "project": "johanmeijer/grott",
+      "level": "Community report — unresolved controls",
+      "telemetry": "This report does not qualify HA Growatt telemetry.",
+      "controls": "Register read/write failures reported. Do not infer control support from a telemetry connection.",
+      "profile": "Keep controls unavailable unless their initial reads succeed.",
+      "limits": "Not physically tested with HA Growatt.",
+      "sources": [
+        {
+          "label": "Older inverter register report",
+          "url": "https://github.com/johanmeijer/grott/issues/721"
+        }
+      ]
+    }
+  ]
+}
