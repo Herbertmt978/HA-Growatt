@@ -9,7 +9,7 @@ COPY src ./src
 RUN python -m pip wheel --no-cache-dir --no-build-isolation --no-deps --wheel-dir /wheels .
 
 FROM ${PYTHON_IMAGE} AS runtime
-ARG VERSION=0.3.0
+ARG VERSION=0.3.2
 ARG REVISION=development
 LABEL org.opencontainers.image.title="HA Growatt" \
       org.opencontainers.image.description="Growatt telemetry and local device services" \

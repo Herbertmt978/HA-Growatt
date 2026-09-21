@@ -4,7 +4,7 @@ HA Growatt reads Growatt datalogger traffic and publishes inverter and meter
 readings. It can forward the connection to Growatt, run as a local datalogger
 server, or listen passively to traffic on a Linux network interface.
 
-Version 0.3.0 includes Docker images and a Home Assistant app. Follow the
+Version 0.3.2 includes Docker images and a Home Assistant app. Follow the
 [migration instructions](docs/installation.md) when replacing an existing
 service so its configuration and sensor history are retained.
 
@@ -65,8 +65,9 @@ repository to HACS as an Integration, download it, restart Home Assistant and ad
 HA Growatt under Devices & services. Keep the app running: the companion uses
 its MQTT status and creates no duplicate measurement sensors.
 
-Companion version 0.3.1 adds the inverter icon to Devices & services. The app
-and standalone service remain at version 0.3.0.
+Version 0.3.2 keeps status publishing running when settings disappear during a
+refresh. The companion ignores missing status overnight and during the sunrise
+grace period, while still reporting an explicit app-offline message.
 
 Experimental battery schedules and additional model controls are disabled by
 default. The [hardware evidence](docs/hardware-support.md) separates manufacturer

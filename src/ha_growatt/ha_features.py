@@ -310,6 +310,10 @@ class HomeAssistantFeatures:
             self._topics[device.identity] = set(configs)
             self._announced[device.identity] = fingerprint
         connection = self.transport.connection(device.identity)
+        # A refresh can remove settings while MQTT publication awaits a reply.
+        # Keep the advertised keys and their values together for this update.
+        values = dict(device.values)
+        schedules = dict(device.schedules)
         state = {
             "connected": asyncio.get_running_loop().time() - device.last_seen < 900,
             "socket_connected": connection != "disconnected",
@@ -321,17 +325,17 @@ class HomeAssistantFeatures:
             "fallbacks": self.transport.stats.fallback_connections,
             "output_failures": self.pipeline.failures,
             "command_result": device.command_result,
-            "settings": sorted(device.values),
-            "schedules": sorted(device.schedules),
+            "settings": sorted(values),
+            "schedules": sorted(schedules),
             "rejected_commands": self.rejected_commands,
             "schema": 1,
         }
         await self.publisher._send(f"ha_growatt/{device.identity}/status", json.dumps(state), False)
-        for key, value in device.values.items():
+        for key, value in values.items():
             await self.publisher._send(
                 f"ha_growatt/{device.identity}/settings/{key}", str(value), False
             )
-        for key, period in device.schedules.items():
+        for key, period in schedules.items():
             await self.publisher._send(
                 f"ha_growatt/{device.identity}/period/{key}", json.dumps(asdict(period)), False
             )

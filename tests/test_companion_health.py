@@ -40,6 +40,27 @@ def test_offline_service_is_separate_even_at_night():
     assert set(check(service_seen=None)) == {"service_offline"}
 
 
+def test_missing_status_waits_for_daylight_and_sunrise_grace():
+    for status in ({}, {"online": True}):
+        for seen in (None, NOW - timedelta(hours=8)):
+            assert not check(daylight=False, service=status, service_seen=seen)
+            assert not check(sunrise=NOW - timedelta(minutes=29), service=status, service_seen=seen)
+            assert set(
+                check(sunrise=NOW - timedelta(minutes=30), service=status, service_seen=seen)
+            ) == {"service_offline"}
+    assert set(check(service={"online": False}, sunrise=NOW - timedelta(minutes=5))) == {
+        "service_offline"
+    }
+
+
+def test_missing_status_recovers_and_still_warns_when_feed_alerts_are_disabled():
+    assert set(check(options=OPTIONS | {"daylight_alerts": False}, service_seen=None)) == {
+        "service_offline"
+    }
+    assert not check(daylight=False, service_seen=NOW)
+    assert set(check(service_seen=NOW)) == {"feed_SYNTHETIC"}
+
+
 def test_bad_future_and_missing_timestamps_are_never_fresh():
     for stamp in (
         "not a date",

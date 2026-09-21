@@ -253,8 +253,10 @@ uses HA's configured location and Sun integration, waits two minutes after its
 own startup and, by default, thirty minutes after sunrise. The default stale
 threshold is fifteen minutes. Change these under the companion's options.
 Fresh readings clear feed warnings; night-time silence does not raise them.
-App/broker failures are reported separately, including at night. Existing sensor
-values and their original timestamps are preserved throughout.
+Missing app status also waits until daylight and the sunrise grace period.
+An explicit app-offline message still raises a warning at night. Existing sensor
+values and their original timestamps are preserved throughout. The app sends
+its heartbeat even when no inverter is reporting.
 
 Buffered readings never overwrite current sensors. With `buffered_events`
 enabled in the app and companion, they produce `ha_growatt_buffered_record` events

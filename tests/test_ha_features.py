@@ -2,9 +2,12 @@ import asyncio
 import json
 from types import SimpleNamespace
 
+import pytest
+
 from ha_growatt.diagnostics import ObservationStats
 from ha_growatt.discovery import discovery_messages
 from ha_growatt.ha_features import Device, HomeAssistantFeatures, feature_discovery
+from ha_growatt.schedules import Period
 from ha_growatt.telemetry import Telemetry
 
 
@@ -162,5 +165,51 @@ def test_feature_state_has_no_raw_packets_addresses_or_credentials():
             "rejected_commands",
             "schema",
         }
+
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("refresh_during", ["settings/output_limit", "period/charge_1"])
+def test_status_publication_survives_settings_disappearing(refresh_during):
+    async def scenario():
+        service = features()
+        service.experimental = True
+        service.models["INVERT0001"] = "sph"
+        service.remember(packet("sph-6"))
+        device = service.devices["INVERT0001"]
+        device.values["output_limit"] = 100
+        device.schedules["charge_1"] = Period("01:00", "02:00", True)
+
+        async def disconnected(*args, **kwargs):
+            raise ConnectionError("The inverter stopped replying")
+
+        service.transport.command = disconnected
+        send = service.publisher._send
+        refreshed = False
+
+        async def refresh_while_sending(topic, payload, retain):
+            nonlocal refreshed
+            if not refreshed and topic.endswith("/" + refresh_during):
+                refreshed = True
+                await service.refresh(device)
+            await send(topic, payload, retain)
+
+        service.publisher._send = refresh_while_sending
+        await service.publish_status(device)
+        assert refreshed and not device.values and not device.schedules
+        first = {
+            topic: json.loads(payload)
+            for topic, payload, _ in service.publisher.messages
+            if topic.startswith("ha_growatt/")
+        }
+        assert first["ha_growatt/INVERT0001/status"]["settings"] == ["output_limit"]
+        assert first["ha_growatt/INVERT0001/status"]["schedules"] == ["charge_1"]
+        assert first["ha_growatt/INVERT0001/settings/output_limit"] == 100
+        assert first["ha_growatt/INVERT0001/period/charge_1"]["start"] == "01:00"
+        service.publisher.messages.clear()
+        await service.publish_status(device)
+        assert len(service.publisher.messages) == 1
+        state = json.loads(service.publisher.messages[0][1])
+        assert state["settings"] == state["schedules"] == []
 
     asyncio.run(scenario())

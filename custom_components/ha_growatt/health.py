@@ -6,19 +6,18 @@ from datetime import datetime, timedelta
 def issues(now, started, daylight, sunrise, service, service_seen, devices, options):
     if now - started < timedelta(minutes=2):
         return {}
-    if (
-        not service.get("online")
-        or service_seen is None
-        or now - service_seen > timedelta(seconds=60)
-    ):
+    if service.get("online") is False:
         return {"service_offline": ("service_offline", {})}
+    daylight_ready = daylight and not (
+        sunrise and now - sunrise < timedelta(minutes=options["sunrise_grace_minutes"])
+    )
+    if service_seen is None or now - service_seen > timedelta(seconds=60):
+        return {"service_offline": ("service_offline", {})} if daylight_ready else {}
     result = {}
     counters = service.get("observations", {})
     if counters.get("failed_measurements", 0) and not counters.get("measurements", 0):
         result["decode_failed"] = ("decode_failed", {})
-    if not options["daylight_alerts"] or not daylight:
-        return result
-    if sunrise and now - sunrise < timedelta(minutes=options["sunrise_grace_minutes"]):
+    if not options["daylight_alerts"] or not daylight_ready:
         return result
     for identity, data in devices.items():
         try:

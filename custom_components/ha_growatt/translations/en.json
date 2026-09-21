@@ -10,11 +10,11 @@
   },
   "options": {"step": {"init": {
     "title": "HA Growatt alerts and events",
-    "description": "Night-time silence does not raise a feed warning. A stopped app or broker is reported separately. Existing readings remain unchanged.",
+    "description": "Missing readings or app status wait until daylight and the sunrise grace period. An explicit app-offline message is reported at any time. Existing readings remain unchanged.",
     "data": {"daylight_alerts": "Warn about silent feeds during daylight", "stale_minutes": "Minutes without a fresh reading", "sunrise_grace_minutes": "Minutes to wait after sunrise", "buffered_events": "Fire events for buffered readings"}
   }}},
   "issues": {
-    "service_offline": {"title": "HA Growatt is not reporting its status", "description": "Check that the HA Growatt app and MQTT broker are running. The companion has not received a current app status. Saved readings remain visible and may be old. This warning clears when status messages resume."},
+    "service_offline": {"title": "HA Growatt is not reporting its status", "description": "Check that the HA Growatt app and MQTT broker are running. The app has reported that it is offline, or its status is missing during daylight after the sunrise grace period. Missing status alone does not raise a warning overnight. Saved readings remain visible and may be old. This warning clears when current status messages resume."},
     "decode_failed": {"title": "HA Growatt cannot decode the incoming measurements", "description": "Open the app and check the inverter's reading profile. Download diagnostics and a support capture if the model is not recognised. New session-key encrypted dataloggers need additional protocol support; changing profiles does not decrypt them."},
     "feed_stale": {"title": "A Growatt inverter is silent during daylight", "description": "Inverter {inverter} has sent no fresh reading for at least {minutes} minutes. Check its power, datalogger connection and selected reading profile. Normal overnight silence is excluded, with a grace period after sunrise. The warning clears when fresh readings arrive or night begins."}
   }

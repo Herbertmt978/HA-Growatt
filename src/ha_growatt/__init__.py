@@ -1,3 +1,3 @@
 """HA Growatt: local inverter telemetry."""
 
-__version__ = "0.3.0"
+__version__ = "0.3.2"

@@ -1,3 +1,10 @@
+# 0.3.2
+
+Keep status messages running when an inverter setting disappears during a
+refresh. The companion now waits until daylight and the sunrise grace period
+before warning about missing status. Explicit app-offline messages still warn
+at any time. Existing readings, entity identifiers and history are preserved.
+
 # 0.3.0
 
 Cloud forwarding recovers automatically after a successful protocol health check.
