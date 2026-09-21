@@ -37,7 +37,7 @@ ha-growatt = "ha_growatt.__main__:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-ha_growatt = ["wire_profiles.json", "web/*.html", "web/*.js", "web/*.css"]
+ha_growatt = ["wire_profiles.json", "hardware_evidence.json", "web/*.html", "web/*.js", "web/*.css"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

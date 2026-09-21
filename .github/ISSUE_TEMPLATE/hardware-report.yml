@@ -1,0 +1,66 @@
+name: Hardware compatibility result
+description: Record working telemetry or a limitation on an exact hardware combination.
+title: "[Hardware] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report what you have already observed. No inverter setting change is needed.
+        Leave unknown details as unknown. Do not include serial numbers, passwords,
+        network addresses, raw packets or unredacted logs.
+  - type: input
+    id: model
+    attributes:
+      label: Exact inverter model
+      description: Use the model printed on the inverter label.
+    validations:
+      required: true
+  - type: input
+    id: firmware
+    attributes:
+      label: Inverter firmware
+  - type: input
+    id: datalogger
+    attributes:
+      label: Datalogger model and firmware
+      description: For example ShineLAN-X, ShineWiFi-X or unknown. Exclude serial numbers.
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Connection used
+      options:
+        - HA Growatt datalogger proxy
+        - HA Growatt standalone server
+        - HA Growatt passive sniffer
+        - Another project's direct Modbus connection
+        - Another connection (explain below)
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: App, companion and Home Assistant versions
+      description: If testing another project, give its name and version instead.
+    validations:
+      required: true
+  - type: input
+    id: profiles
+    attributes:
+      label: Reading and control profiles
+  - type: textarea
+    id: telemetry
+    attributes:
+      label: Readings and connection results
+      description: Fresh power/energy readings, units, comparison source, cloud forwarding, overnight restart and any failures. Separate checks actually performed from assumptions.
+    validations:
+      required: true
+  - type: textarea
+    id: controls
+    attributes:
+      label: Controls, if already tested
+      description: Give the setting, initial read, write acknowledgement, readback and observed physical result separately. Otherwise write not tested. Do not enable experimental controls to complete this form.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and limitations
+      description: Attach redacted diagnostics from the app or link the relevant public report. Check attachments for private data. State unknowns and any unsupported behaviour.

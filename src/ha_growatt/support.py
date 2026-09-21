@@ -10,6 +10,7 @@ from importlib.resources import files
 
 from . import __version__
 from .discovery import validate_identity
+from .installation import compatibility_catalogue, installation_checks, mapped_port
 from .migration import migration_preview
 
 
@@ -43,8 +44,8 @@ class SupportServer:
             )
         if not stats.device_frames:
             warnings.append(
-                "Waiting for the first datalogger packet. Check its destination IP and port 5279; "
-                "it may be asleep overnight."
+                "Waiting for the first datalogger packet. "
+                "Check its destination IP and published TCP port; it may be asleep overnight."
             )
         elif not features or not any(item.readings for item in features.devices.values()):
             warnings.append(
@@ -99,7 +100,7 @@ class SupportServer:
                     ),
                 }
             )
-        return {
+        result = {
             "version": __version__,
             "listener": self.transport.running,
             "mqtt_connected": connected,
@@ -114,18 +115,37 @@ class SupportServer:
             "devices": devices,
             "warnings": warnings,
         }
+        if not redacted:
+            result["installation"] = installation_checks(
+                result,
+                discovery_enabled=self.pipeline.settings.runtime.home_assistant,
+                features_enabled=self.pipeline.settings.runtime.ha_features,
+            )
+        return result
 
     async def dispatch(self, method, path, headers, body):
         if method == "GET" and path == "/favicon.ico":
             return 204, "image/x-icon", b""
-        if method == "GET" and path in {"/", "/app.js", "/style.css"}:
+        if method == "GET" and path in {"/", "/app.js", "/setup.js", "/style.css"}:
             name = "index.html" if path == "/" else path[1:]
             content_type = {
                 "index.html": "text/html",
                 "app.js": "text/javascript",
+                "setup.js": "text/javascript",
                 "style.css": "text/css",
             }[name]
             return 200, content_type, files("ha_growatt").joinpath("web", name).read_bytes()
+        if method == "GET" and path == "/api/compatibility":
+            return 200, "application/json", json.dumps(compatibility_catalogue()).encode()
+        if method == "GET" and path == "/api/installation":
+            port = None
+            if self.supervisor:
+                try:
+                    info = await asyncio.to_thread(self.supervisor.request, "/addons/self/info")
+                    port = mapped_port(info, self.pipeline.settings.relay.listen_port)
+                except (ConnectionError, KeyError, TypeError):
+                    pass
+            return 200, "application/json", json.dumps({"host_port": port}).encode()
         if method == "GET" and path == "/api/status":
             return 200, "application/json", json.dumps(self.status()).encode()
         if method == "GET" and path == "/api/diagnostics":

@@ -1,5 +1,12 @@
 # Using the app
 
+Open the web UI and follow **Set up HA Growatt** for broker, datalogger, fresh
+readings, profile and history checks. Install and start the MQTT broker before
+starting the app. The [installation guide](https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/guided-setup.md)
+covers these prerequisites. Search **Hardware compatibility** in the web UI or
+read the [published matrix](https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/hardware-matrix.md)
+to check the evidence for a model and connection.
+
 With Mosquitto installed, leave credentials empty and keep `mqtt_auto` enabled
 to use Home Assistant's MQTT service. Existing explicit broker settings are
 preserved. For another broker, turn `mqtt_auto` off and enter its host, port,

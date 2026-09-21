@@ -8,6 +8,10 @@ Version 0.3.2 includes Docker images and a Home Assistant app. Follow the
 [migration instructions](docs/installation.md) when replacing an existing
 service so its configuration and sensor history are retained.
 
+New users can follow the [guided installation](docs/guided-setup.md) in the app's
+web UI. The [hardware matrix](docs/hardware-matrix.md) separates checks on our
+installation from documentation and results reported in other projects.
+
 Home Assistant discovery keeps existing device and sensor identifiers, units
 and statistics settings. The standard profile exposes 32 sensors for the
 generic and MOD layouts. Full discovery includes the other decoded fields.

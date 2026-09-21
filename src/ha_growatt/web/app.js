@@ -70,6 +70,7 @@ async function refresh(renderForms = true) {
   refreshing = true;
   try {
   const data = await api("api/status");
+  renderInstallation(data);
   $("checks").replaceChildren();
   for (const [label, value] of [
     ["Datalogger listener", data.listener ? "Listening" : "Stopped"],
@@ -198,6 +199,9 @@ async function refresh(renderForms = true) {
     );
   if ([...$("schedule-device").options].some((o) => o.value === previous))
     $("schedule-device").value = previous;
+  } catch (error) {
+    installationUnavailable();
+    throw error;
   } finally {
     refreshing = false;
   }

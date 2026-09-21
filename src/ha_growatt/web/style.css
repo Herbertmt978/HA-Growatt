@@ -154,6 +154,28 @@ footer {
   color: var(--muted);
   font-size: 0.85rem;
 }
+.setup-nav, .setup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+.setup-nav button {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.setup-nav button[aria-current="step"] {
+  border: 2px solid var(--accent);
+  font-weight: 700;
+}
+#setup-panel { border-block: 1px solid var(--line); padding: 12px 0; }
+.setup-review { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
+.setup-review input { min-width: 22px; }
+.hardware-result { border-top: 1px solid var(--line); padding-block: 16px; }
+.hardware-result summary { cursor: pointer; line-height: 1.6; min-height: 44px; }
+.hardware-result dt { font-weight: 700; margin-top: 12px; }
+.hardware-result dd { margin: 4px 0; line-height: 1.6; }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #101713;

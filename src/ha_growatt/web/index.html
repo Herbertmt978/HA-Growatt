@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>HA Growatt</title>
     <link rel="stylesheet" href="style.css" />
+    <script src="setup.js" defer></script>
     <script src="app.js" defer></script>
   </head>
   <body>
@@ -15,6 +16,29 @@
         <p>Readings, connection checks and inverter settings.</p>
       </header>
       <p id="message" role="status" aria-live="polite"></p>
+      <section aria-labelledby="setup-title">
+        <h2 id="setup-title">Set up HA Growatt</h2>
+        <p>This guide checks the connection and helps you find the right settings.
+          It does not change your datalogger, enable controls or move sensor history.</p>
+        <div class="fields">
+          <label>Installation<select id="setup-kind">
+            <option value="new">New installation</option>
+            <option value="migration">Replacing an existing service</option>
+          </select></label>
+          <label>Number of inverters<input id="setup-count" type="number" min="1" max="100" value="1" required /></label>
+        </div>
+        <nav id="setup-nav" class="setup-nav" aria-label="Installation steps"></nav>
+        <div id="setup-panel">
+          <h3 id="setup-step-title" tabindex="-1"></h3>
+          <div id="setup-instructions"></div>
+          <ul id="setup-checks" aria-live="polite"></ul>
+        </div>
+        <div class="setup-actions">
+          <button id="setup-back" type="button">Back</button>
+          <button id="setup-next" type="button">Next</button>
+        </div>
+        <p id="setup-summary" role="status">Waiting for connection checks.</p>
+      </section>
       <section aria-labelledby="connection-title">
         <h2 id="connection-title">Connection checks</h2>
         <div id="checks" class="checks"></div>
@@ -91,6 +115,18 @@
             <tbody></tbody>
           </table>
         </div>
+      </section>
+      <section aria-labelledby="hardware-title">
+        <h2 id="hardware-title">Hardware compatibility</h2>
+        <p id="hardware-notice">Loading the evidence catalogue.</p>
+        <div class="fields">
+          <label>Find a model, firmware or datalogger<input id="hardware-search" type="search" /></label>
+          <label>Evidence<select id="hardware-level"><option value="">All evidence</option></select></label>
+        </div>
+        <p id="hardware-count" role="status"></p>
+        <div id="hardware-results"></div>
+        <p><a href="https://github.com/Herbertmt978/HA-Growatt/issues/new?template=hardware-report.yml" target="_blank" rel="noreferrer">Share a hardware result</a>
+          · <a href="https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/hardware-matrix.md" target="_blank" rel="noreferrer">Read the published matrix</a></p>
       </section>
       <section aria-labelledby="support-title">
         <h2 id="support-title">Help with a problem</h2>
