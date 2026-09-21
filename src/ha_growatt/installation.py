@@ -12,7 +12,10 @@ def compatibility_catalogue():
 
 def installation_checks(status, *, discovery_enabled=True, features_enabled=True):
     devices = status["devices"]
-    fresh = sum(d["readings"] > 0 and d["recent"] and not d["restored"] for d in devices)
+    fresh = sum(
+        d["readings"] > 0 and d["recent"] and not d["restored"] and d["profile"] != "pending"
+        for d in devices
+    )
     return {
         "listener": bool(status["listener"]),
         "broker": bool(status["mqtt_connected"]),

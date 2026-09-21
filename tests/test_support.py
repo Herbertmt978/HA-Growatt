@@ -247,6 +247,41 @@ def test_hardware_edit_preserves_profile_cache_and_unknown_details():
     asyncio.run(scenario())
 
 
+def test_setup_waits_for_a_reading_under_the_changed_profile():
+    class Client(Supervisor):
+        def __init__(self):
+            self.options = {}
+
+        def request(self, path, data=None):
+            if data:
+                self.options = data["options"]
+            return {"options": self.options}
+
+    async def scenario():
+        server = support()
+        server.supervisor = Client()
+        assert server.status()["installation"]["all_seen_inverters_fresh"] is True
+        code, _, _ = await server.dispatch(
+            "POST",
+            "/api/profiles",
+            {"x-ha-growatt": "1", "content-type": "application/json"},
+            json.dumps({"serial": "PRIVATE001", "family": "sph", "controls": "auto"}).encode(),
+        )
+        assert code == 200
+        pending = server.status()
+        assert pending["devices"][0]["readings"] == 1
+        assert pending["devices"][0]["recent"] is True
+        assert pending["devices"][0]["profile"] == "pending"
+        assert pending["installation"]["fresh_inverters"] == 0
+        assert pending["installation"]["all_seen_inverters_fresh"] is False
+        server.pipeline.features.remember(
+            Telemetry({"pvserial": "PRIVATE001", "pvpowerout": 4567}, None, "sph-6")
+        )
+        assert server.status()["installation"]["all_seen_inverters_fresh"] is True
+
+    asyncio.run(scenario())
+
+
 def test_firmware_read_preserves_the_global_reading_profile():
     class Client(Supervisor):
         def __init__(self):

@@ -109,7 +109,7 @@ function updateSetupChecks() {
       : "Setup still has checks to complete. You can visit every step while waiting for readings.";
 }
 function renderInstallation(status) {
-  const devices = JSON.stringify(status.devices.map(({identity, family, controls}) => ({identity, family, controls})));
+  const devices = JSON.stringify(status.devices.map(({identity, family, controls, profile}) => ({identity, family, controls, profile})));
   if (setupDevices !== null && devices !== setupDevices) {
     setupReviewed.profiles = false;
     setupReviewed.entities = false;

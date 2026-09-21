@@ -31,7 +31,7 @@ from ha_growatt.installation import compatibility_catalogue, installation_checks
 )
 def test_first_readings_need_every_device_fresh(devices, fresh, all_fresh):
     status = {
-        "devices": devices,
+        "devices": [dict(device, profile="mod-6") for device in devices],
         "listener": True,
         "mqtt_connected": False,
         "transport": {"device_frames": 3},
