@@ -60,3 +60,13 @@ These projects provide a head start on behaviour and evidence, rather than code
 to import into the app's different transport and web UI. No upstream implementation
 was copied for this feature. The matrix links each external report and records
 its connection and qualification limits.
+
+The direct Modbus polling profiles were written for HA Growatt from Growatt's
+[Protocol II V1.24](https://www.amosplanet.org/wp-content/uploads/2023/06/Growatt-Inverter-Modbus-RTU-Protocol_II-V1_24-English.pdf)
+and [PV V3.14](https://www.amosplanet.org/wp-content/uploads/2023/07/Growatt-PV-Inverter-Modbus-RS485-RTU-Protocol-V3-14.pdf)
+input-register tables. They reuse this project's existing read-only Modbus TCP
+scanner and do not contain code from another integration. The separation
+between MIC and MIN layouts matters: the same register number can mean a
+different quantity on the two devices. The direct receiver has synthetic TCP
+gateway tests, but no claimed physical Modbus qualification for the owner's
+ShineWiFi-X devices.

@@ -18,17 +18,18 @@
 
 ---
 
-HA Growatt receives traffic from your Growatt datalogger. You can install it as
-one Home Assistant integration, or use the app and MQTT for its wider set of
-outputs and inverter tools. Both routes can forward to Growatt for ShinePhone.
-If the cloud stops responding, local fallback keeps supported readings flowing.
+HA Growatt can receive traffic from a Growatt datalogger inside Home Assistant
+or in its separate app. It can also poll a direct Modbus TCP gateway when that
+connection is available. The Shine routes can forward to Growatt for ShinePhone;
+local fallback keeps readings flowing when the cloud stops responding.
 
 Choose the route that fits your installation:
 
 | Component | Purpose |
 | --- | --- |
-| **Home Assistant integration only** | Receives datalogger traffic inside Home Assistant. No separate app or MQTT broker is needed for readings, cloud forwarding, restart recovery, buffered events or daylight alerts. |
-| **HA Growatt app and optional companion** | The app publishes MQTT sensors and offers the web setup page, other outputs and supported inverter tools. The companion adds Repairs, buffered events and history adoption without duplicating those sensors. |
+| **Home Assistant Shine receiver** | Receives datalogger traffic inside Home Assistant. No separate app or MQTT broker is needed for readings, cloud forwarding, restart recovery, buffered events or daylight alerts. Supported controls and optional outputs can be enabled separately. |
+| **Home Assistant direct Modbus** | Polls a separately accessible Modbus TCP inverter or gateway, using an explicitly selected register profile. It reads only; it does not change inverter settings or relay Shine traffic. |
+| **HA Growatt app and optional companion** | The app publishes MQTT sensors and offers guided setup, a web support page, CSV and Python-extension outputs. The companion adds Repairs, buffered events and history adoption without duplicating those sensors. |
 
 The service can also run in Docker or Python outside Home Assistant. Existing
 app and MQTT installations remain supported; adding the native receiver does
@@ -36,8 +37,8 @@ not silently move their entities or history.
 
 > [!NOTE]
 > **Release status:** The badge above shows the latest published version. The
-> features under [Version 0.6.0](#version-060) need the 0.6.0 integration or
-> app. Existing app installations can update without changing their setup.
+> features under [Version 0.7.0](#version-070) need the 0.7.0 integration.
+> Existing app installations can update without changing their setup.
 
 ## Quick start
 
@@ -46,8 +47,10 @@ not silently move their entities or history.
 - Home Assistant for the one-part integration, Home Assistant OS for the app,
   or a separate machine running Docker or Python 3.12+.
 - A working MQTT broker and Home Assistant's MQTT integration if using the app route.
-- A supported Growatt datalogger that can send traffic to your service's LAN address.
-- Access to the datalogger's upload-server settings and a stable address for the service.
+- A Growatt datalogger that can send traffic to your service's LAN address for
+  the Shine routes, or a separately accessible Modbus TCP connection for polling.
+- Access to the datalogger's upload-server settings for a Shine receiver, and a
+  stable address for whichever service it uses.
 
 ### Integration only: one Home Assistant installation
 
@@ -65,11 +68,28 @@ fresh readings, then check the inverter devices, **Connected** sensors and
 daily energy values. Saved readings return after a quiet restart with their
 original time; a restored reading does not mark a datalogger connected.
 
-The app still provides its web support page, other output destinations and
-supported inverter controls. If you currently use those features, keep the app
-route below. Native entities have different identifiers, so preview history
-adoption before retiring existing MQTT entities. See the
+In the integration's **Configure** menu, supported inverter controls start
+disabled. Enable them only after checking the physical model and a successful
+setting read. Battery controls and schedules have a separate experimental
+switch. The same menu can configure raw MQTT, PVOutput, InfluxDB or HTTP output;
+each destination runs independently. Home Assistant's device pages, Repairs and
+redacted diagnostic downloads provide the support information. The app still
+offers its guided web page, CSV and Python extensions. Native entities have
+different identifiers, so preview history adoption before retiring existing
+MQTT entities. See the
 [Home Assistant guide](docs/home-assistant-features.md#integration-only-installation).
+
+### Direct Modbus TCP
+
+Choose **HA Growatt → Read a direct Modbus TCP connection** only when your
+inverter or gateway exposes one. Enter its address, unit number and a stable
+device identity, then choose the documented MIN, MIC or legacy register
+profile. The integration reads two small input-register blocks about once a
+minute and keeps the last valid reading through a quiet restart. Failed or
+incomplete reads never replace valid measurements. A ShineWiFi-X upload
+connection does not itself prove that Modbus TCP is available; check your
+hardware before changing a working setup. This route is read-only and creates
+separate Home Assistant entity IDs. See the [Modbus guide](docs/home-assistant-features.md#direct-modbus-tcp).
 
 ### App and MQTT
 
@@ -134,8 +154,8 @@ service and MQTT running. See the [Home Assistant guide](docs/home-assistant-fea
 | Restart recovery | Saved readings return after a quiet restart with their original timestamps. Restored values are distinguished from fresh telemetry. |
 | Setup | Guided installation, automatic broker configuration, per-inverter profiles and a searchable hardware evidence catalogue. |
 | Troubleshooting | Connection checks, redacted diagnostics and a history/Energy preview. The optional companion suppresses missing-status notices overnight and during the sunrise grace period. Explicit app-offline notices still warn. |
-| Controls | Supported output limits and family-specific battery settings. Settings must respond to a read before becoming available; writes are checked by reading back the result. |
-| Other installations | Proxy, standalone server and Linux passive sniffer modes; raw MQTT, PVOutput, InfluxDB 1 and 2, CSV, HTTP and Python extension outputs. |
+| Controls | The app and HA-only Shine receiver offer supported output limits and family-specific battery settings. Settings must respond to a read before becoming available; writes are checked by reading back the result. Direct Modbus polling never writes. |
+| Other installations | Proxy, standalone server and Linux passive sniffer modes; raw MQTT, PVOutput, InfluxDB 1 and 2, and HTTP outputs in the HA-only Shine route. CSV and Python extensions remain app features. |
 
 Experimental battery schedules and additional model controls are **off by
 default**. A successful telemetry connection does not qualify a control.
@@ -145,11 +165,13 @@ default**. A successful telemetry connection does not qualify a control.
 ~~~mermaid
 flowchart LR
     Inverter[Growatt inverter] --> Logger[Growatt datalogger]
-    Logger --> App[HA Growatt service]
-    App -->|Optional forwarding| Cloud[Growatt cloud / ShinePhone]
-    App --> MQTT[MQTT broker]
-    MQTT --> HA[Home Assistant sensors]
-    MQTT --> Companion[Optional companion integration]
+    Logger -->|Shine upload| Receiver[HA Growatt app or HA-only receiver]
+    Receiver -->|Optional forwarding| Cloud[Growatt cloud / ShinePhone]
+    Receiver -->|App route| MQTT[MQTT broker]
+    MQTT --> HA[Home Assistant]
+    Receiver -->|HA-only route| HA
+    Inverter -->|Separate Modbus TCP gateway, if present| Modbus[Read-only HA polling]
+    Modbus --> HA
 ~~~
 
 The service supports protocol versions 2, 5 and 6, 15 built-in layouts, custom
@@ -189,6 +211,24 @@ does not establish a successful migration.
 Follow the [installation and migration instructions](docs/installation.md) and
 check the [compatibility record](docs/compatibility.md) before retiring the old service.
 
+## Version 0.7.0
+
+The Home Assistant Shine receiver can now show supported inverter settings
+as native entities and send readings to raw MQTT, PVOutput, InfluxDB or an HTTP
+endpoint. Controls and each output are optional. Settings appear only after a
+live read from the connected datalogger; battery controls and schedules are
+experimental and off by default. The integration also has redacted device
+diagnostics and receiver health counters, so most support checks no longer
+need the app's web page.
+
+A separate, read-only Modbus TCP option polls a named inverter or gateway.
+It has documented MIN, MIC and legacy register profiles, bounded requests,
+connection status and restart recovery. It needs a real Modbus TCP endpoint;
+the existing ShineWiFi-X feeds do not establish one. No direct Modbus hardware
+or battery writes have been physically verified for this release. The app's
+existing proxy, MQTT entities and Energy history are unchanged. See the
+[0.7.0 notes](docs/releases/0.7.0.md).
+
 ## Version 0.6.0
 
 HA Growatt can now receive datalogger traffic inside Home Assistant without a
@@ -202,9 +242,9 @@ produce a shareable report of packet shape, changing block positions and safe
 decode categories. It contains no packet bytes, serials, exact times or
 measurement values. The private replay remains separate.
 
-The one-part route has not been physically qualified on every Growatt model.
-The app remains the route for advanced controls, additional output targets and
-its web support page. See the [0.6.0 notes](docs/releases/0.6.0.md).
+At the time of this release, advanced controls and additional output targets
+still needed the app. The app continues to provide its web support page. See
+the [0.6.0 notes](docs/releases/0.6.0.md).
 
 ## Version 0.5.0
 

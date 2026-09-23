@@ -198,6 +198,44 @@ def test_native_receiver_separates_buffered_and_failed_frames():
     asyncio.run(scenario())
 
 
+def test_live_packet_before_platform_subscription_is_replayed_as_live():
+    async def scenario():
+        receiver = NativeReceiver()
+        await receiver.observe("device", frame())
+        replayed = []
+        receiver.subscribe(replayed.append)
+        assert len(replayed) == 1
+        assert replayed[0].identity == "INVERT0001"
+        assert replayed[0].restored is False
+
+    asyncio.run(scenario())
+
+
+def test_optional_output_receives_live_and_buffered_without_blocking_readings():
+    async def scenario():
+        seen = []
+
+        async def output(telemetry):
+            seen.append(telemetry.buffered)
+            raise ConnectionError("Optional destination unavailable")
+
+        receiver = NativeReceiver(on_telemetry=output)
+        live = []
+        buffered = []
+        receiver.subscribe(live.append)
+        receiver.subscribe_buffered(buffered.append)
+        source = frame()
+        await receiver.observe("device", source)
+        await receiver.observe(
+            "device", Frame(source.transaction, source.protocol, source.unit, 80, source.payload)
+        )
+        assert seen == [False, True]
+        assert len(live) == len(buffered) == 1
+        assert receiver.measurements == receiver.buffered_records == 1
+
+    asyncio.run(scenario())
+
+
 def test_native_receiver_can_share_unknown_frame_evidence_without_packet_contents():
     async def scenario():
         receiver = NativeReceiver()

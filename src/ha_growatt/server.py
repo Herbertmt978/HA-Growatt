@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import socket
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from urllib.parse import parse_qs, urlsplit
@@ -30,6 +31,7 @@ class DeviceSession:
     inverters: dict[str, dict] = field(default_factory=dict)
     lock: asyncio.Lock = field(default_factory=asyncio.Lock)
     pending: dict[tuple[int, str], asyncio.Future] = field(default_factory=dict)
+    command_pending: dict[int, tuple[Frame, asyncio.Future]] = field(default_factory=dict)
 
 
 class Server:
@@ -160,6 +162,20 @@ class Server:
                     future = session.pending.get((frame.function, key))
                     if future is not None and not future.done():
                         future.set_result(value)
+                    command = session.command_pending.get(frame.transaction)
+                    if command is not None:
+                        request, command_future = command
+                        width = 30 if frame.protocol == 6 else 10
+                        address_width = 4 if frame.function == 16 else 2
+                        if (
+                            frame.protocol == request.protocol
+                            and frame.unit == request.unit
+                            and frame.function == request.function
+                            and frame.payload[width : width + address_width]
+                            == request.payload[width : width + address_width]
+                            and not command_future.done()
+                        ):
+                            command_future.set_result(frame)
                 if self.observer and frame.function in {3, 4, 27, 32, 80}:
                     if self._queue.full():
                         self._queue.get_nowait()
@@ -171,6 +187,9 @@ class Server:
             if session.logger and self._registry.get(session.logger) is session:
                 self._registry.pop(session.logger)
             for future in session.pending.values():
+                if not future.done():
+                    future.set_exception(ConnectionError("Datalogger disconnected"))
+            for _, future in session.command_pending.values():
                 if not future.done():
                     future.set_exception(ConnectionError("Datalogger disconnected"))
             await _close(session.writer)
@@ -186,6 +205,73 @@ class Server:
                 pass
             finally:
                 self._queue.task_done()
+
+    def _inverter_session(self, identity: str) -> DeviceSession | None:
+        return next(
+            (
+                session
+                for session in self._registry.values()
+                if identity in session.inverters and not session.writer.is_closing()
+            ),
+            None,
+        )
+
+    def session_key(self, identity: str) -> int | None:
+        session = self._inverter_session(identity)
+        return id(session) if session is not None else None
+
+    def connection(self, identity: str) -> str:
+        return "local" if self.session_key(identity) is not None else "disconnected"
+
+    async def command(
+        self,
+        identity: str,
+        function: int,
+        body: bytes,
+        *,
+        before_send: Callable[[], None] | None = None,
+    ) -> Frame:
+        """Send a register request to the current session and match its reply."""
+        if (function not in {5, 6} or len(body) != 4) and (function != 16 or len(body) != 10):
+            raise ValueError("Only a bounded inverter register request may be sent")
+        session = self._inverter_session(identity)
+        if session is None or not session.logger:
+            raise ConnectionError("Datalogger is not connected")
+
+        def check_current() -> None:
+            if (
+                session not in self._sessions
+                or session.writer.is_closing()
+                or identity not in session.inverters
+                or self._registry.get(session.logger) is not session
+            ):
+                raise ConnectionError("Datalogger disconnected before the command was sent")
+            if before_send:
+                before_send()
+
+        async with session.lock:
+            check_current()
+            self._sequence = (self._sequence % 65535) + 1
+            sequence = self._sequence
+            if sequence in session.command_pending:
+                raise ConnectionError("Reconnect before reusing a pending command sequence")
+            protocol = session.protocol
+            frame = Frame(
+                sequence,
+                protocol,
+                int(session.inverters[identity]["inverterno"], 16),
+                function,
+                logger_prefix(session.logger, protocol) + body,
+            )
+            future = asyncio.get_running_loop().create_future()
+            session.command_pending[sequence] = (frame, future)
+            try:
+                check_current()
+                await self._send(session, frame)
+                async with asyncio.timeout(self.response_seconds):
+                    return await future
+            finally:
+                session.command_pending.pop(sequence, None)
 
     async def api(self, method: str, path: str) -> tuple[int, str]:
         parsed = urlsplit(path)

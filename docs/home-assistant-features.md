@@ -1,8 +1,9 @@
 # Home Assistant features
 
-The integration can now receive datalogger traffic itself, or act as a companion
-to the app. Additional battery profiles and schedules remain experimental and
-disabled by default; see the hardware evidence below.
+The integration can receive datalogger traffic itself, poll an explicitly
+configured direct Modbus TCP connection, or act as a companion to the app.
+Battery controls and schedules remain experimental and disabled by default;
+see the hardware evidence below.
 
 ## Integration-only installation
 
@@ -30,11 +31,54 @@ as the shareable report. Capture lasts at most ten minutes and 256 frames, and
 is cleared after thirty minutes or shutdown. The report contains only packet
 structure and decoding outcomes. No private replay is returned by this action.
 
-The native route does not include the app's web UI, MQTT discovery identifiers,
-other output destinations or inverter write controls. Keep the app and select
-the companion route if you need those features. Changing routes creates new
-entity IDs; use the history-adoption preview to check matching measurements
-before releasing an old ID. Do not point one datalogger at both receivers.
+The native Shine route offers optional raw MQTT, PVOutput, InfluxDB 1 or 2 and
+HTTP delivery. These outputs run in separate bounded queues and skip buffered
+records. Configure them under **HA Growatt → Configure → Optional output
+destinations**. Clear a destination's address or system ID to turn it off.
+Passwords and tokens are kept out of diagnostic downloads; enter a new value
+only when changing one. Output failures appear in the receiver's diagnostic
+sensors and download without interrupting readings or cloud forwarding. The
+HTTP body follows the app's JSON-string format. CSV and executable Python
+extensions remain in the app, where their file and process access belongs.
+
+Supported native Shine controls are off by default. In **Configure → Readings,
+alerts and controls**, enable them after checking the inverter's physical
+model. Under **Choose an inverter control profile**, record that exact model
+and select a profile only if it matches. A setting appears after a live
+datalogger session answers a read; each write is checked with a readback. The
+output-power limit uses the documented register. Battery controls and SPH/SPA
+schedule times need the separate experimental switch, a matching physical
+model and an appropriate decoded profile. The native receiver never offers
+arbitrary register writes or grid-code settings. A model name entered in the
+UI is owner-supplied information, not hardware verification.
+
+Home Assistant's device pages show reading and connection entities plus
+receiver diagnostic counters. Use **Download diagnostics** on the integration
+or device page for redacted support details; use Repairs for daylight failures
+and `capture_evidence` for an unfamiliar Shine packet. The app retains its
+guided web support page. Changing routes creates new entity IDs; use the
+history-adoption preview before releasing an old ID. Do not point one
+datalogger at both receivers.
+
+## Direct Modbus TCP
+
+This is a separate connection to an inverter or gateway, not the ShineWiFi
+upload stream. Choose **Read a direct Modbus TCP connection** during integration
+setup and enter its reachable address, Modbus unit number and a stable device
+identity. Select the MIN TL-X/XH V1.24 profile for a matching MIN, the MIC
+V3.14 profile for a matching MIC, or the legacy V1.24 profile only when that
+register table matches the actual device. The names describe manufacturer
+register tables; the two owner-owned inverters have not been checked through
+this direct connection. One minute is the default poll interval.
+
+This route sends only input-register reads. A complete and plausible pair of
+blocks updates the sensors. A failed block, incorrect profile or unavailable
+inverter leaves the last valid measurements in place and turns the Connected
+sensor off. The saved reading returns after restart without marking the
+gateway connected. It does not forward to ShinePhone, publish optional outputs
+or offer writes. If a suitable direct gateway is not present, keep the
+working Shine route. Never infer direct Modbus access solely from the presence
+of a ShineWiFi-X datalogger.
 
 ## Setup and support page
 

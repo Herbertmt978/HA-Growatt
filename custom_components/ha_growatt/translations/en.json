@@ -1,11 +1,16 @@
 {
   "title": "HA Growatt",
   "config": {
-    "step": {"user": {"menu_options": {"direct": "Receive dataloggers in Home Assistant", "companion": "Connect the existing HA Growatt app"}},
+    "step": {"user": {"menu_options": {"direct": "Receive dataloggers in Home Assistant", "modbus": "Read a direct Modbus TCP connection", "companion": "Connect the existing HA Growatt app"}},
     "direct": {
       "title": "Receive Growatt readings in Home Assistant",
       "description": "Home Assistant will listen for your ShineWiFi dataloggers on this port. Point each datalogger at this Home Assistant host and port. Cloud forwarding keeps Growatt's cloud service available and falls back to local replies if it fails. The default profile selects a layout from each packet. Stop any other receiver using this port first.",
       "data": {"port": "Datalogger TCP port", "forward_cloud": "Forward readings to Growatt cloud", "family": "Preferred inverter family"}
+    },
+    "modbus": {
+      "title": "Read a Growatt inverter over Modbus TCP",
+      "description": "Use this only if your inverter or gateway exposes direct Modbus TCP. A ShineWiFi upload connection alone does not establish that it does. Reads are paced and read-only. Choose the documented register profile for your hardware; the legacy profile is experimental. Give this connection a stable identity so its Home Assistant entities keep their history. MIC and MIN have different register profiles.",
+      "data": {"host": "Modbus gateway address", "port": "Modbus TCP port", "unit": "Modbus unit address", "identity": "Stable device identity", "profile": "Register profile", "interval": "Seconds between polls"}
     },
     "companion": {
       "title": "Connect the HA Growatt companion",
@@ -15,14 +20,26 @@
     "abort": {"already_configured": "HA Growatt is already configured.", "mqtt_required": "Set up the MQTT integration and start the HA Growatt app first."},
     "error": {"port_in_use": "Home Assistant cannot open that port. Stop the other receiver or choose another port."}
   },
-  "options": {"step": {"init": {
-    "title": "HA Growatt alerts and events",
-    "description": "Missing readings wait until daylight and the sunrise grace period. Existing readings remain unchanged. Changing the native receiver's family waits for fresh readings before restoring saved values.",
-    "data": {"daylight_alerts": "Warn about silent feeds during daylight", "stale_minutes": "Minutes without a fresh reading", "sunrise_grace_minutes": "Minutes to wait after sunrise", "buffered_events": "Fire events for buffered readings", "family": "Preferred inverter family (native receiver only)", "port": "Datalogger TCP port (native receiver only)", "forward_cloud": "Forward to Growatt cloud (native receiver only)"}
-  }}, "error": {"port_in_use": "Home Assistant cannot open that port. Stop the other receiver or choose another port."}},
+  "options": {"step": {
+    "init": {"menu_options": {"receiver": "Readings, alerts and controls", "inverter": "Choose an inverter control profile", "outputs": "Optional output destinations"}},
+    "receiver": {
+      "title": "HA Growatt readings and controls",
+      "description": "Missing readings wait until daylight and the sunrise grace period. Changing the native receiver's family waits for fresh readings before restoring saved values. Controls start disabled; a connected inverter must answer a setting read before a control appears. Experimental battery settings need matching hardware and separate authorisation here.",
+      "data": {"daylight_alerts": "Warn about silent feeds during daylight", "stale_minutes": "Minutes without a fresh reading", "sunrise_grace_minutes": "Minutes to wait after sunrise", "buffered_events": "Fire events for buffered readings", "family": "Preferred inverter family (native receiver only)", "port": "Datalogger TCP port (native receiver only)", "forward_cloud": "Forward to Growatt cloud (native receiver only)", "enable_controls": "Enable supported inverter controls", "experimental_controls": "Enable experimental battery controls"}
+    },
+    "modbus_options": {"title": "Direct Modbus readings", "description": "Changing the connection or register profile leaves the current entity IDs in place. A new profile must produce a complete valid reading before values update. This connection only reads input registers; it does not control the inverter or forward data to Growatt.", "data": {"host": "Modbus gateway address", "port": "Modbus TCP port", "unit": "Modbus unit address", "profile": "Register profile", "interval": "Seconds between polls", "daylight_alerts": "Warn about failed reads during daylight", "stale_minutes": "Minutes without a fresh reading", "sunrise_grace_minutes": "Minutes to wait after sunrise", "buffered_events": "Fire buffered-reading events (Shine route only)"}},
+    "inverter": {"title": "Choose an inverter", "description": "Choose a discovered inverter to set its control profile. The physical model label is more reliable than a packet layout.", "data": {"identity": "Inverter"}},
+    "inverter_model": {"title": "Control profile for {inverter}", "description": "Enter the exact model from the inverter's physical label. This does not prove that a write is safe or that a battery is installed. Leave the control profile on Automatic unless a documented family matches. Experimental battery controls also need their separate switch enabled and successful setting readback.", "data": {"control_model": "Control profile", "hardware_model": "Exact physical model"}},
+    "outputs": {"menu_options": {"http_output": "HTTP webhook", "pvoutput_output": "PVOutput", "influx_output": "InfluxDB", "mqtt_output": "Raw MQTT"}},
+    "http_output": {"title": "HTTP output", "description": "Send each live reading to an HTTP or HTTPS endpoint using the app's JSON message format. Clear the address to turn this output off.", "data": {"endpoint": "HTTP endpoint"}},
+    "pvoutput_output": {"title": "PVOutput", "description": "Enter your system ID and API key. Leave the key blank to keep its saved value; clear the system ID to turn this output off. Buffered readings are skipped.", "data": {"system": "PVOutput system ID", "api_key": "API key"}},
+    "influx_output": {"title": "InfluxDB", "description": "Enter an HTTP or HTTPS endpoint. Leave the token or password blank to keep its saved value; clear the endpoint to turn this output off. Buffered readings are skipped.", "data": {"endpoint": "InfluxDB endpoint", "version": "InfluxDB version", "database": "Version 1 database", "organisation": "Version 2 organisation", "bucket": "Version 2 bucket", "username": "Version 1 username", "password": "Version 1 password", "token": "Version 2 token"}},
+    "mqtt_output": {"title": "Raw MQTT", "description": "Send app-compatible JSON readings to a separate MQTT topic. This is optional and does not create Home Assistant discovery entities. Leave the password blank to keep its saved value; clear the host to turn this output off.", "data": {"host": "MQTT broker", "port": "MQTT port", "username": "MQTT username", "password": "MQTT password", "tls": "Use TLS", "topic": "Topic"}}
+  }, "abort": {"no_inverters": "Wait for a fresh inverter reading before choosing its control profile."}, "error": {"port_in_use": "Home Assistant cannot open that port. Stop the other receiver or choose another port.", "api_key_required": "Enter a PVOutput API key to enable this output.", "invalid_output": "Check the address and required settings for this destination."}},
   "issues": {
     "service_offline": {"title": "HA Growatt is not reporting its status", "description": "Check that the HA Growatt app and MQTT broker are running if you use the app route. The app has reported that it is offline, or its status is missing during daylight after the sunrise grace period. Missing status alone does not raise a warning overnight. Saved readings remain visible and may be old. This warning clears when current status messages resume."},
     "decode_failed": {"title": "HA Growatt cannot decode the incoming measurements", "description": "Check the inverter family in integration options or the app's reading profile. Download diagnostics and a shareable packet report if the model is not recognised. New session-key encrypted dataloggers need additional protocol support; changing profiles does not decrypt them."},
-    "feed_stale": {"title": "A Growatt inverter is silent during daylight", "description": "Inverter {inverter} has sent no fresh reading for at least {minutes} minutes. Check its power, datalogger connection and selected reading profile. Normal overnight silence is excluded, with a grace period after sunrise. The warning clears when fresh readings arrive or night begins."}
+    "feed_stale": {"title": "A Growatt inverter is silent during daylight", "description": "Inverter {inverter} has sent no fresh reading for at least {minutes} minutes. Check its power, datalogger connection and selected reading profile. Normal overnight silence is excluded, with a grace period after sunrise. The warning clears when fresh readings arrive or night begins."},
+    "modbus_unavailable": {"title": "HA Growatt cannot read the Modbus gateway", "description": "The configured direct Modbus TCP connection has not returned a complete reading during daylight. Check the gateway address, unit number, selected register profile and whether the inverter is awake. The ShineWiFi upload address is a separate connection. No register writes have been sent."}
   }
 }

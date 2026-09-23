@@ -43,7 +43,9 @@ async def adoption(hass, target_entity, source_entity_id, confirm=False, same_me
     target = registry.async_get(target_entity)
     mqtt_target = target and target.platform == "mqtt" and target.unique_id.startswith("grott_")
     native_target = (
-        target and target.platform == DOMAIN and target.unique_id.startswith("ha_growatt_direct_")
+        target
+        and target.platform == DOMAIN
+        and target.unique_id.startswith(("ha_growatt_direct_", "ha_growatt_modbus_"))
     )
     if not (mqtt_target or native_target):
         raise HomeAssistantError("Choose an HA Growatt measurement sensor")

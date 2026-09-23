@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
@@ -42,6 +42,7 @@ class NativeReceiver:
         forward_cloud: bool = True,
         state_path: str = "",
         family: str = "default",
+        on_telemetry: Callable[[Telemetry], Awaitable[None]] | None = None,
     ) -> None:
         if type(port) is not int or not 1024 <= port <= 65535:
             raise ValueError("The datalogger port must be between 1024 and 65535")
@@ -50,9 +51,11 @@ class NativeReceiver:
         self.port = port
         self.forward_cloud = forward_cloud
         self.decoder = FamilyDecoder(SelectionSettings(family=family))
+        self.on_telemetry = on_telemetry
         self.packet_health = PacketHealth()
         self.private_capture = PrivateCapture()
         self.snapshots: dict[str, Snapshot] = {}
+        self._live_snapshots: set[str] = set()
         self._listeners: set[Callable[[NativeReading], None]] = set()
         self._buffered_listeners: set[Callable[[Telemetry], None]] = set()
         self._store = (
@@ -73,10 +76,17 @@ class NativeReceiver:
     def running(self) -> bool:
         return bool(self._transport and self._transport.running)
 
+    @property
+    def control_transport(self) -> Relay | Server | None:
+        """Return only the currently running, session-aware command transport."""
+        return self._transport if self.running else None
+
     def subscribe(self, listener: Callable[[NativeReading], None]) -> Callable[[], None]:
         self._listeners.add(listener)
         for identity, snapshot in self.snapshots.items():
-            listener(NativeReading(identity, snapshot, restored=True))
+            listener(
+                NativeReading(identity, snapshot, restored=identity not in self._live_snapshots)
+            )
         return lambda: self._listeners.discard(listener)
 
     def subscribe_buffered(self, listener: Callable[[Telemetry], None]) -> Callable[[], None]:
@@ -125,6 +135,12 @@ class NativeReceiver:
                 self.failed_measurements += 1
             return
         self.packet_health.observe(frame, telemetry)
+        if self.on_telemetry is not None:
+            try:
+                async with asyncio.timeout(0.5):
+                    await self.on_telemetry(telemetry)
+            except Exception:
+                _LOG.warning("A native telemetry output failed; receiver traffic continues")
         if telemetry.buffered:
             self.buffered_records += 1
             for listener in tuple(self._buffered_listeners):
@@ -144,6 +160,7 @@ class NativeReceiver:
             return
         snapshot = Snapshot(telemetry, datetime.now(UTC))
         self.snapshots[identity] = snapshot
+        self._live_snapshots.add(identity)
         if frame.function != 3:
             self.measurements += 1
         self.incomplete_fields += telemetry.decode_errors
@@ -169,3 +186,4 @@ class NativeReceiver:
             await transport.__aexit__(None, None, None)
         self._listeners.clear()
         self._buffered_listeners.clear()
+        self._live_snapshots.clear()
