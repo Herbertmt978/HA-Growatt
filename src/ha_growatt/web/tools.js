@@ -30,10 +30,16 @@ function registerTools(device, hardware, profileForm) {
     controls.forEach((button) => { button.disabled = true; });
     inputs.start.disabled = inputs.count.disabled = true;
     // Keep auto-refresh from replacing this panel while a read is outstanding.
+    const wasDirty = profileForm.dataset.dirty === "true";
+    let editedDuringRead = false;
+    const noteEdit = () => { editedDuringRead = true; };
+    profileForm.addEventListener("input", noteEdit);
     profileForm.dataset.dirty = "true";
     status.textContent = "Reading from the inverter…";
     try { await work(); } catch (error) { status.textContent = error.message; }
     finally {
+      profileForm.removeEventListener("input", noteEdit);
+      if (!wasDirty && !editedDuringRead) delete profileForm.dataset.dirty;
       busy = false;
       identify.disabled = read.disabled = false;
       inputs.start.disabled = inputs.count.disabled = false;
