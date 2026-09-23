@@ -1,3 +1,13 @@
+# 0.6.0
+
+The support page's private capture now includes a shareable structure report
+for packet layouts that HA Growatt cannot decode. It describes packet shapes
+and changes without publishing packet bytes, serials or readings. The existing
+private replay remains separate.
+
+The optional Home Assistant integration can now receive datalogger traffic
+without this app or MQTT. Existing app installations continue to work as before.
+
 # 0.5.0
 
 The setup guide now links directly to the optional companion. Its setup form

@@ -1,4 +1,4 @@
-"""Enable the companion using Home Assistant's existing MQTT connection."""
+"""Set up a native receiver or connect the existing app via MQTT."""
 
 import asyncio
 import json
@@ -70,10 +70,39 @@ def schema(options):
     )
 
 
+def direct_schema(values=None):
+    values = values or {}
+    return vol.Schema(
+        {
+            vol.Optional("port", default=values.get("port", 5279)): vol.All(
+                vol.Coerce(int), vol.Range(min=1024, max=65535)
+            ),
+            vol.Optional("forward_cloud", default=values.get("forward_cloud", True)): bool,
+            vol.Optional("family", default=values.get("family", "default")): vol.In(
+                ["default", "min", "mod", "sph", "spf", "spa", "tl3", "max"]
+            ),
+        }
+    )
+
+
+async def port_available(port):
+    """Check a local bind; a later race is still handled during receiver setup."""
+    try:
+        listener = await asyncio.start_server(lambda _r, w: w.close(), "0.0.0.0", port)
+    except OSError:
+        return False
+    listener.close()
+    await listener.wait_closed()
+    return True
+
+
 class Flow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     async def async_step_user(self, user_input=None):
+        return self.async_show_menu(step_id="user", menu_options=["direct", "companion"])
+
+    async def async_step_companion(self, user_input=None):
         await self.async_set_unique_id(DOMAIN)
         self._abort_if_unique_id_configured()
         if not self.hass.config_entries.async_entries("mqtt"):
@@ -81,9 +110,25 @@ class Flow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             return self.async_create_entry(title="HA Growatt", data={}, options=user_input)
         return self.async_show_form(
-            step_id="user",
+            step_id="companion",
             data_schema=schema(DEFAULTS),
             description_placeholders={"connection_note": await app_connection_note(self.hass)},
+        )
+
+    async def async_step_direct(self, user_input=None):
+        await self.async_set_unique_id("ha_growatt_direct")
+        self._abort_if_unique_id_configured()
+        errors = {}
+        if user_input is not None:
+            if await port_available(user_input["port"]):
+                return self.async_create_entry(
+                    title="HA Growatt receiver",
+                    data={"mode": "direct", **user_input},
+                    options=DEFAULTS,
+                )
+            errors["base"] = "port_in_use"
+        return self.async_show_form(
+            step_id="direct", data_schema=direct_schema(user_input), errors=errors
         )
 
     @staticmethod
@@ -94,6 +139,25 @@ class Flow(config_entries.ConfigFlow, domain=DOMAIN):
 
 class Options(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
+        options = dict(self.config_entry.options)
+        if self.config_entry.data.get("mode") == "direct":
+            direct = dict(self.config_entry.data) | options
+            if user_input is not None:
+                if user_input["port"] != direct["port"] and not await port_available(
+                    user_input["port"]
+                ):
+                    return self.async_show_form(
+                        step_id="init",
+                        data_schema=vol.Schema(
+                            {**schema(direct).schema, **direct_schema(direct).schema}
+                        ),
+                        errors={"base": "port_in_use"},
+                    )
+                return self.async_create_entry(data=user_input)
+            return self.async_show_form(
+                step_id="init",
+                data_schema=vol.Schema({**schema(direct).schema, **direct_schema(direct).schema}),
+            )
         if user_input is not None:
             return self.async_create_entry(data=user_input)
-        return self.async_show_form(step_id="init", data_schema=schema(self.config_entry.options))
+        return self.async_show_form(step_id="init", data_schema=schema(options))

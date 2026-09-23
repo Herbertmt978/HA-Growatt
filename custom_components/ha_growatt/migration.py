@@ -41,8 +41,12 @@ def register(hass):
 async def adoption(hass, target_entity, source_entity_id, confirm=False, same_measurement=False):
     registry = er.async_get(hass)
     target = registry.async_get(target_entity)
-    if target is None or target.platform != "mqtt" or not target.unique_id.startswith("grott_"):
-        raise HomeAssistantError("Choose an HA Growatt MQTT measurement sensor")
+    mqtt_target = target and target.platform == "mqtt" and target.unique_id.startswith("grott_")
+    native_target = (
+        target and target.platform == DOMAIN and target.unique_id.startswith("ha_growatt_direct_")
+    )
+    if not (mqtt_target or native_target):
+        raise HomeAssistantError("Choose an HA Growatt measurement sensor")
     if target_entity == source_entity_id or not source_entity_id.startswith("sensor."):
         raise HomeAssistantError("Choose a different historical sensor ID")
     if registry.async_get(source_entity_id) or hass.states.get(source_entity_id):

@@ -8,7 +8,6 @@ adopt_history:
       selector:
         entity:
           domain: sensor
-          integration: mqtt
     source_entity_id:
       name: Historical entity ID
       description: The old sensor must have been removed and its statistics retained.
@@ -27,6 +26,20 @@ adopt_history:
       default: false
       selector:
         boolean:
+capture_evidence:
+  name: Capture packet evidence
+  description: Start a ten-minute private in-memory capture or return a shareable structure-only report. No packet bytes or readings appear in the report.
+  fields:
+    action:
+      name: Action
+      required: true
+      selector:
+        select:
+          options:
+            - label: Start capture
+              value: start
+            - label: Get shareable report
+              value: report
 identify_hardware:
   name: Identify hardware
   description: Read documented identity registers. Returns evidence without changing profiles or controls. The response is private.

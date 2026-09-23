@@ -1,7 +1,40 @@
 # Home Assistant features
 
-These features are included in 0.3.0. Additional battery profiles and schedules
-are experimental and disabled by default; see the hardware evidence below.
+The integration can now receive datalogger traffic itself, or act as a companion
+to the app. Additional battery profiles and schedules remain experimental and
+disabled by default; see the hardware evidence below.
+
+## Integration-only installation
+
+From version 0.6.0, install the repository as a custom HACS integration or copy
+`custom_components/ha_growatt` into Home Assistant. Home Assistant downloads
+the matching receiver wheel from the release, so it needs internet access for
+the first installation or upgrade. Add **HA Growatt** under Devices & services
+and choose **Receive dataloggers in Home Assistant**. Select the TCP port, cloud
+forwarding and a preferred inverter family. **Automatic** is the normal family
+choice. Point the ShineWiFi upload server at Home Assistant's LAN address and
+the chosen port; stop another service using that port first.
+
+This route creates native measurement sensors and a Connected binary sensor
+for each inverter. Its decoder, cloud forwarding, local fallback and restart
+cache use the same Python library as the app. Buffered uploads fire
+`ha_growatt_buffered_record` events but never replace live readings. Daylight
+Repairs, redacted diagnostics and the `adopt_history` preview also work without
+MQTT. A profile-family change invalidates saved readings until a new packet
+arrives. The last reading keeps its original timestamp on restart; Connected
+remains off until live data arrives.
+
+For an unknown layout, call `ha_growatt.capture_evidence` with `action: start`.
+After packets arrive, call it with `action: report` and use the action response
+as the shareable report. Capture lasts at most ten minutes and 256 frames, and
+is cleared after thirty minutes or shutdown. The report contains only packet
+structure and decoding outcomes. No private replay is returned by this action.
+
+The native route does not include the app's web UI, MQTT discovery identifiers,
+other output destinations or inverter write controls. Keep the app and select
+the companion route if you need those features. Changing routes creates new
+entity IDs; use the history-adoption preview to check matching measurements
+before releasing an old ID. Do not point one datalogger at both receivers.
 
 ## Setup and support page
 
@@ -273,7 +306,8 @@ events. Raw MQTT, InfluxDB and other existing outputs retain their own policies.
 ### Adopt a previous entity ID
 
 The `ha_growatt.adopt_history` action first previews a historical ID for an HA
-Growatt MQTT sensor. The old entity must be removed, with its statistics retained;
+Growatt MQTT or native sensor. The old entity must be removed, with its
+statistics retained;
 disabling it does not release its ID. The action checks ownership, current data,
 compatible units and cumulative versus measurement statistics.
 
@@ -361,7 +395,14 @@ replay**, acknowledge the private data notice and start recording. You can then
 download **shareable evidence** from the same short-lived capture. It gives each
 feed a generic label and records protocol, function, packet length, active
 32-byte blocks, decoding result, selected built-in profile and missing fields.
-It contains no payload bytes, serial numbers, exact times or measurement values.
+Frames that fail decoding also appear in an **undecoded layouts** summary,
+grouped by feed, protocol, function and packet length. It shows how often each
+shape appeared, which 32-byte blocks changed between samples, a fixed reason
+category, the selected profile when built in or automatic, and built-in
+profiles with compatible headers. A compatible header does not mean that the
+profile can decode the packet. Long block lists are limited to 64 entries with
+an omitted count. The file contains no payload bytes, serial numbers, exact
+times or measurement values.
 This is the file to attach to a public issue. Check it before posting, especially
 if you have added custom layouts or support tooling of your own.
 
