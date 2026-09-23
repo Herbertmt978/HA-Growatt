@@ -89,7 +89,7 @@ docker run --rm --read-only --cap-drop ALL --security-opt no-new-privileges \
 ```
 
 Run it for each supported Docker platform. Test passive capture separately on
-Linux with only `NET_RAW`, using the probe's `--sniff` option. The probe checks
+Linux as root with only `NET_RAW`, using the probe's `--sniff` option. The probe checks
 installed profile data, real proxy/server sockets, passive health and SIGTERM
 shutdown. Native broker and Home Assistant migration checks are additional
 release requirements. The `--supervisor` probe also checks root-owned private

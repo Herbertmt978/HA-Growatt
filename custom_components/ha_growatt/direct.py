@@ -15,10 +15,13 @@ from homeassistant.helpers.event import async_track_state_change_event, async_tr
 from homeassistant.helpers.sun import get_astral_event_date
 from homeassistant.util import dt as dt_util
 
+from ha_growatt.native_outputs import NativeOutputs
 from ha_growatt.native_receiver import NativeReceiver
 
 from .const import DEFAULTS, DOMAIN, GUIDE
+from .direct_controls import DirectControls
 from .health import issues
+from .output_config import native_output_settings
 
 _IDENTITY = re.compile(r"[A-Za-z0-9_-]{1,64}\Z")
 
@@ -27,12 +30,15 @@ class DirectHub:
     def __init__(self, hass, entry):
         self.hass, self.entry = hass, entry
         self.options = DEFAULTS | entry.options
+        self.outputs = NativeOutputs(native_output_settings(self.options))
         self.receiver = NativeReceiver(
             port=self.options.get("port", entry.data["port"]),
             forward_cloud=self.options.get("forward_cloud", entry.data["forward_cloud"]),
             state_path=hass.config.path(".storage", "ha_growatt_native_readings.json"),
             family=self.options.get("family", entry.data.get("family", "default")),
+            on_telemetry=self.outputs.publish,
         )
+        self.controls = DirectControls(self)
         self.started = dt_util.utcnow()
         self.current_issues = {}
         self.unsubscribers = []
@@ -40,7 +46,12 @@ class DirectHub:
         self.recent_events = deque(maxlen=256)
 
     async def start(self):
-        await self.receiver.start()
+        self.outputs.start()
+        try:
+            await self.receiver.start()
+        except BaseException:
+            await self.outputs.close()
+            raise
         self.unsubscribers.append(self.receiver.subscribe(self.reading))
         self.unsubscribers.append(self.receiver.subscribe_buffered(self.buffered))
         self.unsubscribers.append(
@@ -71,6 +82,7 @@ class DirectHub:
 
     @callback
     def reading(self, reading):
+        self.controls.observe(reading)
         self.evaluate(dt_util.utcnow())
 
     @callback
@@ -106,6 +118,7 @@ class DirectHub:
     def evaluate(self, now):
         if self.closed:
             return
+        self.controls.check_sessions()
         sun = self.hass.states.get("sun.sun")
         service = {
             "online": self.receiver.running,
@@ -130,6 +143,7 @@ class DirectHub:
             devices,
             self.options,
         )
+        wanted = {f"direct_{key}": value for key, value in wanted.items()}
         for key in self.current_issues.keys() - wanted.keys():
             ir.async_delete_issue(self.hass, DOMAIN, key)
         for key, (translation, placeholders) in wanted.items():
@@ -155,4 +169,6 @@ class DirectHub:
         for key in self.current_issues:
             ir.async_delete_issue(self.hass, DOMAIN, key)
         self.current_issues.clear()
+        await self.controls.close()
         await self.receiver.close()
+        await self.outputs.close()

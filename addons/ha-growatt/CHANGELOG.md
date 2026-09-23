@@ -1,3 +1,10 @@
+# 0.7.0
+
+The optional Home Assistant integration can now offer supported settings and
+output destinations without this app. It also has a separate read-only Modbus
+TCP polling route for a suitable inverter or gateway. Existing app settings,
+MQTT entities and cloud forwarding are unchanged.
+
 # 0.6.0
 
 The support page's private capture now includes a shareable structure report

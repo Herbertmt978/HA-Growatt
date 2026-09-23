@@ -15,10 +15,11 @@ Real captures and installation details remain outside this repository.
 | Server | Real connections check protocol 2, 5 and 6 acknowledgements, clock responses, reconnects and register requests. Fifty-one observed API exchanges cover reads, writes, multiple registers and error responses. |
 | Sniffer | TCP reassembly covers retransmission, reordering, wrapping sequence numbers and bounded connection storage. Container probes exercise actual Linux packet capture. |
 | Configuration | INI settings, environment overrides, app options, time zones, buffered publication, native MQTT, optional destinations, custom layouts and extension settings are covered. |
-| Python and Linux | All 2,817 tests, lint checks and package builds pass on Python 3.12, 3.13 and 3.14. The full suite also passes against the installed Linux Python 3.13 image. |
+| Python and Linux | The 0.7.0 source passes 3,097 tests on Python 3.12, 3.13 and 3.14, plus lint and package builds. The installed Linux Python 3.13 image also passes all 3,097 tests. |
 | Container platforms | amd64, arm64, arm/v7 and 386 images pass installed-package decoding, real proxy/server connections, passive health, SIGTERM shutdown and Linux capture probes. |
 | Native Home Assistant | An isolated instance on HAOS-DEV accepts the old and new discovery records with the same 64 entity identities, values, units and classes. Full discovery and cleanup, MQTT reload/birth, broker restart and Core restart pass. Recorder retains history and the expected statistic metadata. |
 | Physical installation | Ninety daylight frames from both inverters match the previous decoder, with no mismatches. Both fresh MQTT states match. The 64 discovery records retain their identities and metadata; the freshness label becomes “Last data push”. |
+| HA-only connection routes | Disposable Home Assistant checks cover native Shine controls, output isolation, diagnostics, Modbus TCP polling, stable device identities and quiet restart recovery. The development Home Assistant instance passes configuration and restart checks. The owner's ShineWiFi-X devices have not been switched to the HA-only receiver, and no physical direct Modbus endpoint has been confirmed. |
 
 ## Layouts and identifiers
 

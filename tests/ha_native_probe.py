@@ -44,7 +44,7 @@ async def main():
         await hass.async_stop()
         return
     flow = await hass.config_entries.flow.async_init("ha_growatt", context={"source": SOURCE_USER})
-    assert set(flow["menu_options"]) == {"direct", "companion"}, flow
+    assert set(flow["menu_options"]) == {"direct", "modbus", "companion"}, flow
     direct_form = await hass.config_entries.flow.async_configure(
         flow["flow_id"], {"next_step_id": "direct"}
     )
