@@ -8,6 +8,23 @@ from collections import OrderedDict
 from .profiles import wire_profiles
 from .protocol import Frame, ProtocolError
 
+_BLOCK_BYTES = 32
+_MAX_REPORTED_BLOCKS = 64
+_DECODE_ISSUES = {
+    "Frame does not match the selected telemetry profile": "selected_profile_mismatch",
+    "Truncated telemetry identity or timestamp": "short_measurement",
+    "Telemetry identity is invalid": "invalid_identity",
+    "No verified default profile matches this frame": "no_default_profile",
+    "No verified profile matches this frame": "no_verified_profile",
+    "No verified family profile matches this frame": "no_verified_family_profile",
+    "Telemetry does not meet the minimum layout score": "low_layout_score",
+}
+
+
+def _reported_blocks(offsets):
+    blocks = sorted(offsets)
+    return blocks[:_MAX_REPORTED_BLOCKS], max(0, len(blocks) - _MAX_REPORTED_BLOCKS)
+
 
 class PacketHealth:
     def __init__(self):
@@ -104,35 +121,87 @@ class PrivateCapture:
     def export_shareable(self, decoder):
         """Describe captured frames without copying their contents or readings.
 
-        Thirty-two-byte activity blocks help locate changing record sections while
-        keeping individual bytes, serials and measurement values out of the file.
+        Thirty-two-byte activity and variation blocks help locate unfamiliar
+        record sections without exposing individual bytes or their values.
         """
         if self.expires and time.monotonic() >= self.expires:
             self.clear()
         labels = {}
         records = []
         profiles = wire_profiles()
+        configured_profile = getattr(decoder, "profile", None)
+        selected_profile = (
+            configured_profile
+            if isinstance(configured_profile, str)
+            and (configured_profile in profiles or configured_profile == "auto")
+            else None
+        )
+        unknown_layouts = {}
         for wire_hex in self.records:
             frame = Frame.from_bytes(bytes.fromhex(wire_hex))
             source = frame.payload[:10]
             if source not in labels:
                 labels[source] = f"Feed {len(labels) + 1}"
+            active_blocks = {
+                offset
+                for offset in range(0, len(frame.payload), _BLOCK_BYTES)
+                if any(frame.payload[offset : offset + _BLOCK_BYTES])
+            }
+            visible_blocks, omitted_blocks = _reported_blocks(active_blocks)
             row = {
                 "source": labels[source],
                 "protocol": frame.protocol,
                 "unit": frame.unit,
                 "function": frame.function,
                 "payload_bytes": len(frame.payload),
-                "active_blocks": [
-                    offset
-                    for offset in range(0, len(frame.payload), 32)
-                    if any(frame.payload[offset : offset + 32])
-                ],
+                "active_blocks": visible_blocks,
+                "active_blocks_omitted": omitted_blocks,
             }
+            if selected_profile is not None:
+                row["selected_profile"] = selected_profile
             try:
                 telemetry = decoder.decode(frame)
-            except ProtocolError:
+            except ProtocolError as error:
                 row["result"] = "decode_failed"
+                shape = (
+                    labels[source],
+                    frame.protocol,
+                    frame.unit,
+                    frame.function,
+                    len(frame.payload),
+                )
+                layout = unknown_layouts.get(shape)
+                if layout is None:
+                    layout = {
+                        "source": labels[source],
+                        "protocol": frame.protocol,
+                        "unit": frame.unit,
+                        "function": frame.function,
+                        "payload_bytes": len(frame.payload),
+                        "frames": 0,
+                        "decode_issues": set(),
+                        "selected_profile": selected_profile,
+                        "header_compatible_profiles": [
+                            name
+                            for name, schema in profiles.items()
+                            if frame.protocol == schema["protocol"]
+                            and frame.function in schema.get("functions", [3, 4, 80])
+                        ],
+                        "active_blocks": set(),
+                        "changing_blocks": set(),
+                        "reference": frame.payload,
+                    }
+                    unknown_layouts[shape] = layout
+                layout["frames"] += 1
+                layout["decode_issues"].add(_DECODE_ISSUES.get(str(error), "other"))
+                layout["active_blocks"].update(active_blocks)
+                reference = layout["reference"]
+                layout["changing_blocks"].update(
+                    offset
+                    for offset in range(0, len(frame.payload), _BLOCK_BYTES)
+                    if frame.payload[offset : offset + _BLOCK_BYTES]
+                    != reference[offset : offset + _BLOCK_BYTES]
+                )
             else:
                 row.update(
                     result="decoded",
@@ -148,15 +217,39 @@ class PrivateCapture:
                         if offset + size > len(frame.payload)
                     ]
             records.append(row)
+        unknown = []
+        for layout in unknown_layouts.values():
+            active, active_omitted = _reported_blocks(layout["active_blocks"])
+            changing, changing_omitted = _reported_blocks(layout["changing_blocks"])
+            unknown.append(
+                {
+                    "layout": f"Undecoded layout {len(unknown) + 1}",
+                    "source": layout["source"],
+                    "protocol": layout["protocol"],
+                    "unit": layout["unit"],
+                    "function": layout["function"],
+                    "payload_bytes": layout["payload_bytes"],
+                    "frames": layout["frames"],
+                    "decode_issues": sorted(layout["decode_issues"]),
+                    "selected_profile": layout["selected_profile"],
+                    "header_compatible_profiles": layout["header_compatible_profiles"],
+                    "active_blocks": active,
+                    "active_blocks_omitted": active_omitted,
+                    "changing_blocks": changing,
+                    "changing_blocks_omitted": changing_omitted,
+                }
+            )
         return {
             "format": "ha-growatt-shareable-1",
             "active": self.active,
             "limit": 256,
             "notice": (
-                "Contains packet structure and decode outcomes only. No packet bytes, "
-                "serial numbers, exact times or measurement values are included."
+                "Contains packet structure and decode outcomes only. Block offsets show "
+                "activity and changes, not values. No packet bytes, serial numbers, "
+                "exact times or measurement values are included."
             ),
             "records": records,
+            "undecoded_layouts": unknown,
         }
 
     def export_serial_redacted(self, decoder):

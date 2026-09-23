@@ -89,8 +89,10 @@ def test_shareable_capture_keeps_structure_without_identity_or_readings():
     assert rows[0]["source"] == rows[1]["source"] == "Feed 1"
     assert rows[0]["result"] == "decoded"
     assert rows[0]["profile"] == "classic-6"
+    assert rows[0]["selected_profile"] == "classic-6"
     assert rows[0]["payload_bytes"] == len(payload)
     assert isinstance(rows[0]["active_blocks"], list)
+    assert shared["undecoded_layouts"] == []
     encoded = json.dumps(shared)
     assert "PRIVATE_READINGS" not in encoded
     assert payload[:10].decode() not in encoded
@@ -110,9 +112,83 @@ def test_shareable_capture_does_not_copy_undecodable_or_expired_packets(monkeypa
     capture.record(Frame(1, 6, 1, 3, b"LOGGER0001PRIVATE_ADDRESS"))
     shared = capture.export_shareable(Decoder())
     assert shared["records"][0]["result"] == "decode_failed"
+    assert shared["undecoded_layouts"][0]["decode_issues"] == ["other"]
     assert "PRIVATE" not in json.dumps(shared)
     clock[0] += 1801
     assert capture.export_shareable(Decoder())["records"] == []
+    assert capture.export_shareable(Decoder())["undecoded_layouts"] == []
+
+
+def test_shareable_unknown_layouts_group_changes_without_leaking_private_bytes():
+    class Decoder:
+        def decode(self, _frame):
+            raise ProtocolError("Frame does not match the selected telemetry profile")
+
+    first = bytearray(128)
+    first[:10] = b"LOGGER0001"
+    secret = b"private@example.com SECRET1234567"
+    first[32 : 32 + len(secret)] = secret
+    second = bytearray(first)
+    second[70:80] = b"READING123"
+    capture = PrivateCapture()
+    capture.start()
+    capture.record(Frame(1, 6, 2, 4, bytes(first)))
+    capture.record(Frame(2, 6, 2, 4, bytes(second)))
+
+    shared = capture.export_shareable(Decoder())
+    assert len(shared["undecoded_layouts"]) == 1
+    layout = shared["undecoded_layouts"][0]
+    assert layout["source"] == "Feed 1"
+    assert layout["frames"] == 2
+    assert layout["payload_bytes"] == 128
+    assert layout["decode_issues"] == ["selected_profile_mismatch"]
+    assert "classic-6" in layout["header_compatible_profiles"]
+    assert layout["active_blocks"] == [0, 32, 64]
+    assert layout["changing_blocks"] == [64]
+    encoded = json.dumps(shared)
+    for secret in ("LOGGER0001", "private@example.com", "SECRET1234567", "READING123"):
+        assert secret not in encoded
+        assert secret.encode().hex() not in encoded
+
+
+def test_shareable_unknown_layout_bounds_block_offsets_and_error_text():
+    class Decoder:
+        def decode(self, _frame):
+            raise ProtocolError("Private password and inverter serial: SECRET0001")
+
+    payload = b"SECRET0001" + bytes([1]) * (32 * 90 - 10)
+    capture = PrivateCapture()
+    capture.start()
+    capture.record(Frame(1, 6, 2, 4, payload))
+    shared = capture.export_shareable(Decoder())
+    row = shared["records"][0]
+    layout = shared["undecoded_layouts"][0]
+    assert len(row["active_blocks"]) == len(layout["active_blocks"]) == 64
+    assert row["active_blocks_omitted"] == layout["active_blocks_omitted"] == 26
+    assert layout["changing_blocks"] == []
+    assert layout["decode_issues"] == ["other"]
+    assert "SECRET" not in json.dumps(shared)
+
+
+@pytest.mark.parametrize(
+    ("failure", "category"),
+    [
+        ("No verified profile matches this frame", "no_verified_profile"),
+        ("No verified family profile matches this frame", "no_verified_family_profile"),
+        ("Telemetry does not meet the minimum layout score", "low_layout_score"),
+    ],
+)
+def test_shareable_family_decoder_failures_use_only_safe_categories(failure, category):
+    class Decoder:
+        def decode(self, _frame):
+            raise ProtocolError(failure)
+
+    capture = PrivateCapture()
+    capture.start()
+    capture.record(frame())
+    shared = capture.export_shareable(Decoder())
+    assert shared["undecoded_layouts"][0]["decode_issues"] == [category]
+    assert failure not in json.dumps(shared)
 
 
 def test_serial_redacted_replay_keeps_known_numbers_and_replaces_other_bytes():

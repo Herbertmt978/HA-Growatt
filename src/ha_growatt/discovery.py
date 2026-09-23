@@ -99,16 +99,14 @@ def state_topic(identity: str) -> str:
     return f"homeassistant/grott/{identity}/state"
 
 
-def discovery_messages(
-    identity: str,
+def sensors_for(
     *,
     profile: str = "v0_1_9_standard",
     wire_profile: str | None = None,
     include_all: bool = False,
     sensor_metadata: dict | None = None,
-) -> dict[str, dict]:
-    """Return retained config messages; no network operation takes place."""
-    validate_identity(identity)
+) -> tuple[Sensor, ...]:
+    """Choose sensor definitions shared by MQTT and native HA publication."""
     if profile not in {"v0_1_9_standard", "all"}:
         raise ValueError("Unknown Home Assistant entity profile")
     sensors = STANDARD_SENSORS
@@ -132,6 +130,75 @@ def discovery_messages(
             for key, metadata in sorted(schema["sensors"].items())
             if metadata["source"] in available
         ) + (STANDARD_SENSORS[-1],)
+    return sensors
+
+
+def sensor_value(
+    sensor: Sensor,
+    values: dict,
+    received_at: datetime,
+    wire_profile: str,
+    *,
+    profile: str = "v0_1_9_standard",
+):
+    """Apply the same aliases and scaling as MQTT discovery to a raw reading."""
+    if sensor.key == "grott_last_push":
+        return received_at
+    key = sensor.source or sensor.key
+    standard = profile == "v0_1_9_standard" and wire_profile in {
+        "mod-6",
+        "extended-6",
+        "custom:T06NNNNXMOD",
+        "custom:T06NNNNX",
+    }
+    if (standard or wire_profile in {"mod-6", "custom:T06NNNNXMOD"}) and sensor.key == "pvpowerout":
+        raw = values.get("pac")
+        if raw is None and "pvfrequentie" in values:
+            raw = values.get("pvpowerout")
+    elif (
+        standard or wire_profile in {"mod-6", "custom:T06NNNNXMOD"}
+    ) and sensor.key == "pvfrequentie":
+        raw = values.get("pvfrequency", values.get("pvfrequentie"))
+    elif (
+        standard or wire_profile in {"mod-6", "custom:T06NNNNXMOD"}
+    ) and sensor.key == "pvipmtemperature":
+        raw = values.get("comboardtemperature")
+        if raw is None and "pvfrequentie" in values:
+            raw = values.get("pvipmtemperature")
+    else:
+        raw = values.get(key)
+    if raw is None:
+        return None
+    if sensor.choices:
+        return dict(sensor.choices).get(raw, "Unknown")
+    if sensor.numeric or sensor.divisor != 1:
+        try:
+            return float(raw) / sensor.divisor
+        except (TypeError, ValueError, OverflowError):
+            return None
+    return raw
+
+
+def discovery_messages(
+    identity: str,
+    *,
+    profile: str = "v0_1_9_standard",
+    wire_profile: str | None = None,
+    include_all: bool = False,
+    sensor_metadata: dict | None = None,
+) -> dict[str, dict]:
+    """Return retained config messages; no network operation takes place."""
+    validate_identity(identity)
+    sensors = sensors_for(
+        profile=profile,
+        wire_profile=wire_profile,
+        include_all=include_all,
+        sensor_metadata=sensor_metadata,
+    )
+    standard = wire_profile is None or (
+        profile == "v0_1_9_standard"
+        and wire_profile in {"mod-6", "extended-6", "custom:T06NNNNXMOD", "custom:T06NNNNX"}
+    )
     result = {}
     for sensor in sensors:
         template = "{{ value_json[" + json.dumps(sensor.source or sensor.key) + "]"

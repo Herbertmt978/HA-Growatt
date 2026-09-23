@@ -199,6 +199,10 @@ class SyntheticInverter:
 
 async def diagnostic_actions(hass, pipeline, inverter, logger, simulator, report):
     flow = await hass.config_entries.flow.async_init("ha_growatt", context={"source": "user"})
+    assert flow["type"] == "menu"
+    flow = await hass.config_entries.flow.async_configure(
+        flow["flow_id"], {"next_step_id": "companion"}
+    )
     assert flow["type"] == "form"
     assert "Live HA Growatt app status" in flow["description_placeholders"]["connection_note"]
     report["native_companion_same_broker_handoff"] = "passed"

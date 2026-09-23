@@ -115,6 +115,10 @@ async def main():
         for old_entry in hass.config_entries.async_entries("ha_growatt"):
             await hass.config_entries.async_remove(old_entry.entry_id)
         flow = await hass.config_entries.flow.async_init("ha_growatt", context={"source": "user"})
+        assert flow["type"] == "menu", flow
+        flow = await hass.config_entries.flow.async_configure(
+            flow["flow_id"], {"next_step_id": "companion"}
+        )
         assert flow["type"] == "form", flow
         flow = await hass.config_entries.flow.async_configure(
             flow["flow_id"],

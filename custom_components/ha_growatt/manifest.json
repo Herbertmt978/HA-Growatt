@@ -1,14 +1,14 @@
 {
   "domain": "ha_growatt",
   "name": "HA Growatt",
-  "after_dependencies": ["recorder"],
+  "after_dependencies": ["recorder", "mqtt"],
   "codeowners": ["@Herbertmt978"],
   "config_flow": true,
-  "dependencies": ["mqtt", "sun"],
+  "dependencies": ["sun"],
   "documentation": "https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/home-assistant-features.md",
   "integration_type": "service",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/Herbertmt978/HA-Growatt/issues",
-  "requirements": [],
-  "version": "0.5.0"
+  "requirements": ["ha-growatt@https://github.com/Herbertmt978/HA-Growatt/releases/download/v0.6.0/ha_growatt-0.6.0-py3-none-any.whl"],
+  "version": "0.6.0"
 }

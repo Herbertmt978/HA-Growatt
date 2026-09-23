@@ -1,4 +1,4 @@
-"""HA-specific support for the app's MQTT service, without duplicate sensors."""
+"""Growatt receiver or companion for an existing app installation."""
 
 import json
 import re
@@ -22,6 +22,24 @@ _IDENTITY = re.compile(r"[A-Za-z0-9_-]{1,64}\Z")
 async def async_setup_entry(hass, entry):
     from .migration import register
 
+    if entry.data.get("mode") == "direct":
+        from .direct import DirectHub
+
+        hub = DirectHub(hass, entry)
+        entry.runtime_data = hub
+        try:
+            await hub.start()
+            await hass.config_entries.async_forward_entry_setups(entry, ["sensor", "binary_sensor"])
+        except BaseException:
+            try:
+                await hass.config_entries.async_unload_platforms(entry, ["sensor", "binary_sensor"])
+            finally:
+                await hub.close()
+            raise
+        register(hass)
+        entry.async_on_unload(entry.add_update_listener(reload_options))
+        return True
+
     companion = Companion(hass, entry)
     entry.runtime_data = companion
     await companion.start()
@@ -35,8 +53,17 @@ async def reload_options(hass, entry):
 
 
 async def async_unload_entry(hass, entry):
-    entry.runtime_data.stop()
-    hass.services.async_remove(DOMAIN, "adopt_history")
+    if entry.data.get("mode") == "direct":
+        unloaded = await hass.config_entries.async_unload_platforms(
+            entry, ["sensor", "binary_sensor"]
+        )
+        if not unloaded:
+            return False
+        await entry.runtime_data.close()
+    else:
+        entry.runtime_data.stop()
+    if len(hass.config_entries.async_entries(DOMAIN)) == 1:
+        hass.services.async_remove(DOMAIN, "adopt_history")
     return True
 
 

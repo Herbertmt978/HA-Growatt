@@ -1,21 +1,28 @@
 {
   "title": "HA Growatt",
   "config": {
-    "step": {"user": {
+    "step": {"user": {"menu_options": {"direct": "Receive dataloggers in Home Assistant", "companion": "Connect the existing HA Growatt app"}},
+    "direct": {
+      "title": "Receive Growatt readings in Home Assistant",
+      "description": "Home Assistant will listen for your ShineWiFi dataloggers on this port. Point each datalogger at this Home Assistant host and port. Cloud forwarding keeps Growatt's cloud service available and falls back to local replies if it fails. The default profile selects a layout from each packet. Stop any other receiver using this port first.",
+      "data": {"port": "Datalogger TCP port", "forward_cloud": "Forward readings to Growatt cloud", "family": "Preferred inverter family"}
+    },
+    "companion": {
       "title": "Connect the HA Growatt companion",
       "description": "{connection_note} Keep the HA Growatt app and MQTT running. This companion adds repair notices and buffered-reading events using your existing MQTT connection. It creates no duplicate measurement sensors. Daylight checks use Home Assistant's location and allow two minutes after startup.",
       "data": {"daylight_alerts": "Warn about silent feeds during daylight", "stale_minutes": "Minutes without a fresh reading", "sunrise_grace_minutes": "Minutes to wait after sunrise", "buffered_events": "Fire events for buffered readings"}
     }},
-    "abort": {"already_configured": "HA Growatt is already configured.", "mqtt_required": "Set up the MQTT integration and start the HA Growatt app first."}
+    "abort": {"already_configured": "HA Growatt is already configured.", "mqtt_required": "Set up the MQTT integration and start the HA Growatt app first."},
+    "error": {"port_in_use": "Home Assistant cannot open that port. Stop the other receiver or choose another port."}
   },
   "options": {"step": {"init": {
     "title": "HA Growatt alerts and events",
-    "description": "Missing readings or app status wait until daylight and the sunrise grace period. An explicit app-offline message is reported at any time. Existing readings remain unchanged.",
-    "data": {"daylight_alerts": "Warn about silent feeds during daylight", "stale_minutes": "Minutes without a fresh reading", "sunrise_grace_minutes": "Minutes to wait after sunrise", "buffered_events": "Fire events for buffered readings"}
-  }}},
+    "description": "Missing readings wait until daylight and the sunrise grace period. Existing readings remain unchanged. Changing the native receiver's family waits for fresh readings before restoring saved values.",
+    "data": {"daylight_alerts": "Warn about silent feeds during daylight", "stale_minutes": "Minutes without a fresh reading", "sunrise_grace_minutes": "Minutes to wait after sunrise", "buffered_events": "Fire events for buffered readings", "family": "Preferred inverter family (native receiver only)", "port": "Datalogger TCP port (native receiver only)", "forward_cloud": "Forward to Growatt cloud (native receiver only)"}
+  }}, "error": {"port_in_use": "Home Assistant cannot open that port. Stop the other receiver or choose another port."}},
   "issues": {
-    "service_offline": {"title": "HA Growatt is not reporting its status", "description": "Check that the HA Growatt app and MQTT broker are running. The app has reported that it is offline, or its status is missing during daylight after the sunrise grace period. Missing status alone does not raise a warning overnight. Saved readings remain visible and may be old. This warning clears when current status messages resume."},
-    "decode_failed": {"title": "HA Growatt cannot decode the incoming measurements", "description": "Open the app and check the inverter's reading profile. Download diagnostics and a support capture if the model is not recognised. New session-key encrypted dataloggers need additional protocol support; changing profiles does not decrypt them."},
+    "service_offline": {"title": "HA Growatt is not reporting its status", "description": "Check that the HA Growatt app and MQTT broker are running if you use the app route. The app has reported that it is offline, or its status is missing during daylight after the sunrise grace period. Missing status alone does not raise a warning overnight. Saved readings remain visible and may be old. This warning clears when current status messages resume."},
+    "decode_failed": {"title": "HA Growatt cannot decode the incoming measurements", "description": "Check the inverter family in integration options or the app's reading profile. Download diagnostics and a shareable packet report if the model is not recognised. New session-key encrypted dataloggers need additional protocol support; changing profiles does not decrypt them."},
     "feed_stale": {"title": "A Growatt inverter is silent during daylight", "description": "Inverter {inverter} has sent no fresh reading for at least {minutes} minutes. Check its power, datalogger connection and selected reading profile. Normal overnight silence is excluded, with a grace period after sunrise. The warning clears when fresh readings arrive or night begins."}
   }
 }

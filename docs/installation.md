@@ -93,6 +93,7 @@ Linux with only `NET_RAW`, using the probe's `--sniff` option. The probe checks
 installed profile data, real proxy/server sockets, passive health and SIGTERM
 shutdown. Native broker and Home Assistant migration checks are additional
 release requirements. The `--supervisor` probe also checks root-owned private
-options and the privilege drop. Run the test harness as root with `SETUID`,
-`SETGID` and `KILL`; the last capability lets the parent test signal the child
-after its user changes. The service itself has no effective capabilities.
+options and the privilege drop. Run that harness as root with writable `/data`
+and `CHOWN`, `SETUID`, `SETGID` and `KILL`; the last capability lets the parent
+test signal the child after its user changes. The service itself has no
+effective capabilities.

@@ -18,36 +18,62 @@
 
 ---
 
-HA Growatt receives traffic from your Growatt datalogger and publishes inverter
-readings to Home Assistant through MQTT. You can keep forwarding to Growatt for
-ShinePhone, or use the service locally. If the cloud stops responding, local
-fallback keeps supported readings flowing to Home Assistant.
+HA Growatt receives traffic from your Growatt datalogger. You can install it as
+one Home Assistant integration, or use the app and MQTT for its wider set of
+outputs and inverter tools. Both routes can forward to Growatt for ShinePhone.
+If the cloud stops responding, local fallback keeps supported readings flowing.
 
-There are two parts:
+Choose the route that fits your installation:
 
 | Component | Purpose |
 | --- | --- |
-| **HA Growatt app** | Receives datalogger traffic, publishes sensors and provides the setup and troubleshooting UI. Install this first on Home Assistant OS. |
-| **Optional companion integration** | Adds daylight-aware Repairs, buffered-reading events and history-adoption tools through HACS. It uses the app's MQTT connection and creates no duplicate measurement sensors. |
+| **Home Assistant integration only** | Receives datalogger traffic inside Home Assistant. No separate app or MQTT broker is needed for readings, cloud forwarding, restart recovery, buffered events or daylight alerts. |
+| **HA Growatt app and optional companion** | The app publishes MQTT sensors and offers the web setup page, other outputs and supported inverter tools. The companion adds Repairs, buffered events and history adoption without duplicating those sensors. |
 
-The service can also run in Docker or Python outside Home Assistant. The
-companion still needs a running HA Growatt service and the same MQTT broker.
+The service can also run in Docker or Python outside Home Assistant. Existing
+app and MQTT installations remain supported; adding the native receiver does
+not silently move their entities or history.
 
 > [!NOTE]
 > **Release status:** The badge above shows the latest published version. The
-> features under [Version 0.5.0](#version-050) require that version of the app;
-> the companion's new actions also require its 0.5.0 update.
+> features under [Version 0.6.0](#version-060) need the 0.6.0 integration or
+> app. Existing app installations can update without changing their setup.
 
 ## Quick start
 
 ### Requirements
 
-- Home Assistant OS for the app, or a separate machine running Docker or Python 3.12+.
-- A working MQTT broker and the MQTT integration in Home Assistant.
+- Home Assistant for the one-part integration, Home Assistant OS for the app,
+  or a separate machine running Docker or Python 3.12+.
+- A working MQTT broker and Home Assistant's MQTT integration if using the app route.
 - A supported Growatt datalogger that can send traffic to your service's LAN address.
 - Access to the datalogger's upload-server settings and a stable address for the service.
 
-### 1. Install the app
+### Integration only: one Home Assistant installation
+
+Add this repository to HACS as a custom **Integration** repository, download
+**HA Growatt**, and restart Home Assistant. Under **Settings → Devices &
+services → Add integration**, choose **HA Growatt → Receive dataloggers in Home
+Assistant**. Keep the automatic profile and cloud forwarding defaults unless
+your hardware needs something different. The integration downloads its pinned
+receiver library from the matching release.
+
+Point each ShineWiFi datalogger at Home Assistant's stable LAN address and the
+selected TCP port, normally **5279**. Only one receiver can use a port: stop an
+existing app or Docker receiver before switching that datalogger. Wait for
+fresh readings, then check the inverter devices, **Connected** sensors and
+daily energy values. Saved readings return after a quiet restart with their
+original time; a restored reading does not mark a datalogger connected.
+
+The app still provides its web support page, other output destinations and
+supported inverter controls. If you currently use those features, keep the app
+route below. Native entities have different identifiers, so preview history
+adoption before retiring existing MQTT entities. See the
+[Home Assistant guide](docs/home-assistant-features.md#integration-only-installation).
+
+### App and MQTT
+
+#### 1. Install the app
 
 In **Settings → Apps → App store → Repositories**, add:
 
@@ -63,7 +89,7 @@ external broker, enter its address and credentials in the app options.
 Start the app and open its web UI. The guided setup checks the broker,
 datalogger connection, fresh readings, profiles and history mappings.
 
-### 2. Connect your datalogger
+#### 2. Connect your datalogger
 
 Set the datalogger's upload server to Home Assistant's stable LAN address and
 the app's published TCP port, normally **5279**. Use the published host port,
@@ -73,7 +99,7 @@ Datalogger settings vary by model and firmware. If yours does not let you change
 the server, check the [datalogger limitations](docs/hardware-support.md) before
 changing your network or firmware.
 
-### 3. Check the readings
+#### 3. Check the readings
 
 1. Wait for fresh readings from every inverter. Solar-only inverters may be silent overnight.
 2. Open **Settings → Devices & services → MQTT** and check the inverter devices.
@@ -90,12 +116,12 @@ Add this repository to HACS with category **Integration**, download **HA Growatt
 and restart Home Assistant. Then open **Settings → Devices & services → Add
 integration** and select **HA Growatt**.
 
-For a manual installation, copy the [companion directory](custom_components/ha_growatt)
+For a manual installation, copy the [integration directory](custom_components/ha_growatt)
 into /config/custom_components/ha_growatt, restart Home Assistant and add the
 integration. Repeat the copy after each manual upgrade.
 
-Keep the app or standalone service running. The companion is not a replacement
-for the datalogger receiver. See [the companion guide](docs/home-assistant-features.md).
+Choose **Connect the existing HA Growatt app**. Keep the app or standalone
+service and MQTT running. See the [Home Assistant guide](docs/home-assistant-features.md).
 
 </details>
 
@@ -162,6 +188,23 @@ does not establish a successful migration.
 
 Follow the [installation and migration instructions](docs/installation.md) and
 check the [compatibility record](docs/compatibility.md) before retiring the old service.
+
+## Version 0.6.0
+
+HA Growatt can now receive datalogger traffic inside Home Assistant without a
+separate app or MQTT broker. This route includes native measurement and
+connection entities, cloud forwarding with local fallback, restart recovery,
+buffered-reading events, daylight alerts, diagnostics and history-adoption
+preview. The existing app route and its entity identifiers are unchanged.
+
+When an unfamiliar packet cannot be decoded, a short private capture can now
+produce a shareable report of packet shape, changing block positions and safe
+decode categories. It contains no packet bytes, serials, exact times or
+measurement values. The private replay remains separate.
+
+The one-part route has not been physically qualified on every Growatt model.
+The app remains the route for advanced controls, additional output targets and
+its web support page. See the [0.6.0 notes](docs/releases/0.6.0.md).
 
 ## Version 0.5.0
 
