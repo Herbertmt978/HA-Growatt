@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="addons/ha-growatt/icon.png" alt="HA Growatt inverter" width="180">
+<img src="addons/ha-growatt/logo.png" alt="HA Growatt inverter illustration" width="240">
 
 # HA Growatt
 
@@ -49,7 +49,7 @@ companion still needs a running HA Growatt service and the same MQTT broker.
 
 ### 1. Install the app
 
-In **Settings → Apps → Install app**, open the repository settings and add:
+In **Settings → Apps → App store → Repositories**, add:
 
 ~~~text
 https://github.com/Herbertmt978/HA-Growatt
