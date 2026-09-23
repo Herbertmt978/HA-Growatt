@@ -138,6 +138,7 @@ def addon_options(
         "mqtt_tls",
         "restore_readings",
         "inverters",
+        "dataloggers",
         "experimental_controls",
     }
     if set(options) - allowed:
@@ -163,6 +164,18 @@ def addon_options(
         raise ValueError("Inverters must be a list of up to 128 profiles")
     from .discovery import validate_identity
 
+    dataloggers = {}
+    logger_options = options.get("dataloggers", [])
+    if not isinstance(logger_options, list) or len(logger_options) > 128:
+        raise ValueError("Dataloggers must be a list of up to 128 devices")
+    for item in logger_options:
+        if not isinstance(item, dict) or set(item) - {"serial", "model", "firmware"}:
+            raise ValueError("Invalid datalogger details")
+        identity = item.get("serial", "")
+        validate_identity(identity)
+        if identity in dataloggers:
+            raise ValueError("Each datalogger must have only one entry")
+        dataloggers[identity] = {key: item[key] for key in ("model", "firmware") if key in item}
     families = {}
     models = {}
     hardware = {}
@@ -203,6 +216,7 @@ def addon_options(
             experimental_controls=_boolean(options.get("experimental_controls", False)),
             control_models=models,
             hardware=hardware,
+            dataloggers=dataloggers,
             settings_refresh_seconds=_integer(options.get("settings_refresh_seconds", 300)),
             buffered_events=_boolean(options.get("buffered_events", True)),
             raw_mqtt=None if ha_enabled else RawMqttSettings(mqtt),
@@ -251,6 +265,7 @@ def load_legacy_options(
         "experimental_controls",
         "control_models",
         "hardware",
+        "dataloggers",
         "settings_refresh_seconds",
         "buffered_events",
         "cloud_recovery_seconds",
@@ -372,6 +387,7 @@ def load_legacy_options(
             get("Generic", "control_models", "HA_GROWATT_CONTROL_MODELS", "{}")
         ),
         hardware=_mapping(get("Generic", "hardware", "HA_GROWATT_HARDWARE", "{}")),
+        dataloggers=_mapping(get("Generic", "dataloggers", "HA_GROWATT_DATALOGGERS", "{}")),
         settings_refresh_seconds=_integer(
             get("Generic", "settings_refresh_seconds", "HA_GROWATT_SETTINGS_REFRESH_SECONDS", 300)
         ),

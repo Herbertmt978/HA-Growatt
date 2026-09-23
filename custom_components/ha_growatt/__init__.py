@@ -14,6 +14,7 @@ from homeassistant.util import dt as dt_util
 
 from .const import DEFAULTS, DOMAIN, GUIDE
 from .health import issues
+from .register_tools import RegisterTools
 
 _IDENTITY = re.compile(r"[A-Za-z0-9_-]{1,64}\Z")
 
@@ -51,9 +52,11 @@ class Companion:
         self.unsubscribers = []
         self.recent_events = deque(maxlen=256)
         self.closed = False
+        self.register_tools = RegisterTools(self)
 
     async def start(self):
         try:
+            await self.register_tools.start()
             for topic in ("ha_growatt/+/status", "ha_growatt/events/buffered"):
                 self.unsubscribers.append(
                     await mqtt.async_subscribe(self.hass, topic, self.receive)
@@ -183,6 +186,7 @@ class Companion:
     @callback
     def stop(self):
         self.closed = True
+        self.register_tools.stop()
         for unsubscribe in self.unsubscribers:
             unsubscribe()
         self.unsubscribers.clear()

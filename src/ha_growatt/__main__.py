@@ -156,6 +156,11 @@ def main() -> None:
     app.add_argument("--config", type=Path, default=Path("/data/options.json"))
     inspect = commands.add_parser("inspect", help="Validate raw binary TCP-stream frames offline")
     inspect.add_argument("path", type=Path)
+    replay = commands.add_parser(
+        "replay", help="Decode a private capture offline without publishing or device writes"
+    )
+    replay.add_argument("path", type=Path)
+    replay.add_argument("--config", type=Path, required=True)
     relay = commands.add_parser("relay", help="Start the development TCP relay")
     relay.add_argument("--upstream", required=True)
     relay.add_argument("--upstream-port", type=int, default=5279)
@@ -178,6 +183,19 @@ def main() -> None:
     try:
         if arguments.command == "healthcheck":
             parser.exit(0 if healthy(arguments.file) else 1)
+        elif arguments.command == "replay":
+            from .packet_health import replay_capture
+
+            if arguments.path.stat().st_size > 5 * 1024 * 1024:
+                raise ValueError("Capture exceeds its size limit")
+            settings = load_settings(arguments.config, {})
+            print(
+                json.dumps(
+                    replay_capture(
+                        json.loads(arguments.path.read_text(encoding="utf-8")), settings.decoder()
+                    )
+                )
+            )
         elif arguments.command == "inspect":
             inspect_capture(arguments.path)
         elif arguments.command == "relay":

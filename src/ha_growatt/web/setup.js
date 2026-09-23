@@ -19,6 +19,12 @@ function setupLink(label, href) {
   link.href = href;
   return link;
 }
+function setupHomeAssistantLink(label, href) {
+  const link = setupLink(label, href);
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  return link;
+}
 function setupParagraph(text) {
   setupElement("setup-instructions").append(setupNode("p", text));
 }
@@ -78,7 +84,15 @@ function showSetupStep(focus = false) {
   } else {
     setupParagraph("In Settings → Devices & services → MQTT, check that every expected inverter has fresh measurement entities. This confirms the Home Assistant side of discovery. The app's checks alone cannot confirm the contents of your dashboard.");
     setupReview("entities", "I have checked the inverter entities in Home Assistant.");
-    setupParagraph("For daylight-aware Repairs and history-adoption tools, optionally add this repository to HACS as an Integration, download HA Growatt, restart Home Assistant, then add HA Growatt under Devices & services. Keep the app running. The companion uses its MQTT status and adds no duplicate measurement sensors.");
+    setupParagraph("The optional companion adds daylight-aware Repairs and history tools. HACS installs the companion; this app still receives datalogger traffic and publishes readings. Download the companion from HACS, restart Home Assistant, then add HA Growatt under Devices & services.");
+    const companionLinks = setupNode("p");
+    companionLinks.append(
+      setupHomeAssistantLink("Open HA Growatt in HACS", "https://my.home-assistant.io/redirect/hacs_repository/?owner=Herbertmt978&repository=HA-Growatt&category=integration"),
+      setupNode("span", " · "),
+      setupHomeAssistantLink("Add the companion integration", "https://my.home-assistant.io/redirect/config_flow_start/?domain=ha_growatt"),
+    );
+    instructions.append(companionLinks);
+    setupParagraph("The companion checks for a fresh app status message on Home Assistant's MQTT broker. If it cannot see one, confirm that Home Assistant and this app use the same broker. You can still finish setup while the app is restarting or offline.");
     instructions.append(setupLink("Read the companion instructions", "https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/home-assistant-features.md"));
     setupParagraph("These checks apply to the current connection. They are not a hardware certification or a battery-control test. Review acknowledgements reset when you reload this page.");
   }
@@ -109,7 +123,7 @@ function updateSetupChecks() {
       : "Setup still has checks to complete. You can visit every step while waiting for readings.";
 }
 function renderInstallation(status) {
-  const devices = JSON.stringify(status.devices.map(({identity, family, controls, profile}) => ({identity, family, controls, profile})));
+  const devices = JSON.stringify(status.devices.map(({identity, family, controls, profile, model}) => ({identity, family, controls, profile, model})));
   if (setupDevices !== null && devices !== setupDevices) {
     setupReviewed.profiles = false;
     setupReviewed.entities = false;

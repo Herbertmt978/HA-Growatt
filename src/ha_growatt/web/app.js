@@ -94,15 +94,36 @@ async function refresh(renderForms = true) {
   );
   $("packet-summary").textContent = `${data.observations.measurements} measurements decoded; ${data.observations.failed_measurements} failed measurements; ${data.observations.incomplete_fields} incomplete fields; ${data.observations.announcement_warnings} announcement warnings.`;
   $("capture-status").textContent = data.capture_active ? "Recording packet summaries (up to ten minutes)." : "Capture is stopped.";
+  $("private-status").textContent = data.private_capture_active ? "Recording private packets." : "Private capture is stopped.";
+  $("packet-health").replaceChildren(...(data.packet_health || []).map((row) => node("li", `${row.source}: ${row.state}. Format changes: ${row.changes}; incomplete or failed measurements: ${row.failures}.`)));
   $("version").textContent = `HA Growatt ${data.version}`;
+  $("dataloggers").replaceChildren();
+  for (const logger of data.dataloggers || []) {
+    const card = node("div");
+    card.className = "device";
+    card.append(node("h3", logger.model ? `${logger.model} · ${logger.identity}` : logger.identity));
+    card.append(node("p", `${logger.connection} · Firmware: ${logger.firmware || "unconfirmed"}`));
+    card.append(node("p", `Last contact: ${logger.last_contact ? new Date(logger.last_contact).toLocaleString() : "No contact this service run"}. Observed upload interval: ${logger.upload_interval == null ? "waiting for two readings" : logger.upload_interval + " seconds"}. Reconnects: ${logger.reconnects}.`));
+    if (logger.history.length) {
+      const history = node("ul");
+      for (const stamp of logger.history) history.append(node("li", new Date(stamp).toLocaleString()));
+      card.append(history);
+    }
+    $("dataloggers").append(card);
+  }
+  const controlDetails = (device) => (device.capabilities?.settings || []).map((setting) => node("li", `${setting.label}: ${setting.reason}`));
   const identities = JSON.stringify(data.devices.map((device) => device.identity));
   if (!renderForms && identities !== displayedDevices &&
       !$("devices").querySelector('[data-dirty="true"]')) renderForms = true;
-  const description = (device) => `${device.restored ? "Saved readings; waiting for fresh data" : device.recent ? "Recent readings" : "No recent readings"} · ${device.profile} · ${device.connection}`;
+  const healthText = (device) => device.clock ? ` Operating state: ${device.operating_state}. Main fault: ${device.fault_description}. Clock: ${device.clock_status}; reference: ${device.clock.reference}${device.clock.offset_seconds == null ? "" : "; offset: " + device.clock.offset_seconds + " seconds"}. ${device.write_conflict}.${device.firmware_changed ? " Recorded firmware changed this service run; settings require fresh readback." : ""}` : "";
+  const description = (device) => `${device.restored ? "Saved readings; waiting for fresh data" : device.recent ? "Recent readings" : "No recent readings"} · ${device.profile} · ${device.connection}. ${device.capabilities?.explanation || ""}${device.datalogger ? " Logger: " + device.datalogger + "." : ""}` + healthText(device);
   if (!renderForms) {
     for (const card of $("devices").children) {
       const device = data.devices.find((item) => item.identity === card.dataset.identity);
-      if (device) card.querySelector("p").textContent = description(device);
+      if (device) {
+        card.querySelector("p").textContent = description(device);
+        card.querySelector(".control-details").replaceChildren(...controlDetails(device));
+      }
     }
     return;
   }
@@ -122,6 +143,10 @@ async function refresh(renderForms = true) {
         description(device),
       ),
     );
+    const details = node("ul");
+    details.className = "control-details";
+    details.replaceChildren(...controlDetails(device));
+    section.append(details);
     const form = node("form"),
       fields = node("div");
     fields.className = "fields";
@@ -170,6 +195,7 @@ async function refresh(renderForms = true) {
       });
     });
     section.append(form);
+    section.append(registerTools(device, hardware, form));
     const readFirmware = node("button", "Read firmware from inverter");
     readFirmware.addEventListener("click", () => action(async () => {
       readFirmware.disabled = true;
@@ -182,7 +208,7 @@ async function refresh(renderForms = true) {
     section.append(readFirmware);
     $("devices").append(section);
     if (
-      ["sph", "spa"].includes(device.controls) &&
+      device.capabilities?.schedules?.length &&
       data.experimental_controls
     ) {
       const option = node("option", device.identity);
@@ -308,6 +334,14 @@ $("refresh").addEventListener("click", () => action(() => refresh()));
 for (const operation of ["start", "stop"]) {
   $("capture-" + operation).addEventListener("click", () => action(async () => {
     const response = await api("api/capture/" + operation, {});
+    $("message").textContent = response.message;
+    await refresh(false);
+  }));
+}
+for (const operation of ["start", "stop", "clear"]) {
+  $("private-" + operation).addEventListener("click", () => action(async () => {
+    if (operation === "start" && !$("private-consent").checked) throw Error("Please acknowledge that the capture contains private data.");
+    const response = await api("api/private-capture/" + operation, {acknowledge_private_data: $("private-consent").checked});
     $("message").textContent = response.message;
     await refresh(false);
   }));

@@ -3,7 +3,7 @@
   "config": {
     "step": {"user": {
       "title": "Connect the HA Growatt companion",
-      "description": "Keep the HA Growatt app and MQTT running. This companion adds repair notices and buffered-reading events using your existing MQTT connection. It creates no duplicate measurement sensors. Daylight checks use Home Assistant's location and allow two minutes after startup.",
+      "description": "{connection_note} Keep the HA Growatt app and MQTT running. This companion adds repair notices and buffered-reading events using your existing MQTT connection. It creates no duplicate measurement sensors. Daylight checks use Home Assistant's location and allow two minutes after startup.",
       "data": {"daylight_alerts": "Warn about silent feeds during daylight", "stale_minutes": "Minutes without a fresh reading", "sunrise_grace_minutes": "Minutes to wait after sunrise", "buffered_events": "Fire events for buffered readings"}
     }},
     "abort": {"already_configured": "HA Growatt is already configured.", "mqtt_required": "Set up the MQTT integration and start the HA Growatt app first."}

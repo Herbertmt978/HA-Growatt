@@ -1,19 +1,19 @@
 {
-  "checked": "2026-09-21",
-  "notice": "Results apply only to the hardware, firmware, connection and software listed. Reports from another project do not verify HA Growatt. A successful read does not prove a control works.",
+  "checked": "2026-09-23",
+  "notice": "Results apply only to the hardware, firmware, connection and software listed. The external 0xAHA results use direct Modbus RTU/TCP, not HA Growatt's Shine datalogger TCP proxy. They do not verify HA Growatt readings or controls. A successful read does not prove a control works.",
   "entries": [
     {
       "id": "verified-installation",
-      "model": "MIN 2500TL-XH and one unidentified inverter",
-      "firmware": "GH1.0 and AL1.0 observed across the pair; model-to-feed mapping unconfirmed",
-      "datalogger": "Model and firmware unconfirmed",
+      "model": "MIN 2500TL-XH and MIC 2000TL-X",
+      "firmware": "MIN 2500TL-XH: AL1.0; MIC 2000TL-X: GH1.0, observed in the saved installation readback",
+      "datalogger": "Growatt ShineWiFi-X on both inverters, owner-confirmed; datalogger firmware unconfirmed",
       "connection": "Growatt datalogger TCP proxy",
       "project": "HA Growatt 0.3.2",
       "level": "Verified installation",
       "telemetry": "Fresh readings, cloud forwarding, MQTT discovery, restart and history preservation verified.",
       "controls": "Not physically qualified; no battery qualification.",
       "profile": "Retain the installation's working Automatic selection.",
-      "limits": "The owner identified one inverter as a MIN 2500TL-XH on 21 September 2026. The two feeds jointly preserve 64 measurement entities. Exact model-to-feed mapping, second model and datalogger variants remain unconfirmed. No battery control was physically qualified.",
+      "limits": "The owner confirmed both models and their feed pairing on 22 September 2026. The two feeds jointly preserve 64 measurement entities. Results apply to this installation and the recorded firmware; both dataloggers are owner-confirmed ShineWiFi-X; datalogger firmware remains unconfirmed. No battery control was physically qualified.",
       "sources": [
         {
           "label": "HA Growatt compatibility checks",
@@ -59,7 +59,7 @@
       "telemetry": "Model-specific register evidence; not a HA Growatt telemetry test.",
       "controls": "Reporter measured charging stopping at register 3048 target and discharge changing at register 3067 under Load Priority, on DN1.0. Changes took roughly two minutes. SPH registers 1071/1091 did not control this device.",
       "profile": "MOD/MID TL3-XH experimental controls, only after confirming the exact model and successful reads.",
-      "limits": "Direct Modbus results do not establish support through a Shine datalogger. HA Growatt has no direct Modbus client. Raising the reported discharge threshold above current charge also caused charging on this firmware; do not assume it only stops discharge.",
+      "limits": "Direct Modbus results do not establish support through a Shine datalogger. HA Growatt's direct Modbus scanner is diagnostic only; its telemetry service uses Shine traffic. Raising the reported discharge threshold above current charge also caused charging on this firmware; do not assume it only stops discharge.",
       "sources": [
         {
           "label": "MID hardware measurements",
@@ -83,6 +83,139 @@
         {
           "label": "Control register evidence",
           "url": "https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/hardware-support.md"
+        }
+      ]
+    },
+    {
+      "id": "0xaha-mic-tl-x",
+      "model": "MIC 600-3300TL-X family",
+      "firmware": "Not stated in the published model matrix",
+      "datalogger": "Not stated in the published model matrix",
+      "connection": "Direct Modbus RTU/TCP",
+      "project": "0xAHA/Growatt_ModbusTCP published model matrix",
+      "level": "External hardware test — direct Modbus",
+      "telemetry": "0xAHA marks this family as tested with real hardware through its direct Modbus integration. HA Growatt Shine readings have not been checked by this report.",
+      "controls": "No HA Growatt control qualification; this is a grid-tied family.",
+      "profile": "Keep HA Growatt on Automatic until fresh Shine readings establish a suitable profile.",
+      "limits": "The published result covers a family and rating range, not every exact variant or firmware. It does not verify the owner's MIC 2000TL-X through this connection; that separate HA Growatt result is listed above.",
+      "sources": [
+        {
+          "label": "0xAHA supported-model matrix",
+          "url": "https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/"
+        }
+      ]
+    },
+    {
+      "id": "0xaha-min-tl-xh",
+      "model": "MIN TL-XH 3000-10000 family",
+      "firmware": "Not stated in the published model matrix",
+      "datalogger": "Not stated in the published model matrix",
+      "connection": "Direct Modbus RTU/TCP",
+      "project": "0xAHA/Growatt_ModbusTCP published model matrix",
+      "level": "External hardware test — direct Modbus",
+      "telemetry": "0xAHA marks this hybrid family as tested with real hardware through its direct Modbus integration. HA Growatt Shine readings have not been checked by this report.",
+      "controls": "No HA Growatt battery control has been physically qualified by this report.",
+      "profile": "Do not select experimental HA Growatt controls from this direct Modbus result alone.",
+      "limits": "0xAHA's listed range starts at 3000 W, so it does not include the owner's MIN 2500TL-XH. The family result does not establish every exact variant, firmware or Shine TCP path.",
+      "sources": [
+        {
+          "label": "0xAHA supported-model matrix",
+          "url": "https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/"
+        }
+      ]
+    },
+    {
+      "id": "0xaha-sph-8000tl3-bh-up",
+      "model": "SPH 8000TL3 BH-UP",
+      "firmware": "Not stated in the published model matrix",
+      "datalogger": "Not stated in the published model matrix",
+      "connection": "Direct Modbus RTU/TCP",
+      "project": "0xAHA/Growatt_ModbusTCP published model matrix",
+      "level": "External hardware test — direct Modbus",
+      "telemetry": "0xAHA explicitly names this model as the tested SPH-TL3 example. HA Growatt Shine readings have not been checked by this report.",
+      "controls": "No HA Growatt battery control or schedule has been physically qualified by this report.",
+      "profile": "Confirm fresh HA Growatt readings before considering a matching experimental control profile.",
+      "limits": "The 0xAHA result does not state firmware or Shine TCP compatibility. It must not be extended to every SPH-TL3 variant.",
+      "sources": [
+        {
+          "label": "0xAHA supported-model matrix",
+          "url": "https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/"
+        }
+      ]
+    },
+    {
+      "id": "0xaha-mod-tl3-xh",
+      "model": "MOD 6000-15000TL3-XH family",
+      "firmware": "Not stated in the published model matrix",
+      "datalogger": "Not stated in the published model matrix",
+      "connection": "Direct Modbus RTU/TCP",
+      "project": "0xAHA/Growatt_ModbusTCP published model matrix",
+      "level": "External hardware test — direct Modbus",
+      "telemetry": "0xAHA marks this hybrid family as tested with real hardware and lists battery monitoring. HA Growatt Shine readings have not been checked by this report.",
+      "controls": "0xAHA labels control support as pending. No HA Growatt control qualification follows from this result.",
+      "profile": "Use HA Growatt's MOD/MID battery controls only after matching the exact model and confirming initial reads; they remain experimental.",
+      "limits": "The published family result does not state firmware or every tested rating. Grid flow readings depend on a suitable meter in 0xAHA's documentation. Direct Modbus evidence does not establish Shine TCP support.",
+      "sources": [
+        {
+          "label": "0xAHA supported-model matrix",
+          "url": "https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/"
+        }
+      ]
+    },
+    {
+      "id": "0xaha-spf-es-plus",
+      "model": "SPF 3000-6000 ES PLUS family",
+      "firmware": "Not stated in the published model matrix",
+      "datalogger": "Not stated in the published model matrix",
+      "connection": "Direct Modbus RTU/TCP",
+      "project": "0xAHA/Growatt_ModbusTCP published model matrix",
+      "level": "External hardware test — direct Modbus",
+      "telemetry": "0xAHA marks this off-grid family as tested with real hardware. HA Growatt Shine readings have not been checked by this report.",
+      "controls": "No HA Growatt control qualification follows from this result.",
+      "profile": "Treat an HA Growatt Shine installation as unverified until fresh readings are checked.",
+      "limits": "0xAHA says this family uses its off-grid protocol and has no grid export. Its direct Modbus result does not establish HA Growatt's Shine protocol, profile or every exact variant.",
+      "sources": [
+        {
+          "label": "0xAHA supported-model matrix",
+          "url": "https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/"
+        }
+      ]
+    },
+    {
+      "id": "0xaha-wit-tl3",
+      "model": "WIT 4000-15000TL3 family",
+      "firmware": "Not stated in the published model matrix",
+      "datalogger": "Not stated in the published model matrix",
+      "connection": "Direct Modbus RTU/TCP",
+      "project": "0xAHA/Growatt_ModbusTCP published model matrix",
+      "level": "External hardware test — direct Modbus",
+      "telemetry": "0xAHA marks this VPP-capable hybrid family as tested with real hardware. HA Growatt Shine readings have not been checked by this report.",
+      "controls": "0xAHA's VPP control support does not qualify HA Growatt controls.",
+      "profile": "Treat HA Growatt support as unverified until this exact model and its Shine traffic are checked.",
+      "limits": "The published family result does not state firmware or every tested rating. The direct Modbus VPP register path is separate from HA Growatt's Shine TCP proxy.",
+      "sources": [
+        {
+          "label": "0xAHA supported-model matrix",
+          "url": "https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/"
+        }
+      ]
+    },
+    {
+      "id": "0xaha-mid-tl3-x",
+      "model": "MID 15000-25000TL3-X family",
+      "firmware": "Not stated in the published model matrix",
+      "datalogger": "Not stated in the published model matrix",
+      "connection": "Direct Modbus RTU/TCP profile",
+      "project": "0xAHA/Growatt_ModbusTCP published model matrix",
+      "level": "External documented profile — hardware validation welcome",
+      "telemetry": "0xAHA lists a profile for this family but marks it as awaiting hardware validation. This is not a verified HA Growatt reading result.",
+      "controls": "No control qualification established.",
+      "profile": "Check exact hardware and fresh HA Growatt readings before assigning any profile.",
+      "limits": "The published matrix marks this family with a caution symbol, unlike its hardware-tested families. It does not establish Shine TCP support. The separate MID 25KTL3-XH field report above is a different model and connection.",
+      "sources": [
+        {
+          "label": "0xAHA supported-model matrix",
+          "url": "https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/"
         }
       ]
     },

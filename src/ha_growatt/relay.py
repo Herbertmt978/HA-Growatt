@@ -11,9 +11,11 @@ from datetime import datetime
 from typing import Literal
 
 from .commands import PERMITTED_RECORDS, may_forward
+from .dataloggers import Logger
 from .device_protocol import acknowledgement, time_command
 from .discovery import validate_identity
 from .protocol import Frame, ProtocolError, read_frame
+from .write_audit import WriteAudit
 
 _LOG = logging.getLogger(__name__)
 Direction = Literal["device", "cloud"]
@@ -127,6 +129,7 @@ class RelaySession:
     last_command: float = 0
     clock_needed: bool = False
     heartbeat: Frame | None = None
+    audit: WriteAudit = field(default_factory=WriteAudit)
 
     def sequence(self) -> int:
         used = self.local_sequences | self.cloud_sequences
@@ -178,6 +181,7 @@ class Relay:
         self._closing = False
         self._devices: dict[str, RelaySession] = {}
         self._connections: set[RelaySession] = set()
+        self.loggers: dict[str, Logger] = {}
 
     @property
     def addresses(self) -> list[tuple]:
@@ -284,7 +288,12 @@ class Relay:
             validate_identity(logger)
             if session.logger and session.logger != logger:
                 raise ProtocolError("Datalogger identity changed during a connection")
+            new_connection = not session.logger
             session.logger, session.protocol = logger, frame.protocol
+            if logger not in self.loggers and len(self.loggers) < 128:
+                self.loggers[logger] = Logger(logger)
+            if logger in self.loggers:
+                self.loggers[logger].contact(new_connection=new_connection)
             if frame.function == 22 and len(frame.payload) <= 32:
                 session.heartbeat = frame
             if frame.function == 3:
@@ -307,12 +316,19 @@ class Relay:
             return
 
     async def _send_device(
-        self, session: RelaySession, wire: bytes, before_send: Callable[[], None] | None = None
+        self,
+        session: RelaySession,
+        wire: bytes,
+        before_send: Callable[[], None] | None = None,
+        *,
+        audit_source=None,
     ) -> None:
         async with session.send_lock:
             if before_send:
                 before_send()
             session.writer.write(wire)
+            if audit_source:
+                session.audit.sent(Frame.from_bytes(wire, verify_checksum=False), audit_source)
             async with asyncio.timeout(self.settings.write_seconds):
                 await session.writer.drain()
 
@@ -436,7 +452,7 @@ class Relay:
                             sequence = session.sequence()
                             session.translations[sequence] = frame.transaction
                             wire = replace(frame, transaction=sequence).to_bytes()
-                await self._send_device(session, wire)
+                await self._send_device(session, wire, audit_source="cloud" if frame else None)
                 self.stats.cloud_frames += 1
                 self._enqueue("cloud", frame)
         except (ProtocolError, OSError, TimeoutError):
@@ -472,6 +488,7 @@ class Relay:
                 return
             frame = self._parse(wire)
             if frame:
+                session.audit.reply(frame)
                 self._identify(frame, session)
                 if frame.transaction in session.translations and frame.function in {
                     5,
@@ -512,11 +529,25 @@ class Relay:
             self.stats.device_frames += 1
             self._enqueue("device", frame)
 
+    def logger_connection(self, identity: str) -> str:
+        connections = [
+            s for s in self._connections if s.logger == identity and not s.writer.is_closing()
+        ]
+        if any(s.cloud for s in connections):
+            return "cloud"
+        return "local" if connections else "disconnected"
+
     def connection(self, identity: str) -> str:
         session = self._devices.get(identity)
         if session is None or session.writer.is_closing():
             return "disconnected"
         return "cloud" if session.cloud else "local"
+
+    def write_status(self, identity: str) -> str:
+        session = self._devices.get(identity)
+        if session is None or session.writer.is_closing():
+            return "Disconnected; no current write evidence"
+        return session.audit.status(session.devices[identity])
 
     def session_key(self, identity: str) -> int | None:
         session = self._devices.get(identity)
@@ -557,7 +588,9 @@ class Relay:
             session.pending[sequence] = (frame, future)
             try:
                 session.last_command = loop.time()
-                await self._send_device(session, frame.to_bytes(), check_current)
+                await self._send_device(
+                    session, frame.to_bytes(), check_current, audit_source="local"
+                )
                 async with asyncio.timeout(self.settings.command_seconds):
                     return await future
             finally:

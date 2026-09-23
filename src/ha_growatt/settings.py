@@ -96,6 +96,7 @@ def _load_settings(path: Path, environment: dict[str, str] | None = None) -> Set
             "experimental_controls",
             "control_models",
             "hardware",
+            "dataloggers",
             "settings_refresh_seconds",
             "buffered_events",
             "minimum_record_bytes",

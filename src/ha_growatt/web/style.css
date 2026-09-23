@@ -207,3 +207,7 @@ footer {
     font-size: 1.9rem;
   }
 }
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

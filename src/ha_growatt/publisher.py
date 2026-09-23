@@ -125,6 +125,7 @@ class Publisher:
         client.subscribe("homeassistant/status", qos=1)
         if self.command_callback is not None:
             client.subscribe("ha_growatt/+/command/+", qos=0)
+            client.subscribe("ha_growatt/diagnostics/request", qos=0)
         if self._feature_status:
             client.publish(
                 "ha_growatt/service/status", '{"online":true,"connections":[]}', qos=1, retain=True

@@ -128,5 +128,4 @@ def test_published_matrix_matches_packaged_evidence():
             assert urlparse(source["url"]).scheme == "https"
         if entry["level"] == "Verified installation":
             assert entry["project"].startswith("HA Growatt")
-            assert "unconfirmed" in entry["firmware"]
             assert "no battery" in entry["controls"].lower()

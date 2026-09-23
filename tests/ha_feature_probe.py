@@ -12,10 +12,14 @@ import sqlite3
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from types import SimpleNamespace
 
 import aiohttp
 from homeassistant import bootstrap, loader
-from homeassistant.core import HomeAssistant
+from homeassistant.components import mqtt as mqtt_component
+from homeassistant.core import Context, HomeAssistant
+from homeassistant.exceptions import HomeAssistantError, Unauthorized
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
 from ha_growatt.controls import response_body
@@ -110,6 +114,14 @@ class SyntheticInverter:
     def __init__(self, logger="TESTLOG001"):
         self.logger = logger
         self.registers = {1070: 50, 1071: 20, 1090: 50, 1091: 90, 1092: 0}
+        for start, raw in ((9, b"GH1.0 GH1.0 "), (125, b"MIC 2000TL-X\0\0\0\0\0")):
+            self.registers.update(
+                {
+                    start + i // 2: int.from_bytes(raw[i : i + 2], "big")
+                    for i in range(0, len(raw), 2)
+                }
+            )
+        self.registers.update({30000: 5200, 30099: 203})
         for start in (1080, 1083, 1086, 1100, 1103, 1106):
             self.registers.update({start: 23 * 256, start + 1: 5 * 256, start + 2: 0})
         self.tasks = set()
@@ -119,6 +131,7 @@ class SyntheticInverter:
         self.silent_cloud = False
 
     async def cloud(self, reader, writer):
+        self.cloud_writer = writer
         task = asyncio.current_task()
         self.tasks.add(task)
         try:
@@ -184,11 +197,123 @@ class SyntheticInverter:
             pass
 
 
+async def diagnostic_actions(hass, pipeline, inverter, logger, simulator, report):
+    flow = await hass.config_entries.flow.async_init("ha_growatt", context={"source": "user"})
+    assert flow["type"] == "form"
+    assert "Live HA Growatt app status" in flow["description_placeholders"]["connection_note"]
+    report["native_companion_same_broker_handoff"] = "passed"
+    flow = await hass.config_entries.flow.async_configure(flow["flow_id"], {})
+    entry = flow["result"]
+    await until(lambda: entry.state.value == "loaded")
+    await until(lambda: IDENTITY in entry.runtime_data.devices)
+    await asyncio.sleep(1)
+    baseline = list(simulator.writes)
+    # Read tools must work without enabling inverter writes.
+    pipeline.features.controls = False
+    try:
+        identity = await hass.services.async_call(
+            "ha_growatt",
+            "identify_hardware",
+            {"device_id": inverter.id},
+            blocking=True,
+            return_response=True,
+        )
+        assert identity["model"] == "MIC 2000TL-X" and identity["firmware"] == "GH1.0"
+        assert "MIC" in identity["family_hint"] and "MIN" in identity["family_hint"]
+        assert pipeline.features.hardware[IDENTITY]["firmware"] == "test-inverter-fw"
+        await asyncio.sleep(5)
+        data = {"device_id": inverter.id, "start": 9, "count": 6}
+        first = await hass.services.async_call(
+            "ha_growatt", "read_registers", data, blocking=True, return_response=True
+        )
+        simulator.registers[9] += 1
+        await asyncio.sleep(5)
+        second = await hass.services.async_call(
+            "ha_growatt",
+            "read_registers",
+            data | {"previous": first["snapshot"]},
+            blocking=True,
+            return_response=True,
+        )
+        assert second["changes"] == [
+            {"address": 9, "before": first["words"][0], "after": first["words"][0] + 1}
+        ]
+        assert simulator.writes == baseline
+        # HA makes its first user the owner regardless of supplied groups.
+        await hass.auth.async_create_user("Probe owner")
+        user = await hass.auth.async_create_user("Read-only probe user", group_ids=[])
+        assert not user.is_admin
+        try:
+            await hass.services.async_call(
+                "ha_growatt",
+                "identify_hardware",
+                {"device_id": inverter.id},
+                blocking=True,
+                return_response=True,
+                context=Context(user_id=user.id),
+            )
+        except Unauthorized:
+            pass
+        else:
+            raise AssertionError("A non-administrator ran a diagnostic action")
+        try:
+            await hass.services.async_call(
+                "ha_growatt",
+                "identify_hardware",
+                {"device_id": logger.id},
+                blocking=True,
+                return_response=True,
+            )
+        except HomeAssistantError:
+            pass
+        else:
+            raise AssertionError("A logger was accepted as an inverter")
+        tools = entry.runtime_data.register_tools
+        future = asyncio.get_running_loop().create_future()
+        tools.pending["a" * 32] = (IDENTITY, future)
+        message = SimpleNamespace(
+            topic="ha_growatt/diagnostics/response/" + "a" * 32,
+            payload=json.dumps({"identity": IDENTITY, "result": {"private": True}}),
+            retain=True,
+        )
+        tools.receive(message)
+        assert not future.done()
+        message.retain = False
+        message.topic = "ha_growatt/diagnostics/response/" + "b" * 32
+        tools.receive(message)
+        assert not future.done()
+        message.topic = "ha_growatt/diagnostics/response/" + "a" * 32
+        message.payload = json.dumps({"identity": "OTHER", "result": {}})
+        tools.receive(message)
+        assert not future.done()
+        assert await hass.config_entries.async_unload(entry.entry_id)
+        assert future.done() and isinstance(future.exception(), HomeAssistantError)
+        assert not hass.services.has_service("ha_growatt", "read_registers")
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        assert hass.services.has_service("ha_growatt", "read_registers")
+        report["native_read_only_identification_comparison_admin_correlation_unload"] = "passed"
+    finally:
+        pipeline.features.controls = True
+        # App option changes normally restart features. This probe changes the
+        # flag in place, so explicitly invalidate its discovery cache as well.
+        pipeline.features._announced.pop(IDENTITY, None)
+        await pipeline.features.publish_status(pipeline.features.devices[IDENTITY])
+        await until(lambda: f"ha_growatt_{IDENTITY}_output_limit" in entities(hass))
+        number = entities(hass)[f"ha_growatt_{IDENTITY}_output_limit"]
+        await until(lambda: hass.states.get(number) and hass.states.get(number).state == "75")
+
+
 async def main():
     hass = await boot()
     mqtt = MqttSettings(BROKER, state_path=str(CONFIG / "reading-cache.json"))
     if os.environ.get("GROWATT_PROBE_PHASE") == "quiet":
         return await quiet_restart(hass, mqtt)
+    from custom_components.ha_growatt.config_flow import app_connection_note
+
+    await mqtt_component.async_publish(
+        hass, "ha_growatt/service/status", '{"online":true}', qos=1, retain=True
+    )
+    assert "No live app status" in await app_connection_note(hass)
     case = next(
         case
         for case in json.loads((BASE / "fixtures/telemetry_cases.json").read_text())
@@ -208,7 +333,11 @@ async def main():
     simulator = SyntheticInverter()
     cloud = await asyncio.start_server(simulator.cloud, "127.0.0.1", 0)
     relay_settings = RelaySettings(
-        "127.0.0.1", cloud.sockets[0].getsockname()[1], listen_port=0, cloud_response_seconds=0.3
+        "127.0.0.1",
+        cloud.sockets[0].getsockname()[1],
+        listen_port=0,
+        cloud_response_seconds=0.3,
+        block_commands=False,
     )
     selection = SelectionSettings(
         strict=True, device_families={IDENTITY: "mod", "QUALIFY002": "sph"}
@@ -219,7 +348,12 @@ async def main():
             mqtt,
             "auto",
             selection,
-            RuntimeOptions(experimental_controls=True, control_models={"QUALIFY002": "sph"}),
+            RuntimeOptions(
+                experimental_controls=True,
+                control_models={"QUALIFY002": "sph"},
+                hardware={IDENTITY: {"model": "MIC 2000TL-X", "firmware": "test-inverter-fw"}},
+                dataloggers={"TESTLOG001": {"model": "ShineWiFi-X", "firmware": "test-logger-fw"}},
+            ),
         )
     )
     relay = Relay(relay_settings, pipeline.observe)
@@ -229,7 +363,7 @@ async def main():
     storage_task = None
     storage = SyntheticInverter("TESTLOG002")
     states_seen = []
-    report = {}
+    report = {"retained_status_not_accepted": "passed"}
     try:
         async with relay:
             reader, simulator.writer = await asyncio.open_connection(*relay.addresses[0][:2])
@@ -255,6 +389,39 @@ async def main():
                 key: value for key, value in ids.items() if key.startswith(f"grott_{IDENTITY}_")
             }
             report["existing_entities_and_discovery"] = "passed"
+            registry = dr.async_get(hass)
+            mqtt_entry = hass.config_entries.async_entries("mqtt")[0].entry_id
+
+            def linked():
+                inverter = registry.async_get_device_by_identifier(("mqtt", IDENTITY), mqtt_entry)
+                logger = registry.async_get_device_by_identifier(
+                    ("mqtt", "ha_growatt_logger_TESTLOG001"), mqtt_entry
+                )
+                return inverter and logger and inverter.via_device_id == logger.id
+
+            await until(linked)
+            logger = registry.async_get_device_by_identifier(
+                ("mqtt", "ha_growatt_logger_TESTLOG001"), mqtt_entry
+            )
+            inverter = registry.async_get_device_by_identifier(("mqtt", IDENTITY), mqtt_entry)
+            assert logger.model == "ShineWiFi-X" and logger.sw_version == "test-logger-fw"
+            assert inverter.model == "MIC 2000TL-X" and inverter.sw_version == "test-inverter-fw"
+            assert all(
+                er.async_get(hass).async_get(entity).device_id == inverter.id
+                for entity in before.values()
+            )
+            logger_entities = entities(hass)
+            contact = logger_entities["ha_growatt_logger_TESTLOG001_last_contact"]
+            await until(
+                lambda: (
+                    hass.states.get(contact)
+                    and hass.states.get(contact).state not in {"unknown", "unavailable"}
+                )
+            )
+            capability_entity = logger_entities[f"ha_growatt_{IDENTITY}_capabilities"]
+            assert "no battery controls" in hass.states.get(capability_entity).state
+            report["logger_device_metadata_link_and_model_capabilities"] = "passed"
+            await diagnostic_actions(hass, pipeline, inverter, logger, simulator, report)
 
             def changed(event):
                 if event.data.get("entity_id") == number and event.data.get("new_state"):
@@ -267,6 +434,25 @@ async def main():
             await until(lambda: hass.states.get(number).state == "42")
             assert simulator.writes == [42]
             assert "verified" in hass.states.get(result).state
+            clock_entity = ids[f"ha_growatt_{IDENTITY}_clock_status"]
+            state_entity = ids[f"ha_growatt_{IDENTITY}_operating_state"]
+            conflict_entity = ids[f"ha_growatt_{IDENTITY}_write_conflict"]
+            assert hass.states.get(clock_entity).state == "Reported clock differs"
+            assert hass.states.get(state_entity).state not in {"unknown", "unavailable"}
+            # Transaction 1 has already been used locally: exercise translated cloud ACKs.
+            simulator.cloud_writer.write(
+                Frame(
+                    1, 6, frame.unit, 6, logger_prefix("TESTLOG001", 6) + bytes([0, 3, 0, 44])
+                ).to_bytes()
+            )
+            await simulator.cloud_writer.drain()
+            await until(lambda: simulator.value == 44)
+            await hass.services.async_call("button", "press", {"entity_id": refresh}, blocking=True)
+            await until(lambda: hass.states.get(number).state == "44")
+            await until(
+                lambda: hass.states.get(conflict_entity).state.startswith("Cloud write confirmed")
+            )
+            report["native_clock_state_and_translated_cloud_conflict"] = "passed"
             simulator.discard = True
             await hass.services.async_call(
                 "number", "set_value", {"entity_id": number, "value": 30}, blocking=True
@@ -359,6 +545,31 @@ async def main():
                         assert installation["all_seen_inverters_fresh"]
                     async with client.get(f"http://127.0.0.1:{port}/api/installation") as response:
                         assert await response.json() == {"host_port": None}
+                    headers = {"X-HA-Growatt": "1"}
+                    async with client.post(
+                        f"http://127.0.0.1:{port}/api/private-capture/start",
+                        headers=headers,
+                        json={"acknowledge_private_data": True},
+                    ) as response:
+                        assert response.status == 200
+                    writes_before_capture = list(simulator.writes)
+                    simulator.writer.write(frame.to_bytes())
+                    await simulator.writer.drain()
+                    await until(lambda: bool(pipeline.private_capture.records))
+                    async with client.get(
+                        f"http://127.0.0.1:{port}/api/private-capture"
+                    ) as response:
+                        private = await response.json()
+                        assert private["frames"] and private["warning"].startswith("Private")
+                    assert simulator.writes == writes_before_capture
+                    async with client.post(
+                        f"http://127.0.0.1:{port}/api/private-capture/clear",
+                        headers=headers,
+                        json={},
+                    ) as response:
+                        assert response.status == 200
+                    assert not pipeline.private_capture.records
+                    report["native_private_capture_without_device_writes"] = "passed"
                     async with client.get(f"http://127.0.0.1:{port}/api/compatibility") as response:
                         catalogue = await response.json()
                         assert catalogue["entries"] and catalogue["notice"]
@@ -456,7 +667,12 @@ async def quiet_restart(hass, mqtt):
         RelaySettings("127.0.0.1", 9, listen_port=0),
         mqtt,
         "auto",
-        runtime=RuntimeOptions(experimental_controls=True, control_models={"QUALIFY002": "sph"}),
+        runtime=RuntimeOptions(
+            experimental_controls=True,
+            control_models={"QUALIFY002": "sph"},
+            hardware={IDENTITY: {"model": "MIC 2000TL-X", "firmware": "test-inverter-fw"}},
+            dataloggers={"TESTLOG001": {"model": "ShineWiFi-X", "firmware": "test-logger-fw"}},
+        ),
     )
     pipeline = Pipeline(settings)
     relay = Relay(settings.relay, pipeline.observe)
@@ -488,6 +704,21 @@ async def quiet_restart(hass, mqtt):
                 lambda: hass.states.get(connected) and hass.states.get(connected).state == "off"
             )
             assert hass.states.get(control).state == "unavailable"
+            await until(lambda: "ha_growatt_logger_TESTLOG001_connection" in entities(hass))
+            logger_entity = entities(hass)["ha_growatt_logger_TESTLOG001_connection"]
+            await until(
+                lambda: (
+                    hass.states.get(logger_entity)
+                    and hass.states.get(logger_entity).state == "disconnected"
+                )
+            )
+            registry = dr.async_get(hass)
+            mqtt_entry = hass.config_entries.async_entries("mqtt")[0].entry_id
+            inverter = registry.async_get_device_by_identifier(("mqtt", IDENTITY), mqtt_entry)
+            logger = registry.async_get_device_by_identifier(
+                ("mqtt", "ha_growatt_logger_TESTLOG001"), mqtt_entry
+            )
+            assert inverter.via_device_id == logger.id
             assert relay.stats.device_frames == 0
             setup = SupportServer(pipeline, relay, None).status()["installation"]
             assert setup["inverters_seen"] >= 2

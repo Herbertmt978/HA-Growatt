@@ -1,3 +1,53 @@
+# 0.5.0
+
+The setup guide now links directly to the optional companion. Its setup form
+checks for a fresh app status on Home Assistant's MQTT broker and explains what
+to check if no status arrives. An old retained status does not count as a live
+connection, and setup can still continue while the app is offline.
+
+A separate command-line scanner reads bounded input and holding register ranges
+from an explicitly named direct-Modbus TCP gateway. It is read-only, paced and
+saves raw results as a private file. A direct-Modbus response does not prove the
+same register works through a Shine datalogger. The compatibility matrix now
+labels published 0xAHA hardware results as external evidence, and the hardware
+report form asks owners to identify the software and connection used.
+
+The support page now downloads shareable packet evidence without serials or
+readings. A separate serial-redacted replay keeps known numeric measurements
+for decoder investigations, with a clear warning that those readings remain
+private. Both use the existing short-lived capture; the original private
+replay is unchanged.
+
+Added read-only hardware identification, bounded holding-register reads and
+comparisons in the app and companion actions. No profiles or controls change
+automatically. Register downloads are separate private reports. The README now
+has a clearer installation path and distinguishes published and upcoming features.
+
+Dataloggers now have separate Home Assistant devices linked to their inverters,
+with connection state, last contact, observed upload interval and recent
+reconnections. Optional logger model and firmware details are kept separate
+from inverter firmware. Existing measurement entities and history are preserved.
+
+Exact MIC TL-X and MIN TL-XH model names now restrict incompatible battery
+controls. The support page explains controls waiting for readback and the
+remaining experimental limits. Correcting a model cancels commands queued
+under the previous selection without discarding saved readings.
+
+The hardware matrix now records the owner's MIN 2500TL-XH, MIC 2000TL-X and two
+ShineWiFi-X loggers. Logger firmware and physical battery-control support remain
+unconfirmed. Battery controls are not physically qualified on this installation.
+
+Fresh readings now have clock checks, readable operating states and supported
+MIC fault descriptions. Stale overnight readings wait for new data. The support
+page records packet-format changes and firmware-detail changes, with a separate,
+explicitly private capture for offline replay. Existing redacted downloads remain
+free of packet bodies.
+
+Setting diagnostics distinguish confirmed cloud writes from unattributed readback
+changes. They observe replies and subsequent reads without retrying writes or
+changing the cloud-blocking default. Fault mappings and cloud-conflict scenarios
+are tested synthetically; they are not new physical hardware qualifications.
+
 # 0.4.0
 
 The app now includes a setup guide for the broker, datalogger connection, first
