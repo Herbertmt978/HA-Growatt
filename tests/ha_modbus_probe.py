@@ -195,6 +195,32 @@ async def fresh_run():
                 hub.receiver.interval = 30
                 expected[identity] = entities
             assert set(expected[DEVICES[0][0]]).isdisjoint(expected[DEVICES[1][0]])
+            offline = await asyncio.start_server(
+                lambda reader, writer: writer.close(), "127.0.0.1", 0
+            )
+            async with offline:
+                offline_entry = await create_entry(
+                    hass,
+                    "TEST_OFFLINE",
+                    3,
+                    "mic-0-v314",
+                    offline.sockets[0].getsockname()[1],
+                )
+                await until(
+                    lambda: (
+                        "ha_growatt_modbus_TEST_OFFLINE_connected"
+                        in entry_entities(hass, offline_entry)
+                    )
+                )
+                offline_entities = entry_entities(hass, offline_entry)
+                assert len(offline_entities) == 1
+                assert (
+                    hass.states.get(
+                        offline_entities["ha_growatt_modbus_TEST_OFFLINE_connected"]
+                    ).state
+                    == "off"
+                )
+                assert await hass.config_entries.async_remove(offline_entry.entry_id)
             hub = entries[0].runtime_data
             now = dt_util.utcnow()
             hass.states.async_set("sun.sun", "above_horizon")

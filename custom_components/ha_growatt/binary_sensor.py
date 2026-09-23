@@ -16,6 +16,11 @@ from .const import DOMAIN
 async def async_setup_entry(hass, entry, async_add_entities):
     hub = entry.runtime_data
     entities = {}
+    if entry.data.get("mode") == "modbus":
+        identity = hub.receiver.identity
+        entity = NativeConnected(identity, "modbus", hub)
+        entities[identity] = entity
+        async_add_entities([entity])
 
     @callback
     def receive(reading):
