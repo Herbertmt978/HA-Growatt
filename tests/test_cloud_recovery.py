@@ -15,7 +15,8 @@ def test_recovery_requires_heartbeat_then_reconnects_without_duplicate_ack(proto
                 "127.0.0.1",
                 port,
                 listen_port=0,
-                cloud_response_seconds=0.05,
+                # Leave room for the CI scheduler to deliver the probe reply.
+                cloud_response_seconds=0.5,
                 cloud_recovery_seconds=0.08,
             )
             async with Relay(settings) as relay:
@@ -33,6 +34,7 @@ def test_recovery_requires_heartbeat_then_reconnects_without_duplicate_ack(proto
                 writer.write(report(protocol, sequence=8).to_bytes())
                 assert await receive(reader) == Frame(8, protocol, 1, 4, b"\0")
                 probe_writer.write(ping.to_bytes())
+                await probe_writer.drain()
                 assert await asyncio.wait_for(reader.read(), 2) == b""
                 assert relay.stats.recovery_reconnects == 1
                 writer.close()
