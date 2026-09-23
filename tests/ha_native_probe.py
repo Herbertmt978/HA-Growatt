@@ -13,6 +13,9 @@ from homeassistant.core import HomeAssistant
 
 
 async def main():
+    # Home Assistant installs its Voluptuous compatibility layer during import.
+    import voluptuous as vol
+
     hass = HomeAssistant("/config")
     loader.async_setup(hass)
     hass.config.skip_pip = True
@@ -49,6 +52,12 @@ async def main():
         "type": str(direct_form.get("type")),
         "reason": direct_form.get("reason"),
     }
+    try:
+        direct_form["data_schema"]({"family": "max"})
+    except vol.Invalid:
+        pass
+    else:
+        raise AssertionError("The native setup offered a family without a built-in layout")
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
         port = sock.getsockname()[1]

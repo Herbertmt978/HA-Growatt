@@ -79,7 +79,7 @@ def direct_schema(values=None):
             ),
             vol.Optional("forward_cloud", default=values.get("forward_cloud", True)): bool,
             vol.Optional("family", default=values.get("family", "default")): vol.In(
-                ["default", "min", "mod", "sph", "spf", "spa", "tl3", "max"]
+                ["default", "min", "mod", "sph", "spf", "spa", "tl3"]
             ),
         }
     )
