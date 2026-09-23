@@ -25,7 +25,10 @@ def support():
     )
     pipeline = Pipeline(settings)
     transport = SimpleNamespace(
-        stats=RelayStats(device_frames=5), running=True, connection=lambda _: "local"
+        stats=RelayStats(device_frames=5),
+        running=True,
+        connection=lambda _: "local",
+        session_key=lambda _: 1,
     )
     pipeline.features = HomeAssistantFeatures(pipeline.ha, transport, pipeline)
     pipeline.features.remember(
@@ -91,6 +94,12 @@ def test_actual_http_routes_headers_and_ingress_boundary():
             diagnostics = await request("/api/diagnostics")
             assert b"Content-Disposition: attachment" in diagnostics
             assert b"PRIVATE001" not in diagnostics
+            for path in ("/api/shareable-capture", "/api/serial-redacted-capture"):
+                download = await request(path)
+                assert b"200" in download.splitlines()[0]
+                assert b"Content-Disposition: attachment" in download
+                assert b"Cache-Control: no-store" in download
+                assert b"PRIVATE001" not in download
             assert b"405" in (await request("/api/profiles", "POST", b"{}")).splitlines()[0]
             assert (
                 b"400"
@@ -220,6 +229,7 @@ def test_hardware_edit_preserves_profile_cache_and_unknown_details():
         server.supervisor = Client()
         device = server.pipeline.features.devices["PRIVATE001"]
         before = device.profile, device.last_record, device.readings
+        device.health = {"fault_description": "Old model fault interpretation"}
 
         async def forbidden(_):
             raise AssertionError("A hardware label must not discard saved readings")
@@ -241,6 +251,7 @@ def test_hardware_edit_preserves_profile_cache_and_unknown_details():
         )
         assert code == 200
         assert (device.profile, device.last_record, device.readings) == before
+        assert device.health == {}
         assert server.pipeline.features.hardware["PRIVATE001"]["firmware"] == "GH1.02"
         assert "Confirmed inverter model" not in json.dumps(server.status(redacted=True))
 
@@ -307,6 +318,10 @@ def test_firmware_read_preserves_the_global_reading_profile():
             return Frame(1, 6, 1, 5, bytes(30) + body + b"GH1.02GH2.01")
 
         server.transport.command = command
+        device = server.pipeline.features.devices["PRIVATE001"]
+        device.values["output_limit"] = 50
+        server.pipeline.features.hardware = {"PRIVATE001": {"firmware": "GH0.0"}}
+        old_context = server.pipeline.features.command_context(device)
         code, _, _ = await server.dispatch(
             "POST",
             "/api/hardware/read",
@@ -316,5 +331,37 @@ def test_firmware_read_preserves_the_global_reading_profile():
         assert code == 200
         assert server.supervisor.options["inverters"][0]["family"] == "sph"
         assert server.pipeline.settings.selection.family == "sph"
+        assert device.firmware_changed and not device.values
+        assert old_context != server.pipeline.features.command_context(device)
+
+    asyncio.run(scenario())
+
+
+def test_private_capture_requires_consent_and_never_enters_redacted_downloads():
+    from ha_growatt.protocol import Frame
+
+    async def scenario():
+        service = support()
+        headers = {"x-ha-growatt": "1", "content-type": "application/json"}
+        with pytest.raises(ValueError):
+            await service.dispatch("POST", "/api/private-capture/start", headers, b"{}")
+        await service.dispatch(
+            "POST", "/api/private-capture/start", headers, b'{"acknowledge_private_data":true}'
+        )
+        service.pipeline.private_capture.record(Frame(1, 6, 2, 4, b"SECRET0001" + bytes(100)))
+        private = json.loads((await service.dispatch("GET", "/api/private-capture", {}, b""))[2])
+        assert len(private["frames"]) == 1
+        shared = json.loads((await service.dispatch("GET", "/api/shareable-capture", {}, b""))[2])
+        assert shared["format"] == "ha-growatt-shareable-1"
+        assert len(shared["records"]) == 1
+        redacted = json.loads(
+            (await service.dispatch("GET", "/api/serial-redacted-capture", {}, b""))[2]
+        )
+        assert redacted["format"] == "ha-growatt-serial-redacted-1"
+        for route in ("/api/diagnostics", "/api/capture", "/api/shareable-capture"):
+            text = (await service.dispatch("GET", route, {}, b""))[2].decode()
+            assert "534543524554" not in text and private["frames"][0] not in text
+        await service.dispatch("POST", "/api/private-capture/clear", headers, b"{}")
+        assert not service.pipeline.private_capture.records
 
     asyncio.run(scenario())

@@ -6,6 +6,7 @@
     <title>HA Growatt</title>
     <link rel="stylesheet" href="style.css" />
     <script src="setup.js" defer></script>
+    <script src="tools.js" defer></script>
     <script src="app.js" defer></script>
   </head>
   <body>
@@ -54,6 +55,13 @@
           battery control profile to the model printed on the inverter.
         </p>
         <div id="devices"></div>
+      </section>
+      <section aria-labelledby="loggers-title">
+        <h2 id="loggers-title">Your dataloggers</h2>
+        <p>Connection history covers this service run. Upload intervals are observed between readings,
+          not read from the logger settings. Add known logger model and firmware details in the app's
+          dataloggers configuration; leave unknown firmware blank.</p>
+        <div id="dataloggers"></div>
       </section>
       <section aria-labelledby="schedule-title">
         <h2 id="schedule-title">Battery schedules</h2>
@@ -148,6 +156,28 @@
         <button id="capture-stop">Stop capture</button>
         <a class="button" href="api/capture" download="ha-growatt-capture.json">Download capture</a>
         <p id="capture-status" role="status"></p>
+        <h3>Packet format checks</h3>
+        <ul id="packet-health"></ul>
+        <details>
+          <summary>Private packet capture for offline replay</summary>
+          <p>This separate download contains real serial numbers and household readings.
+            Do not attach it to a public issue. It records at most ten minutes, 256 frames
+            or 2 MiB. Memory is cleared after thirty minutes or when the app restarts.
+            Only complete supported TCP frames can be captured.</p>
+          <label><input id="private-consent" type="checkbox" /> I understand this capture contains private data.</label>
+          <button id="private-start">Start private capture</button>
+          <button id="private-stop">Stop private capture</button>
+          <button id="private-clear">Delete private capture</button>
+          <a class="button" href="api/shareable-capture" download="ha-growatt-shareable-capture.json">Download shareable evidence</a>
+          <a class="button" href="api/serial-redacted-capture" download="ha-growatt-serial-redacted-capture.json">Download serial-redacted replay</a>
+          <a class="button" href="api/private-capture" download="ha-growatt-private-capture.json">Download private capture</a>
+          <p>The shareable file shows packet structure and decoding results without
+            serial numbers, payload bytes, exact times or readings. It cannot replay
+            the original packets. The serial-redacted replay replaces identities,
+            times and unknown bytes but keeps real numeric readings. Review that
+            file before sharing. The private capture still contains everything.</p>
+          <p id="private-status" role="status"></p>
+        </details>
         <p>
           <a
             href="https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/home-assistant-features.md"

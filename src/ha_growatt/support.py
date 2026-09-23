@@ -87,6 +87,10 @@ class SupportServer:
                     "readings": device.readings,
                     "decode_errors": device.decode_errors,
                     "restored": device.readings == 0,
+                    "capabilities": features.capability_status(device),
+                    "firmware_changed": device.firmware_changed,
+                    **({} if redacted else features.reading_diagnostics(device)),
+                    **({"datalogger": device.logger} if not redacted else {}),
                     "family": self.pipeline.settings.selection.device_families.get(
                         device.identity, self.pipeline.settings.selection.family
                     ),
@@ -110,9 +114,21 @@ class SupportServer:
             "transport": asdict(stats),
             "observations": observations,
             "capture_active": self.pipeline.capture.active,
+            "private_capture_active": self.pipeline.private_capture.active,
+            "packet_health": self.pipeline.packet_health.export(),
             "output_failures": self.pipeline.failures,
             "dropped_readings": self.pipeline.dropped,
             "devices": devices,
+            "dataloggers": [
+                {
+                    "identity": f"Datalogger {index}" if redacted else identity,
+                    **state,
+                    **({} if redacted else features.dataloggers.get(identity, {})),
+                }
+                for index, (identity, state) in enumerate(
+                    features.logger_statuses().items() if features else [], 1
+                )
+            ],
             "warnings": warnings,
         }
         if not redacted:
@@ -126,12 +142,13 @@ class SupportServer:
     async def dispatch(self, method, path, headers, body):
         if method == "GET" and path == "/favicon.ico":
             return 204, "image/x-icon", b""
-        if method == "GET" and path in {"/", "/app.js", "/setup.js", "/style.css"}:
+        if method == "GET" and path in {"/", "/app.js", "/setup.js", "/tools.js", "/style.css"}:
             name = "index.html" if path == "/" else path[1:]
             content_type = {
                 "index.html": "text/html",
                 "app.js": "text/javascript",
                 "setup.js": "text/javascript",
+                "tools.js": "text/javascript",
                 "style.css": "text/css",
             }[name]
             return 200, content_type, files("ha_growatt").joinpath("web", name).read_bytes()
@@ -154,6 +171,29 @@ class SupportServer:
                 "application/json",
                 json.dumps(self.status(redacted=True), indent=2).encode(),
             )
+        if method == "GET" and path == "/api/private-capture":
+            return (
+                200,
+                "application/json",
+                json.dumps(self.pipeline.private_capture.export()).encode(),
+            )
+        if method == "GET" and path == "/api/shareable-capture":
+            return (
+                200,
+                "application/json",
+                json.dumps(
+                    self.pipeline.private_capture.export_shareable(self.pipeline.decoder), indent=2
+                ).encode(),
+            )
+        if method == "GET" and path == "/api/serial-redacted-capture":
+            return (
+                200,
+                "application/json",
+                json.dumps(
+                    self.pipeline.private_capture.export_serial_redacted(self.pipeline.decoder),
+                    indent=2,
+                ).encode(),
+            )
         if method == "GET" and path == "/api/capture":
             return (
                 200,
@@ -169,7 +209,23 @@ class SupportServer:
         data = json.loads(body)
         if not isinstance(data, dict):
             raise ValueError("Expected an object")
-        if path == "/api/capture/start":
+        if path == "/api/private-capture/start":
+            if data.get("acknowledge_private_data") is not True:
+                raise ValueError("Acknowledge private packet data before recording")
+            self.pipeline.private_capture.start()
+            result = {
+                "message": (
+                    "Private capture started. Keep the download private; "
+                    "memory is cleared after thirty minutes."
+                )
+            }
+        elif path == "/api/private-capture/stop":
+            self.pipeline.private_capture.stop()
+            result = {"message": "Private capture stopped."}
+        elif path == "/api/private-capture/clear":
+            self.pipeline.private_capture.clear()
+            result = {"message": "Private capture deleted from memory."}
+        elif path == "/api/capture/start":
             self.pipeline.capture.start()
             result = {
                 "message": "Recording packet summaries for ten minutes. "
@@ -178,6 +234,13 @@ class SupportServer:
         elif path == "/api/capture/stop":
             self.pipeline.capture.stop()
             result = {"message": "Capture stopped. The download is ready."}
+        elif path == "/api/register-diagnostics":
+            if not self.pipeline.features:
+                raise ValueError("Enable Home Assistant features to use read-only diagnostics")
+            try:
+                result = await self.pipeline.features.diagnostics.run(data)
+            except ValueError as error:
+                return 400, "application/json", json.dumps({"error": str(error)}).encode()
         elif path == "/api/hardware/read":
             from .hardware import read_firmware
 
@@ -190,6 +253,7 @@ class SupportServer:
                 )
             async with self._profile_lock, device.lock:
                 firmware = await read_firmware(self.transport, identity)
+                previous = features.hardware.get(identity, {}).get("firmware", "")
                 updated = await self.supervisor.profile(
                     identity,
                     self.pipeline.settings.selection.device_families.get(
@@ -205,6 +269,11 @@ class SupportServer:
                     ),
                 )
                 features.hardware = updated.runtime.hardware
+                if previous and previous != firmware:
+                    device.firmware_changed = True
+                    device.values.clear()
+                    device.schedules.clear()
+                    device.refresh_at = 0
             result = {"message": "Firmware read and saved.", "firmware": firmware}
         elif path == "/api/profiles":
             identity = data.get("serial", "")
@@ -228,6 +297,27 @@ class SupportServer:
                 ) or updated.runtime.control_models.get(
                     identity, "auto"
                 ) != self.pipeline.settings.runtime.control_models.get(identity, "auto")
+                model_changed = updated.runtime.hardware.get(identity, {}).get(
+                    "model", ""
+                ) != self.pipeline.settings.runtime.hardware.get(identity, {}).get("model", "")
+                previous_firmware = self.pipeline.settings.runtime.hardware.get(identity, {}).get(
+                    "firmware", ""
+                )
+                firmware_changed = bool(
+                    previous_firmware
+                    and previous_firmware
+                    != updated.runtime.hardware.get(identity, {}).get("firmware", "")
+                )
+                if (model_changed or profile_changed) and device:
+                    device.health.clear()
+                if profile_changed and device:
+                    device.clock.clear()
+                if firmware_changed and device:
+                    device.firmware_changed = True
+                if (model_changed or firmware_changed) and device:
+                    device.values.clear()
+                    device.schedules.clear()
+                    device.refresh_at = 0
                 self.pipeline.settings = replace(
                     self.pipeline.settings,
                     selection=updated.selection,
@@ -282,7 +372,7 @@ class SupportServer:
             return
         self._tasks.add(task)
         try:
-            async with asyncio.timeout(45):
+            async with asyncio.timeout(60):
                 head = await asyncio.wait_for(reader.readuntil(b"\r\n\r\n"), 5)
                 if len(head) > 8192:
                     raise ValueError("Request headers are too large")
@@ -316,9 +406,26 @@ class SupportServer:
                     )
                 disposition = (
                     'Content-Disposition: attachment; filename="ha-growatt-'
-                    + ("capture" if path == "/api/capture" else "diagnostics")
+                    + (
+                        "private-capture"
+                        if path == "/api/private-capture"
+                        else "shareable-capture"
+                        if path == "/api/shareable-capture"
+                        else "serial-redacted-capture"
+                        if path == "/api/serial-redacted-capture"
+                        else "capture"
+                        if path == "/api/capture"
+                        else "diagnostics"
+                    )
                     + '.json"\r\n'
-                    if path in {"/api/diagnostics", "/api/capture"}
+                    if path
+                    in {
+                        "/api/diagnostics",
+                        "/api/capture",
+                        "/api/private-capture",
+                        "/api/shareable-capture",
+                        "/api/serial-redacted-capture",
+                    }
                     else ""
                 )
                 writer.write(

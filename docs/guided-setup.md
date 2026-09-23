@@ -6,7 +6,9 @@ configuration in the existing app options and per-inverter forms.
 
 Before installing, check the [hardware matrix](hardware-matrix.md). A working
 result from another project is useful evidence, but does not verify HA Growatt
-on that model, firmware or connection.
+on that model, firmware or connection. The 0xAHA results in the matrix use direct
+Modbus RTU/TCP; HA Growatt's app receives Shine datalogger TCP traffic. Look for
+an HA Growatt result on your exact hardware before treating it as confirmed.
 
 ## Before the app starts
 
@@ -49,7 +51,12 @@ binds the same port. See [migration](installation.md) for the existing formats.
   includes them. Power in W/kW is not accumulated energy in kWh.
 - **Finish:** confirm the measurement entities in Home Assistant's MQTT integration.
   The optional HACS companion adds Repairs and history tools; the app still runs
-  the datalogger connection. It adds no duplicate measurement sensors.
+  the datalogger connection. It adds no duplicate measurement sensors. Use the
+  guide's **Open HA Growatt in HACS** link, restart Home Assistant after the
+  download, then select **Add the companion integration**. Its setup form checks
+  for a fresh app status on Home Assistant's MQTT broker. If none arrives,
+  check the app and broker settings; the companion can still be added while
+  the app is restarting.
 
 Steps remain accessible while readings are pending. Acknowledgements are kept
 only for the current page session. The guide cannot certify hardware, confirm

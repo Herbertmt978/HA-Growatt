@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from .diagnostics import ObservationStats, SupportCapture
 from .extensions import ExtensionProcess, layout_context
 from .outputs import InfluxOutput, PVOutput, RawPublisher, send_http
+from .packet_health import PacketHealth, PrivateCapture
 from .protocol import Frame, ProtocolError, mask_payload
 from .publisher import Publisher
 from .settings import Settings
@@ -40,6 +41,8 @@ class Pipeline:
         self.features = None
         self.observations = ObservationStats()
         self.capture = SupportCapture()
+        self.private_capture = PrivateCapture()
+        self.packet_health = PacketHealth()
         options = settings.runtime
         if options.home_assistant:
             ha = self.ha = ha_publisher(settings.mqtt)
@@ -133,6 +136,7 @@ class Pipeline:
                     experimental=self.settings.runtime.experimental_controls,
                     models=self.settings.runtime.control_models,
                     hardware=self.settings.runtime.hardware,
+                    dataloggers=self.settings.runtime.dataloggers,
                     refresh_seconds=self.settings.runtime.settings_refresh_seconds,
                 )
 
@@ -160,6 +164,7 @@ class Pipeline:
     async def observe(self, direction: str, frame: Frame) -> None:
         if direction != "device":
             return
+        self.private_capture.record(frame)
         if self.settings.runtime.diagnostic_logging:
             _LOG.info(
                 "Packet protocol=%s record=%02x%02x bytes=%s raw=%s",
@@ -188,6 +193,7 @@ class Pipeline:
         try:
             telemetry = self.decoder.decode(frame)
         except ProtocolError:
+            self.packet_health.observe(frame)
             if frame.function == 3:
                 self.observations.announcement_warnings += 1
                 self.capture.record(frame, "announcement_not_measurement")
@@ -195,6 +201,7 @@ class Pipeline:
                 self.observations.failed_measurements += 1
                 self.capture.record(frame, "measurement_decode_failed")
             return
+        self.packet_health.observe(frame, telemetry)
         if frame.function != 3:
             self.observations.measurements += 1
             self.observations.incomplete_fields += telemetry.decode_errors
@@ -218,6 +225,7 @@ class Pipeline:
             queue.put_nowait(reading)
 
     async def close(self) -> None:
+        self.private_capture.clear()
         if self.features:
             await self.features.close()
         try:

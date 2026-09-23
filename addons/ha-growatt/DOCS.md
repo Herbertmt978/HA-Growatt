@@ -1,5 +1,11 @@
 # Using the app
 
+Version 0.5.0 adds clock, operating-state, main-fault and setting-change
+sensors. The support page explains packet-format changes and offers a separate
+private replay capture when redacted summaries are insufficient. See the
+[diagnostic guide](https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/home-assistant-features.md#reading-and-setting-diagnostics-050)
+for time references, supported mappings, capture limits and evidence requirements.
+
 Open the web UI and follow **Set up HA Growatt** for broker, datalogger, fresh
 readings, profile and history checks. Install and start the MQTT broker before
 starting the app. The [installation guide](https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/guided-setup.md)
@@ -57,3 +63,61 @@ The app requests Supervisor access for its MQTT service settings and its own
 profile configuration. Home Assistant API access is used only to read registry,
 statistics and Energy information for the preview. It does not change HA history
 or Energy settings. Ingress provides access through your existing HA login.
+
+## Datalogger devices and model capabilities
+
+With HA features enabled in proxy mode, each observed datalogger has its own
+Home Assistant device. Existing inverter devices link through that logger;
+measurement entity identifiers, topics and history stay unchanged. Connections
+and heartbeats are tracked even when no inverter measurement can be decoded.
+
+Logger diagnostics show the cloud/local/disconnected connection, last contact,
+observed upload interval and reconnections since the service started. The last
+ten reconnection times appear in the reconnect sensor attributes and the web
+UI. The interval needs two fresh readings from the same inverter on the same
+connection. Gaps over an hour and reconnections reset it; it is not a readback
+of the configured upload interval. Restored readings can restore the device
+link, but cannot make the logger appear connected or create a new contact time.
+
+Add confirmed logger details in the app configuration, then restart the app:
+
+```yaml
+dataloggers:
+  - serial: LOGGER0001
+    model: ShineWiFi-X
+    firmware: ""
+```
+
+Replace the example serial with the logger shown in the web UI. Leave unknown
+firmware blank. Inverter firmware is separate and is never reused as logger
+firmware. Python configurations accept a `runtime.dataloggers` mapping; INI
+uses a JSON mapping in `Generic.dataloggers`, or `HA_GROWATT_DATALOGGERS`.
+No firmware or model is inferred solely from a logger serial.
+
+The exact inverter model now constrains the existing control profiles:
+
+- MIC TL-X: output limit only, subject to successful readback; no battery controls.
+- MIN TL-XH: no SPH schedules or MOD battery registers. The existing MIN battery
+  controls still require the MIN TL-XH control profile, compatible decoded
+  records, experimental controls enabled and successful readback. Battery
+  hardware and writes remain physically unverified.
+- Other or unknown model names: retain the existing profile-based behaviour,
+  with the model marked unconfirmed. This is not a claim of hardware support.
+
+Version 0.5.0 includes **Identify hardware and inspect registers** under each
+inverter. Identification never changes a profile automatically. Bounded register
+reads, comparisons and private exports are explained in the
+[register tools guide](../../docs/register-tools.md).
+
+Enter exact model names, such as `MIN 2500TL-XH` or `MIC 2000TL-X`, in the web UI.
+The decoder remains independent: keep a working Automatic reading profile.
+A MIN model name does not authorise MIN register access through a MOD record.
+The support page explains disabled controls, disconnected loggers and settings
+waiting for readback. Correcting a model clears cached control values and
+rejects queued commands from the old selection, without clearing readings.
+
+The support page also offers shareable packet evidence and a serial-redacted
+replay from an explicitly started private capture. The first contains no
+readings; the second retains numeric measurements. See the
+[capture guide](../../docs/home-assistant-features.md#shareable-packet-evidence-and-private-replay)
+before attaching either file to a report.

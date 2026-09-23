@@ -27,3 +27,44 @@ adopt_history:
       default: false
       selector:
         boolean:
+identify_hardware:
+  name: Identify hardware
+  description: Read documented identity registers. Returns evidence without changing profiles or controls. The response is private.
+  fields:
+    device_id:
+      name: Inverter
+      required: true
+      selector:
+        device:
+          integration: mqtt
+read_registers:
+  name: Read holding registers
+  description: Read up to 32 holding registers. No writes. Returns private raw words and an optional comparison with the preceding read, valid for ten minutes on the same connection.
+  fields:
+    device_id:
+      name: Inverter
+      required: true
+      selector:
+        device:
+          integration: mqtt
+    start:
+      name: First register address
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 65535
+          mode: box
+    count:
+      name: Number of registers
+      default: 1
+      selector:
+        number:
+          min: 1
+          max: 32
+          mode: box
+    previous:
+      name: Previous snapshot
+      description: Optional snapshot value returned by the preceding read of this device and range.
+      selector:
+        text:

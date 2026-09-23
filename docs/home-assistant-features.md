@@ -246,6 +246,10 @@ Add this repository to HACS as an **Integration**, download HA Growatt, restart
 Home Assistant and add **HA Growatt** under Devices & services. The app, MQTT
 integration and companion must use the same broker. The companion needs no new
 credentials and does not listen for dataloggers or create measurement sensors.
+The setup form reports whether a fresh app status arrived through Home
+Assistant's MQTT connection. A retained status is not counted as a live check.
+If it cannot see the app, check that both use the same broker; a temporary
+outage does not prevent adding the companion.
 
 The companion raises HA Repairs for an app that stops reporting, measurements
 that cannot be decoded, or an inverter that stays silent during daylight. It
@@ -292,3 +296,104 @@ undo, because HA can then move the historical series with the entity.
 
 The companion's native diagnostics download excludes device identities, readings
 and network settings. Removing the companion leaves the app's measurements running.
+
+## Reading and setting diagnostics (0.5.0)
+
+Four extra diagnostic sensors describe the operating state, main fault, reported
+clock and setting changes. Existing numeric sensors, entity IDs, readings and
+history are unchanged. These checks never correct a clock or retry a write.
+
+Clock checks compare each fresh packet's wall-clock timestamp with the configured
+publication time zone, or the service's local time when that setting is `local`.
+The support page names that reference and shows the signed difference in seconds:
+positive means the packet clock is ahead. This is not a measurement of the inverter's
+internal clock register. Network or logger buffering can also produce a difference.
+Within two minutes is treated as aligned; an offset close to one hour suggests a
+possible time-zone or daylight-saving difference, without asserting its cause.
+The service time zone can differ from Home Assistant's. Check the named reference
+before using the existing manual clock button. No fresh reading for fifteen minutes
+changes these sensors to waiting for fresh readings, including overnight. Restored
+and buffered readings do not produce fresh clock warnings.
+
+MIC TL-X and MIN TL-XH operating states use the documented TL-X web-status byte
+when decoded with `mod-6` or `min-6`. Main fault descriptions currently cover the
+MIC codes listed in the manufacturer manual. Other codes and families are explicitly
+unmapped. Storage fault fields and bitfields are not substituted for an inverter's
+main fault. Keep the original numeric sensors and consult the inverter display and
+its model-specific manual if a fault persists. This mapping has protocol tests;
+we have not deliberately induced faults on physical inverters.
+
+The support page keeps bounded packet-format observations for this service run.
+A new protocol, payload length or decoded profile is recorded after successful
+measurement decoding. Failed or incomplete measurements are shown separately;
+a later complete measurement reports recovery. Announcements and buffered records
+do not change the baseline. A format change is evidence to investigate, not proof
+that firmware changed. A manual firmware read which differs from saved details
+clears cached settings and requires fresh readback. Correcting a recorded firmware
+version also invalidates commands queued under the previous details. Firmware is
+not polled automatically, and a firmware update that leaves the format unchanged
+cannot be detected from packet shape alone.
+
+Setting-change attribution requires an observed, forwarded cloud write, a matching
+successful device reply, and a later local register read matching that cloud value
+while differing from the requested local value. A mismatch alone is labelled
+unconfirmed. Blocked commands, timeouts, stale reads and ambiguous reused cloud
+transactions do not count as confirmed cloud changes. Single-register settings and
+supported grouped schedules use the same checks. Evidence lasts for the current
+connection, is bounded to 256 registers and 256 distinct cloud write requests, and
+is only available for writes passing through this relay. Reconnect resets it.
+An unrelated successful read does not clear another setting's conflict. The normal
+cloud-write blocking default remains enabled. No automatic corrective write is sent.
+
+### Hardware identification and register inspection
+
+Version 0.5.0 adds explicit read-only identification and small holding-register
+reads in the app and companion actions. Reports include uncertain or unavailable
+fields; applying metadata remains a separate choice. See the
+[register tools guide](register-tools.md) for comparisons, private exports,
+administrator access and the limits of model detection.
+
+### Shareable packet evidence and private replay
+
+The usual diagnostics and support capture remain redacted and contain no packet
+bodies. If those are insufficient, expand **Private packet capture for offline
+replay**, acknowledge the private data notice and start recording. You can then
+download **shareable evidence** from the same short-lived capture. It gives each
+feed a generic label and records protocol, function, packet length, active
+32-byte blocks, decoding result, selected built-in profile and missing fields.
+It contains no payload bytes, serial numbers, exact times or measurement values.
+This is the file to attach to a public issue. Check it before posting, especially
+if you have added custom layouts or support tooling of your own.
+
+For a decoder investigation that needs actual measurement values, download the
+**serial-redacted replay**. This preserves the supported frame shape and known
+numeric fields, replaces serials with generic stand-ins, gives every frame a
+fixed synthetic timestamp and removes unknown bytes. Frames that fail decoding,
+use a custom layout or contain log text are skipped rather than copied. The
+download says how many were skipped. It still contains real numeric readings,
+which may reveal generation or household activity. Review it before sharing and
+get the owner's consent before posting someone else's data. Replay it offline
+with the same command as the private file; the saved built-in profile is used.
+
+The private download still contains complete packets, including serial numbers
+and household readings. Keep it private; do not upload it to a public issue or
+commit it to Git. The shareable evidence cannot replay those packets or reveal
+the exact values behind an unknown layout. A private capture may still be needed
+for a difficult decoder investigation, with the owner's informed consent.
+
+Capture stops after ten minutes, 256 frames or 2 MiB, whichever comes first. Its
+in-memory contents are deleted after thirty minutes, on request or on app shutdown.
+A downloaded copy remains your responsibility. Only complete supported framed
+announcement/measurement packets are included; malformed framing and unsupported
+wire protocols cannot be reconstructed by this capture. It does not collect writes.
+
+Replay on a trusted computer using the same decoder configuration:
+
+```sh
+ha-growatt replay ha-growatt-private-capture.json --config ha-growatt.toml
+```
+
+Replay does not start the relay, connect to MQTT or write to a device. Its report
+contains decode outcomes and field counts, not identities or readings. Unknown
+layouts cannot be automatically guaranteed safe to publish. Build a reviewed,
+synthetic regression fixture before sharing an example in the repository.

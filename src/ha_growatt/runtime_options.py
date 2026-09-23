@@ -15,6 +15,7 @@ class RuntimeOptions:
     experimental_controls: bool = False
     control_models: dict[str, str] = field(default_factory=dict)
     hardware: dict[str, dict[str, str]] = field(default_factory=dict)
+    dataloggers: dict[str, dict[str, str]] = field(default_factory=dict)
     settings_refresh_seconds: int = 300
     buffered_events: bool = True
     policy: PublicationPolicy = PublicationPolicy("server", False)
@@ -44,21 +45,24 @@ class RuntimeOptions:
             raise ValueError("Settings refresh must be zero or between 30 and 86400 seconds")
         if type(self.buffered_events) is not bool:
             raise ValueError("Buffered events must be a boolean")
-        if not isinstance(self.hardware, dict) or len(self.hardware) > 128:
-            raise ValueError("Hardware details must be an inverter mapping")
         from .discovery import validate_identity
 
-        for identity, details in self.hardware.items():
-            validate_identity(identity)
-            if not isinstance(details, dict) or set(details) - {"model", "firmware"}:
-                raise ValueError("Hardware details accept model and firmware")
-            if any(
-                not isinstance(value, str)
-                or len(value) > 80
-                or any(not c.isprintable() for c in value)
-                for value in details.values()
-            ):
-                raise ValueError("Model and firmware must be printable text of up to 80 characters")
+        for collection in (self.hardware, self.dataloggers):
+            if not isinstance(collection, dict) or len(collection) > 128:
+                raise ValueError("Hardware details must be a mapping of up to 128 devices")
+            for identity, details in collection.items():
+                validate_identity(identity)
+                if not isinstance(details, dict) or set(details) - {"model", "firmware"}:
+                    raise ValueError("Hardware details accept model and firmware")
+                if any(
+                    not isinstance(value, str)
+                    or len(value) > 80
+                    or any(not c.isprintable() for c in value)
+                    for value in details.values()
+                ):
+                    raise ValueError(
+                        "Model and firmware must be printable text of up to 80 characters"
+                    )
         if not isinstance(self.control_models, dict):
             raise ValueError("Control profiles must be an inverter-to-model mapping")
         from .discovery import validate_identity

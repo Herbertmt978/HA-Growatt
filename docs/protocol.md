@@ -28,3 +28,22 @@ where packet layout variants differ from the general register documentation.
 
 The XOR mask is obfuscation, not transport security. MQTT TLS is available through
 configuration; datalogger traffic should remain on the local network.
+
+Additional diagnostic evidence:
+
+- [Growatt Modbus V1.24, TL-X/TL-XH input table](https://www.amosplanet.org/wp-content/uploads/2023/06/Growatt-Inverter-Modbus-RTU-Protocol_II-V1_24-English.pdf)
+  defines the low-byte web state at input 3000, main fault at 3105 and main
+  warning at 3106. Battery-converter faults have a separate meaning.
+- [Growatt MIC 600–3300TL-X manual, June 2023, section 11.2](https://de.growatt.com/upload/file/MIC_600-3000TL-X_User_manual_EN_202306.pdf)
+  supplies the limited MIC main-fault descriptions. Other model families are
+  not assigned these descriptions without matching evidence.
+
+Clock differences are observations of packet wall time, not a new protocol write.
+Cloud-write attribution correlates function 6/16 acknowledgements with a subsequent
+function 5 read in the same TCP session, after any transaction translation. The
+implementation is new code; external implementations were not copied.
+
+The [read-only identification tools](register-tools.md) use the documented
+firmware and optional model fields, plus VPP DTC and version codes. A DTC is a
+family hint only. Reads use TCP function 5 with inclusive holding addresses;
+the tool accepts at most 32 words and preserves normal command pacing.

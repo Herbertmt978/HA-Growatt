@@ -55,3 +55,13 @@ version, selected profiles and downloaded diagnostics. For a control, say
 whether its initial read succeeded, whether the read-back matched, and whether
 the inverter's actual behaviour changed. Do not post passwords, serial numbers
 or raw captures. A support file deliberately contains no packet contents.
+
+## Exact model constraints
+
+The configured exact model can restrict a control profile; it never changes the
+telemetry decoder or enables a new register block automatically. MIC TL-X
+models exclude battery controls. MIN TL-XH models exclude SPH schedules and
+MOD/MID battery controls. Unknown models retain the existing profile behaviour
+and are labelled unconfirmed. Readback still gates availability and confirms
+every write. See the [app guide](../addons/ha-growatt/DOCS.md#datalogger-devices-and-model-capabilities)
+for configuration and logger diagnostics.

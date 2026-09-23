@@ -8,6 +8,9 @@ body:
         Report what you have already observed. No inverter setting change is needed.
         Leave unknown details as unknown. Do not include serial numbers, passwords,
         network addresses, raw packets or unredacted logs.
+        A result from a direct Modbus integration does not establish that HA Growatt
+        works through a Shine datalogger. Say which software and connection produced
+        each result.
   - type: input
     id: model
     attributes:
@@ -24,6 +27,11 @@ body:
     attributes:
       label: Datalogger model and firmware
       description: For example ShineLAN-X, ShineWiFi-X or unknown. Exclude serial numbers.
+  - type: input
+    id: connection_hardware
+    attributes:
+      label: Connection hardware
+      description: Give the adapter or dongle model and whether you used its Shine upload connection or direct Modbus. Do not include its network address.
   - type: dropdown
     id: connection
     attributes:
@@ -63,4 +71,4 @@ body:
     id: evidence
     attributes:
       label: Evidence and limitations
-      description: Attach redacted diagnostics from the app or link the relevant public report. Check attachments for private data. State unknowns and any unsupported behaviour.
+      description: Attach redacted diagnostics or link a public report. Summarise read-only scan ranges and responses, marking input and holding separately; do not attach the private raw scan because registers can contain serial numbers. State unknowns and unsupported behaviour.

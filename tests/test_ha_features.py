@@ -150,6 +150,13 @@ def test_feature_state_has_no_raw_packets_addresses_or_credentials():
         await service.publish_status(service.devices["INVERT0001"])
         state = json.loads(service.publisher.messages[-1][1])
         assert set(state) == {
+            "reported_codes",
+            "operating_state",
+            "write_conflict",
+            "fault_description",
+            "clock",
+            "clock_status",
+            "capabilities",
             "connected",
             "socket_connected",
             "connection",
