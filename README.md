@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="addons/ha-growatt/logo.png" alt="HA Growatt inverter illustration" width="240">
+<img src="brand/inverter.svg" alt="Illustration of a solar inverter with a green status light" width="240">
 
 # HA Growatt
 
