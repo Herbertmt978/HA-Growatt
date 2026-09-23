@@ -5,6 +5,11 @@ from ha_growatt.outputs import InfluxSettings, PVOutputSettings, RawMqttSettings
 from ha_growatt.publisher import MqttSettings
 
 
+def destination_secret(submitted, saved, previous, selected):
+    """Never carry a saved credential to a different destination."""
+    return submitted or (saved if previous == selected else "")
+
+
 def native_output_settings(options):
     raw_mqtt = None
     if host := options.get("output_mqtt_host", "").strip():

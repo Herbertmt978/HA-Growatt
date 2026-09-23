@@ -385,11 +385,24 @@ class Options(config_entries.OptionsFlow):
         options = self.config_entry.options
         output_schema = self._influx_schema()
         if user_input is not None:
+            from .output_config import destination_secret
+
             values = {f"output_influx_{key}": value for key, value in user_input.items()}
+            previous = (
+                options.get("output_influx_endpoint", "").strip(),
+                options.get("output_influx_version", 2),
+                options.get("output_influx_username", ""),
+            )
+            selected = (
+                user_input["endpoint"].strip(),
+                user_input["version"],
+                user_input["username"],
+            )
             for key in ("token", "password"):
                 name = f"output_influx_{key}"
-                if not values[name]:
-                    values[name] = options.get(name, "")
+                values[name] = destination_secret(
+                    values[name], options.get(name, ""), previous, selected
+                )
             if not user_input["endpoint"].strip():
                 values["output_influx_token"] = ""
                 values["output_influx_password"] = ""
@@ -428,9 +441,27 @@ class Options(config_entries.OptionsFlow):
         options = self.config_entry.options
         output_schema = self._mqtt_schema()
         if user_input is not None:
+            from .output_config import destination_secret
+
             values = {f"output_mqtt_{key}": value for key, value in user_input.items()}
-            if not user_input["password"]:
-                values["output_mqtt_password"] = options.get("output_mqtt_password", "")
+            previous = (
+                options.get("output_mqtt_host", "").strip(),
+                options.get("output_mqtt_port", 1883),
+                options.get("output_mqtt_username", ""),
+                options.get("output_mqtt_tls", False),
+            )
+            selected = (
+                user_input["host"].strip(),
+                user_input["port"],
+                user_input["username"],
+                user_input["tls"],
+            )
+            values["output_mqtt_password"] = destination_secret(
+                user_input["password"],
+                options.get("output_mqtt_password", ""),
+                previous,
+                selected,
+            )
             if not user_input["host"].strip():
                 values["output_mqtt_password"] = ""
             return self._save_output(values, "mqtt_output", output_schema)

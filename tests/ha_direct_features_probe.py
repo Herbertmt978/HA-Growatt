@@ -11,7 +11,7 @@ from pathlib import Path
 from types import MappingProxyType
 
 from homeassistant import bootstrap, loader
-from homeassistant.config_entries import SOURCE_USER, ConfigEntry
+from homeassistant.config_entries import SOURCE_USER, ConfigEntry, ConfigEntryDisabler
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
@@ -130,6 +130,15 @@ async def main():
         async_get_config_entry_diagnostics,
         async_get_device_diagnostics,
     )
+
+    async def output_form(entry, step):
+        flow = await hass.config_entries.options.async_init(entry.entry_id)
+        flow = await hass.config_entries.options.async_configure(
+            flow["flow_id"], {"next_step_id": "outputs"}
+        )
+        return await hass.config_entries.options.async_configure(
+            flow["flow_id"], {"next_step_id": step}
+        )
 
     fixture = json.loads(
         await asyncio.to_thread(Path("/repo/tests/fixtures/telemetry_cases.json").read_text)
@@ -259,6 +268,80 @@ async def main():
         assert diagnostics["controls_enabled"] is True
         assert "output_limit" in device_diagnostics["controls_available"]
         assert "charge_1" in device_diagnostics["schedules_available"]
+
+        # A disabled entry lets us exercise the real options flow without
+        # starting an output connection to a synthetic address.
+        output_entry = ConfigEntry(
+            domain="ha_growatt",
+            title="Output options check",
+            data={"mode": "direct", "port": port + 1, "forward_cloud": False},
+            options={
+                "output_mqtt_host": "old.example",
+                "output_mqtt_port": 1883,
+                "output_mqtt_username": "reader",
+                "output_mqtt_password": "old-mqtt-secret",
+                "output_mqtt_tls": True,
+                "output_influx_endpoint": "https://old.example",
+                "output_influx_version": 2,
+                "output_influx_organisation": "solar",
+                "output_influx_bucket": "energy",
+                "output_influx_token": "old-influx-secret",
+            },
+            source=SOURCE_USER,
+            version=1,
+            minor_version=1,
+            unique_id="ha_growatt_output_check",
+            discovery_keys=MappingProxyType({}),
+            subentries_data=[],
+            pref_disable_new_entities=None,
+            pref_disable_polling=None,
+            disabled_by=ConfigEntryDisabler.USER,
+        )
+        await hass.config_entries.async_add(output_entry)
+        flow = await output_form(output_entry, "mqtt_output")
+        same = await hass.config_entries.options.async_configure(
+            flow["flow_id"],
+            {
+                "host": "old.example",
+                "port": 1883,
+                "username": "reader",
+                "password": "",
+                "tls": True,
+                "topic": "energy/updated",
+            },
+        )
+        assert same["type"] == "create_entry"
+        assert output_entry.options["output_mqtt_password"] == "old-mqtt-secret"
+        flow = await output_form(output_entry, "mqtt_output")
+        changed = await hass.config_entries.options.async_configure(
+            flow["flow_id"],
+            {
+                "host": "new.example",
+                "port": 1883,
+                "username": "reader",
+                "password": "",
+                "tls": True,
+                "topic": "energy/updated",
+            },
+        )
+        assert changed["type"] == "create_entry"
+        assert output_entry.options["output_mqtt_password"] == ""
+        flow = await output_form(output_entry, "influx_output")
+        rejected = await hass.config_entries.options.async_configure(
+            flow["flow_id"],
+            {
+                "endpoint": "https://new.example",
+                "version": 2,
+                "database": "growatt",
+                "organisation": "solar",
+                "bucket": "energy",
+                "username": "",
+                "password": "",
+                "token": "",
+            },
+        )
+        assert rejected["type"] == "form" and rejected["errors"]["base"] == "invalid_output"
+        assert output_entry.options["output_influx_token"] == "old-influx-secret"
         assert await hass.config_entries.async_unload(entry.entry_id)
         assert entry.state.value == "not_loaded"
         print("Native Shine setup, control gates, entities, diagnostics and unload: passed")

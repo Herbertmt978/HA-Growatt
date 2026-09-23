@@ -36,7 +36,9 @@ HTTP delivery. These outputs run in separate bounded queues and skip buffered
 records. Configure them under **HA Growatt → Configure → Optional output
 destinations**. Clear a destination's address or system ID to turn it off.
 Passwords and tokens are kept out of diagnostic downloads; enter a new value
-only when changing one. Output failures appear in the receiver's diagnostic
+only when changing one. If you change a destination address, port, TLS setting
+or account, enter its password or token again; the previous credential is not
+sent to the new destination. Output failures appear in the receiver's diagnostic
 sensors and download without interrupting readings or cloud forwarding. The
 HTTP body follows the app's JSON-string format. CSV and executable Python
 extensions remain in the app, where their file and process access belongs.
