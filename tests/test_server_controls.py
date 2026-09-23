@@ -30,6 +30,7 @@ def test_standalone_register_command_matches_sequence_function_and_address():
             assert first_session is not None
             task = asyncio.create_task(server.command("INVERT0001", 5, b"\0\3\0\3"))
             request = await received(reader)
+            first_sent = asyncio.get_running_loop().time()
             wrong = Frame(request.transaction, 6, 1, 5, prefix + b"\0\4\0\4\0\x32")
             writer.write(wrong.to_bytes())
             await writer.drain()
@@ -43,6 +44,7 @@ def test_standalone_register_command_matches_sequence_function_and_address():
             period_body = b"\x04L\x04N\x16\0\x06\0\0\x01"
             period_task = asyncio.create_task(server.command("INVERT0001", 16, period_body))
             period_request = await received(reader)
+            assert asyncio.get_running_loop().time() - first_sent >= 0.9
             period_reply = Frame(
                 period_request.transaction, 6, 1, 16, prefix + period_body[:4] + b"\0"
             )

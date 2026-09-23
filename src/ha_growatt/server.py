@@ -30,6 +30,7 @@ class DeviceSession:
     logger: str | None = None
     inverters: dict[str, dict] = field(default_factory=dict)
     lock: asyncio.Lock = field(default_factory=asyncio.Lock)
+    last_command: float = 0
     pending: dict[tuple[int, str], asyncio.Future] = field(default_factory=dict)
     command_pending: dict[int, tuple[Frame, asyncio.Future]] = field(default_factory=dict)
 
@@ -250,6 +251,8 @@ class Server:
                 before_send()
 
         async with session.lock:
+            loop = asyncio.get_running_loop()
+            await asyncio.sleep(max(0, 1 - (loop.time() - session.last_command)))
             check_current()
             self._sequence = (self._sequence % 65535) + 1
             sequence = self._sequence
@@ -263,10 +266,11 @@ class Server:
                 function,
                 logger_prefix(session.logger, protocol) + body,
             )
-            future = asyncio.get_running_loop().create_future()
+            future = loop.create_future()
             session.command_pending[sequence] = (frame, future)
             try:
                 check_current()
+                session.last_command = loop.time()
                 await self._send(session, frame)
                 async with asyncio.timeout(self.response_seconds):
                     return await future

@@ -83,7 +83,12 @@ class ModbusHub:
             self.options | {"stale_minutes": self.stale_minutes},
         )
         wanted = {f"modbus_{self.receiver.identity}_{key}": value for key, value in wanted.items()}
-        if not self.receiver.connected and self.receiver.failed_measurements:
+        if (
+            self.options["daylight_alerts"]
+            and now - self.started >= timedelta(minutes=2)
+            and not self.receiver.connected
+            and self.receiver.failed_measurements
+        ):
             daylight = bool(sun and sun.state == "above_horizon")
             sunrise = get_astral_event_date(self.hass, "sunrise", now)
             if daylight and (

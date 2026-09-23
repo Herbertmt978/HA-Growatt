@@ -13,12 +13,14 @@ import json
 import os
 from datetime import timedelta
 from pathlib import Path
+from unittest.mock import patch
 
 from homeassistant import bootstrap, loader
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
+from homeassistant.util import dt as dt_util
 
 from custom_components.ha_growatt.binary_sensor import NativeConnected
 from custom_components.ha_growatt.diagnostics import async_get_config_entry_diagnostics
@@ -193,6 +195,29 @@ async def fresh_run():
                 hub.receiver.interval = 30
                 expected[identity] = entities
             assert set(expected[DEVICES[0][0]]).isdisjoint(expected[DEVICES[1][0]])
+            hub = entries[0].runtime_data
+            now = dt_util.utcnow()
+            hass.states.async_set("sun.sun", "above_horizon")
+            hub.receiver.connected = False
+            hub.receiver.failed_measurements = 1
+            hub.started = now - timedelta(minutes=3)
+            with patch(
+                "custom_components.ha_growatt.modbus.get_astral_event_date", return_value=None
+            ):
+                hub.options["daylight_alerts"] = False
+                hub.evaluate(now)
+                assert not any(key.endswith("_unavailable") for key in hub.current_issues)
+                hub.options["daylight_alerts"] = True
+                hub.started = now
+                hub.evaluate(now)
+                assert not any(key.endswith("_unavailable") for key in hub.current_issues)
+                hub.started = now - timedelta(minutes=3)
+                hub.evaluate(now)
+                assert any(key.endswith("_unavailable") for key in hub.current_issues)
+                hub.receiver.connected = True
+                hub.receiver.failed_measurements = 0
+                hub.evaluate(now)
+                assert not any(key.endswith("_unavailable") for key in hub.current_issues)
             SAVED.write_text(json.dumps(expected, sort_keys=True), encoding="utf-8")
             print("Modbus UI flow, both profiles, entities and diagnostics passed")
         finally:
