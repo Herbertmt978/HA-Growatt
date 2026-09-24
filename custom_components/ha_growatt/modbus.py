@@ -29,6 +29,15 @@ class ModbusHub:
             identity=connection["identity"],
             profile=connection["profile"],
             interval=connection["interval"],
+            timeout=connection.get("timeout", 3),
+            delay=connection.get("request_delay", 1),
+            block_words=connection.get("block_words", 32),
+            transport=connection.get("transport", "tcp"),
+            udp_framing=connection.get("udp_framing", "socket"),
+            baudrate=connection.get("baudrate", 9600),
+            parity=connection.get("parity", "N"),
+            stopbits=connection.get("stopbits", 1),
+            fast_power_interval=connection.get("fast_power_interval", 0),
             state_path=hass.config.path(
                 ".storage", f"ha_growatt_modbus_{connection['identity']}.json"
             ),

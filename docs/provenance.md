@@ -71,6 +71,16 @@ different quantity on the two devices. The direct receiver has synthetic TCP
 gateway tests, but no claimed physical Modbus qualification for the owner's
 ShineWiFi-X devices.
 
+The serial RTU and UDP transports follow the published
+[Modbus serial-line guide](https://www.modbus.org/docs/Modbus_over_serial_line_V1_02.pdf)
+and [Modbus messaging guide](https://www.modbus.org/docs/Modbus_Messaging_Implementation_Guide_V1_0b.pdf).
+[Growatt Modbus](https://github.com/jacobbjerregaard/homeassistant-growatt-modbus)
+documents serial, TCP and UDP connections and implements both socket and RTU
+UDP framers. HA Growatt's framing and tests were written here; no transport
+code was copied. Its optional faster power cadence also informed this design,
+but HA Growatt limits those polls to power registers and leaves energy
+timestamps on the complete reading.
+
 The later three-string MIN profile adds the PV3 positions and optional
 diagnostic positions documented in Protocol II V1.24. The broader
 [0xAHA hardware matrix](https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/)

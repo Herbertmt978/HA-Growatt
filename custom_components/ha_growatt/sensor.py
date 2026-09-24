@@ -11,6 +11,7 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.event import async_track_time_interval
 
 from ha_growatt.discovery import sensor_value, sensors_for
+from ha_growatt.unknown_shine import MAX_FORMATS
 
 from .const import DOMAIN
 
@@ -31,6 +32,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
                 ("output_dropped", "Dropped output readings"),
             )
         ]
+        if hub.receiver.unknown_formats is not None:
+            counters.append(UnknownShineSensor(hub.receiver.unknown_formats))
         async_add_entities(counters)
 
         @callback
@@ -63,9 +66,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
                 added.append(entity)
             else:
                 entity.set_reading(reading)
-        for key, entity in entities.items():
-            if key[0] == reading.identity and key not in current:
-                entity.clear_reading()
+        if not reading.partial:
+            for key, entity in entities.items():
+                if key[0] == reading.identity and key not in current:
+                    entity.clear_reading()
         if added:
             async_add_entities(added)
 
@@ -147,5 +151,36 @@ class NativeCounter(SensorEntity):
             )
         else:
             self._attr_native_value = getattr(self.hub.receiver, self.key)
+        if self.hass is not None:
+            self.async_write_ha_state()
+
+
+class UnknownShineSensor(SensorEntity):
+    """An optional receiver summary with no packet bytes or device identifiers."""
+
+    _attr_has_entity_name = True
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:help-circle-outline"
+    _attr_name = "Unrecognised Shine packets"
+    _attr_unique_id = "ha_growatt_direct_receiver_unknown_shine_packets"
+    _attr_device_info = DeviceInfo(
+        identifiers={(DOMAIN, "ha_growatt_direct_receiver")},
+        name="HA Growatt receiver",
+        manufacturer="HA Growatt",
+    )
+
+    def __init__(self, formats):
+        self.formats = formats
+        self.refresh()
+
+    @callback
+    def refresh(self):
+        summary = self.formats.export()
+        self._attr_native_value = summary["total_frames"]
+        self._attr_extra_state_attributes = {
+            "formats": summary["formats"],
+            "other_frames": summary["other_frames"],
+            "format_limit": MAX_FORMATS,
+        }
         if self.hass is not None:
             self.async_write_ha_state()

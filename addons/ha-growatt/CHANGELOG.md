@@ -1,3 +1,12 @@
+# 0.8.0
+
+The optional Home Assistant integration adds read-only serial RTU and UDP
+Modbus connections, documented register profiles and an optional faster power
+reading. The existing app route and MQTT entities keep their current setup.
+The native Shine receiver shipped in 0.7.0 was checked with both owner-owned
+inverters on DEV Home Assistant. No direct Modbus connection was available for
+a physical check.
+
 # 0.7.0
 
 The optional Home Assistant integration can now offer supported settings and

@@ -19,7 +19,7 @@
 ---
 
 HA Growatt can receive traffic from a Growatt datalogger inside Home Assistant
-or in its separate app. It can also poll a direct Modbus TCP gateway when that
+or in its separate app. It can also poll a direct Modbus connection when that
 connection is available. The Shine routes can forward to Growatt for ShinePhone;
 local fallback keeps readings flowing when the cloud stops responding.
 
@@ -28,7 +28,7 @@ Choose the route that fits your installation:
 | Component | Purpose |
 | --- | --- |
 | **Home Assistant Shine receiver** | Receives datalogger traffic inside Home Assistant. No separate app or MQTT broker is needed for readings, cloud forwarding, restart recovery, buffered events or daylight alerts. Supported controls and optional outputs can be enabled separately. |
-| **Home Assistant direct Modbus** | Polls a separately accessible Modbus TCP inverter or gateway, using an explicitly selected register profile. It reads only; it does not change inverter settings or relay Shine traffic. |
+| **Home Assistant direct Modbus** | Polls a separately accessible TCP, UDP or wired serial RTU connection. Supported MIN/MIC device codes can select a base profile automatically; other models use an explicit register profile. It reads only; it does not change inverter settings or relay Shine traffic. |
 | **HA Growatt app and optional companion** | The app publishes MQTT sensors and offers guided setup, a web support page, CSV and Python-extension outputs. The companion adds Repairs, buffered events and history adoption without duplicating those sensors. |
 
 The service can also run in Docker or Python outside Home Assistant. Existing
@@ -37,8 +37,9 @@ not silently move their entities or history.
 
 > [!NOTE]
 > **Release status:** The badge above shows the latest published version. The
-> features under [Version 0.7.0](#version-070) need the 0.7.0 integration.
-> Existing app installations can update without changing their setup.
+> serial and UDP Modbus options, faster power polling and optional Shine packet
+> summary need the matching 0.8.0 integration and receiver wheel. Existing app
+> installations can update without changing their setup.
 
 ## Quick start
 
@@ -48,7 +49,8 @@ not silently move their entities or history.
   or a separate machine running Docker or Python 3.12+.
 - A working MQTT broker and Home Assistant's MQTT integration if using the app route.
 - A Growatt datalogger that can send traffic to your service's LAN address for
-  the Shine routes, or a separately accessible Modbus TCP connection for polling.
+  the Shine routes, or a separately accessible Modbus TCP, UDP or serial RTU
+  connection for polling.
 - Access to the datalogger's upload-server settings for a Shine receiver, and a
   stable address for whichever service it uses.
 
@@ -79,17 +81,25 @@ different identifiers, so preview history adoption before retiring existing
 MQTT entities. See the
 [Home Assistant guide](docs/home-assistant-features.md#integration-only-installation).
 
-### Direct Modbus TCP
+### Direct Modbus
 
-Choose **HA Growatt → Read a direct Modbus TCP connection** only when your
-inverter or gateway exposes one. Enter its address, unit number and a stable
-device identity, then choose the documented MIN, MIC or legacy register
-profile. Documented profiles read two small input-register blocks about once a
-minute and keeps the last valid reading through a quiet restart. Failed or
-incomplete reads never replace valid measurements. A ShineWiFi-X upload
+Choose **HA Growatt → Read a direct Modbus connection** only when your inverter
+or gateway exposes Modbus TCP, UDP or wired serial RTU. Enter its address or
+local serial device, unit number and stable device identity. UDP offers socket
+(MBAP) and RTU datagram framing; choose what your gateway actually supports.
+A serial adapter must be attached to the Home Assistant host and exposed to its
+container, if used. **Auto** recognises
+only supported MIN/MIC device type codes; an unknown or ambiguous model needs
+a manual choice. The three-phase TL3 profile is manual and uses Growatt's
+published V1.39 input table. Documented profiles read small input-register
+blocks about once a minute and keep the last valid reading through a quiet
+restart. Failed or
+incomplete reads never replace valid measurements. Optional faster power polling
+updates only current power readings; energy totals and their timestamps still
+come from complete polls. A ShineWiFi-X upload
 connection does not itself prove that Modbus TCP is available; check your
 hardware before changing a working setup. This route is read-only and creates
-separate Home Assistant entity IDs. See the [Modbus guide](docs/home-assistant-features.md#direct-modbus-tcp).
+separate Home Assistant entity IDs. See the [Modbus guide](docs/home-assistant-features.md#direct-modbus).
 
 For a documented three-string MIN TL-X/XH, select the separate V1.24 profile
 to see PV3 power and energy. Its extra fault and temperature readings appear
@@ -99,6 +109,11 @@ device. It creates disabled diagnostic entities with raw numbers, never energy
 sensors, and does not save those values for restart recovery. Raw registers
 may contain identifiers or settings; keep them private. Neither route has
 been physically checked on this installation.
+
+For a gateway that cannot answer 32-word reads, reduce the maximum block size
+in the integration's connection options. Request delay and timeout can also be
+adjusted there. Existing installations keep the same defaults. These settings
+do not establish that a ShineWiFi-X exposes a direct Modbus connection.
 
 ### App and MQTT
 
@@ -195,6 +210,14 @@ The installation used for physical telemetry checks has a **Growatt MIN
 Their saved inverter firmware readings are AL1.0 and GH1.0 respectively; logger
 firmware is unconfirmed. Both working feeds decode through the MOD layout.
 
+On 24 September 2026, both physical logger streams also produced live devices
+and readings in the native Home Assistant receiver. They kept updating during
+a controlled Growatt cloud outage and reconnected after cloud access returned.
+The loggers were routed to DEV through a temporary transparent TCP relay, so
+their final destination settings were not changed. See the
+[native hardware test](docs/native-hardware-test-2026-09-24.md) for the results
+and limits.
+
 The [hardware matrix](docs/hardware-matrix.md) distinguishes our physical
 checks, manufacturer documentation and results reported by other projects.
 Other model families have protocol coverage, but that is not a claim that we
@@ -219,6 +242,21 @@ does not establish a successful migration.
 
 Follow the [installation and migration instructions](docs/installation.md) and
 check the [compatibility record](docs/compatibility.md) before retiring the old service.
+
+## Version 0.8.0
+
+The native Shine receiver shipped in 0.7.0 was checked on the owner's MIN
+2500TL-XH and MIC 2000TL-X through a temporary transparent relay on DEV. Both
+feeds kept updating during a controlled Growatt cloud outage and cloud
+forwarding reconnected afterwards. The dataloggers were not permanently
+redirected; see the [hardware test](docs/native-hardware-test-2026-09-24.md).
+
+Direct Modbus now offers read-only TCP, UDP and serial RTU connections,
+conservative MIN/MIC auto-selection, additional documented profiles and an
+optional faster power reading. The new transport and model checks use test
+gateways; this installation has no confirmed direct Modbus endpoint. An
+opt-in Shine diagnostic counts unfamiliar packet shapes without exposing
+unknown bytes or values. See the [0.8.0 notes](docs/releases/0.8.0.md).
 
 ## Version 0.7.0
 

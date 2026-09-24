@@ -16,6 +16,7 @@ from .relay import Relay, RelaySettings
 from .selection import FamilyDecoder, SelectionSettings
 from .server import Server
 from .telemetry import Telemetry
+from .unknown_shine import UnknownShineFormats
 
 _LOG = logging.getLogger(__name__)
 
@@ -25,6 +26,7 @@ class NativeReading:
     identity: str
     snapshot: Snapshot
     restored: bool = False
+    partial: bool = False
 
 
 class NativeReceiver:
@@ -42,18 +44,22 @@ class NativeReceiver:
         forward_cloud: bool = True,
         state_path: str = "",
         family: str = "default",
+        unknown_diagnostics: bool = False,
         on_telemetry: Callable[[Telemetry], Awaitable[None]] | None = None,
     ) -> None:
         if type(port) is not int or not 1024 <= port <= 65535:
             raise ValueError("The datalogger port must be between 1024 and 65535")
         if type(forward_cloud) is not bool:
             raise ValueError("Cloud forwarding must be on or off")
+        if type(unknown_diagnostics) is not bool:
+            raise ValueError("Unknown Shine diagnostics must be on or off")
         self.port = port
         self.forward_cloud = forward_cloud
         self.decoder = FamilyDecoder(SelectionSettings(family=family))
         self.on_telemetry = on_telemetry
         self.packet_health = PacketHealth()
         self.private_capture = PrivateCapture()
+        self.unknown_formats = UnknownShineFormats() if unknown_diagnostics else None
         self.snapshots: dict[str, Snapshot] = {}
         self._live_snapshots: set[str] = set()
         self._listeners: set[Callable[[NativeReading], None]] = set()
@@ -128,6 +134,8 @@ class NativeReceiver:
         try:
             telemetry = self.decoder.decode(frame)
         except (ProtocolError, ValueError, UnicodeError):
+            if self.unknown_formats is not None:
+                self.unknown_formats.observe(frame)
             self.packet_health.observe(frame)
             if frame.function == 3:
                 self.announcement_warnings += 1
@@ -135,6 +143,8 @@ class NativeReceiver:
                 self.failed_measurements += 1
             return
         self.packet_health.observe(frame, telemetry)
+        if self.unknown_formats is not None:
+            self.unknown_formats.observe(frame, telemetry)
         if self.on_telemetry is not None:
             try:
                 async with asyncio.timeout(0.5):

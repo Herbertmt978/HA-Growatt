@@ -15,12 +15,22 @@ async def async_get_config_entry_diagnostics(hass, entry):
             "version": 1,
             "mode": "modbus",
             "profile": service.receiver.profile,
+            "resolved_profile": receiver.detected_profile,
+            "transport": receiver.transport,
+            "udp_framing": receiver.udp_framing if receiver.transport == "udp" else None,
+            "full_poll_seconds": receiver.interval,
+            "fast_power_poll_seconds": receiver.fast_power_interval,
+            "request_delay": receiver.reader.delay,
+            "reply_timeout": receiver.reader.timeout,
+            "block_words": receiver.block_words,
             "receiver_running": receiver.running,
             "gateway_connected": receiver.connected,
             "inverters": len(receiver.snapshots),
             "observations": {
                 "measurements": receiver.measurements,
                 "failed_measurements": receiver.failed_measurements,
+                "fast_power_polls": receiver.fast_power_polls,
+                "failed_fast_power_polls": receiver.failed_fast_power_polls,
             },
             "last_error": receiver.last_error,
             "restart_recovery_available": (
@@ -47,6 +57,11 @@ async def async_get_config_entry_diagnostics(hass, entry):
             },
             "restart_recovery_available": not receiver.cache_error,
             "packet_health": receiver.packet_health.export(),
+            **(
+                {"unknown_shine_packets": receiver.unknown_formats.export()}
+                if receiver.unknown_formats is not None
+                else {}
+            ),
             "controls_enabled": service.controls.enabled,
             "controls_available": sum(
                 len(service.controls.controls(identity)) for identity in service.controls.states

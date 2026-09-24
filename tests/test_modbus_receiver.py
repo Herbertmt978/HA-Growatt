@@ -7,11 +7,14 @@ import pytest
 
 from ha_growatt.discovery import sensor_value, sensors_for
 from ha_growatt.modbus_receiver import (
+    AUTO_PROFILE,
     OPTIONAL_BLOCKS,
     PROFILES,
     ModbusReceiver,
     decode_input_registers,
+    detect_input_profile,
 )
+from ha_growatt.modbus_scan import ReadError
 
 
 def _u32(words, first, value):
@@ -19,7 +22,7 @@ def _u32(words, first, value):
 
 
 def _registers(profile, *, total=12345):
-    if profile in {"min-3000-v124", "min-three-string-v124"}:
+    if profile in {"min-3000-v124", "min-three-string-v124", "tl3-three-phase-v139"}:
         words = {address: 0 for address in range(3000, 3079)}
         words[3000] = 1
         _u32(words, 3001, 20450)
@@ -33,7 +36,7 @@ def _registers(profile, *, total=12345):
         _u32(words, 3053, total + 20)
         _u32(words, 3055, 72)
         _u32(words, 3057, total + 10)
-        if profile == "min-three-string-v124":
+        if profile in {"min-three-string-v124", "tl3-three-phase-v139"}:
             words.update({address: 0 for address in range(3086, 3109)})
             words[3011], words[3012] = 3600, 41
             _u32(words, 3013, 14760)
@@ -41,6 +44,13 @@ def _registers(profile, *, total=12345):
             _u32(words, 3065, total + 5)
             words[3086], words[3093], words[3094], words[3095] = 2, 256, 267, 274
             words[3105], words[3106] = 9, 3
+            if profile == "tl3-three-phase-v139":
+                _u32(words, 3028, 12100)
+                words[3030], words[3031] = 2310, 51
+                _u32(words, 3032, 11800)
+                words[3034], words[3035] = 2320, 49
+                _u32(words, 3036, 11500)
+                words[3038], words[3039], words[3040] = 4010, 4020, 4030
     elif profile == "mic-0-v314":
         words = {address: 0 for address in range(58)}
         words[0] = 1
@@ -82,6 +92,272 @@ def _response(request, values, *, broken=False):
     return (
         transaction + request[2:4] + (len(payload) + 1).to_bytes(2, "big") + request[6:7] + payload
     )
+
+
+@pytest.mark.parametrize(
+    "dtc,has_3000,expected",
+    [
+        (5200, False, "mic-0-v314"),
+        (5200, True, "min-3000-v124"),
+        (5201, True, "min-3000-v124"),
+        (5100, True, "min-3000-v124"),
+    ],
+)
+def test_auto_identifies_only_supported_device_type_and_input_range(dtc, has_3000, expected):
+    class Reader:
+        def __init__(self):
+            self.calls = []
+
+        async def read(self, kind, first, count):
+            self.calls.append((kind, first, count))
+            if kind == "holding" and first == 30000:
+                return [dtc]
+            if kind == "input" and first == 3003 and has_3000:
+                return [0]  # An asleep inverter may have no PV voltage.
+            raise ReadError("Modbus exception 2", splittable=True)
+
+    async def scenario():
+        reader = Reader()
+        assert await detect_input_profile(reader) == expected
+        assert reader.calls == [("holding", 30000, 1), ("input", 3003, 1)]
+
+    asyncio.run(scenario())
+
+
+def test_auto_requires_manual_selection_for_unknown_or_ambiguous_family():
+    class Reader:
+        async def read(self, kind, first, count):
+            if kind == "holding" and first == 30000:
+                return [5400]  # Shared by MOD and MID; neither has a qualified map here.
+            raise ReadError("Modbus exception 2", splittable=True)
+
+    async def scenario():
+        with pytest.raises(ValueError, match="device type code"):
+            await detect_input_profile(Reader())
+
+    asyncio.run(scenario())
+
+
+def test_auto_does_not_treat_a_probe_timeout_as_a_mic_identity():
+    class Reader:
+        async def read(self, kind, first, count):
+            if kind == "holding":
+                return [5200]
+            raise ReadError("TimeoutError")
+
+    async def scenario():
+        with pytest.raises(ReadError, match="TimeoutError"):
+            await detect_input_profile(Reader())
+
+    asyncio.run(scenario())
+
+
+def test_auto_can_use_legacy_device_type_register():
+    class Reader:
+        async def read(self, kind, first, count):
+            if kind == "holding" and first == 30000:
+                raise ReadError("Modbus exception 2", splittable=True)
+            if kind == "holding" and first == 43:
+                return [5200]
+            if kind == "input" and first == 3003:
+                return [0]
+            raise AssertionError("Unexpected Modbus request")
+
+    assert asyncio.run(detect_input_profile(Reader())) == "min-3000-v124"
+
+
+@pytest.mark.parametrize("profile", list(PROFILES))
+def test_fast_power_poll_only_reads_power_and_preserves_full_snapshot(profile):
+    class Reader:
+        def __init__(self, words):
+            self.words = words
+            self.calls = []
+
+        async def read(self, kind, first, count):
+            self.calls.append((kind, first, count))
+            return [self.words[first + index] for index in range(count)]
+
+    async def scenario():
+        words = _registers(profile)
+        receiver = ModbusReceiver(
+            host="127.0.0.1",
+            identity="FAST",
+            profile=profile,
+            interval=60,
+            fast_power_interval=5,
+        )
+        reader = Reader(words)
+        receiver.reader = reader
+        readings = []
+        receiver.subscribe(readings.append)
+        assert not await receiver.poll_power_once()  # No complete reading yet.
+        assert await receiver.poll_once()
+        full_snapshot = receiver.snapshots["FAST"]
+        full_energy = full_snapshot.telemetry.values["pvenergytotal"]
+        reader.calls.clear()
+        power_address = 3001 if profile.startswith(("min-", "tl3-")) else 1
+        _u32(words, power_address, 10000)
+        assert await receiver.poll_power_once()
+        assert receiver.snapshots["FAST"] is full_snapshot
+        assert receiver.snapshots["FAST"].telemetry.values["pvenergytotal"] == full_energy
+        assert receiver.measurements == 1 and receiver.fast_power_polls == 1
+        assert readings[-1].partial
+        assert "pvenergytotal" not in readings[-1].snapshot.telemetry.values
+        assert readings[-1].snapshot.telemetry.values["pvpowerin"] == 10000
+        assert all(kind == "input" for kind, _, _ in reader.calls)
+        assert not any(first >= 3047 or first in {26, 28, 53, 55} for _, first, _ in reader.calls)
+        await receiver.close()
+
+    asyncio.run(scenario())
+
+
+def test_fast_power_failure_never_replaces_full_reading():
+    class Reader:
+        def __init__(self, words):
+            self.words = words
+            self.fail = False
+
+        async def read(self, kind, first, count):
+            if self.fail:
+                raise ReadError("TimeoutError")
+            return [self.words[first + index] for index in range(count)]
+
+    async def scenario():
+        receiver = ModbusReceiver(
+            host="127.0.0.1",
+            identity="FAST",
+            profile="mic-0-v314",
+            fast_power_interval=5,
+        )
+        reader = Reader(_registers("mic-0-v314"))
+        receiver.reader = reader
+        seen = []
+        receiver.subscribe(seen.append)
+        assert await receiver.poll_once()
+        original = receiver.snapshots["FAST"]
+        reader.fail = True
+        assert not await receiver.poll_power_once()
+        assert receiver.connected
+        assert receiver.failed_fast_power_polls == 1
+        assert receiver.snapshots["FAST"] is original and len(seen) == 1
+        await receiver.close()
+
+    asyncio.run(scenario())
+
+
+def test_fast_and_full_polls_share_one_reader_lock():
+    class Reader:
+        def __init__(self):
+            self.words = _registers("mic-0-v314")
+            self.active = 0
+            self.peak = 0
+
+        async def read(self, kind, first, count):
+            self.active += 1
+            self.peak = max(self.peak, self.active)
+            await asyncio.sleep(0.001)
+            values = [self.words[first + index] for index in range(count)]
+            self.active -= 1
+            return values
+
+    async def scenario():
+        receiver = ModbusReceiver(
+            host="127.0.0.1",
+            identity="FAST",
+            profile="mic-0-v314",
+            fast_power_interval=5,
+        )
+        reader = Reader()
+        receiver.reader = reader
+        assert await receiver.poll_once()
+        assert all(await asyncio.gather(receiver.poll_once(), receiver.poll_power_once()))
+        assert reader.peak == 1
+        await receiver.close()
+
+    asyncio.run(scenario())
+
+
+def test_auto_poll_uses_read_only_dtc_and_publishes_resolved_profile():
+    async def scenario():
+        values = _registers("min-three-string-v124")
+        requests = []
+
+        async def reply(reader, writer):
+            request = await reader.readexactly(12)
+            kind = request[7]
+            first = int.from_bytes(request[8:10], "big")
+            count = int.from_bytes(request[10:12], "big")
+            requests.append((kind, first, count))
+            if kind == 3:
+                assert first == 30000 and count == 1
+                payload = b"\x03\x02" + (5201).to_bytes(2, "big")
+                writer.write(
+                    request[:4] + (len(payload) + 1).to_bytes(2, "big") + request[6:7] + payload
+                )
+            else:
+                writer.write(_response(request, values))
+            await writer.drain()
+            writer.close()
+
+        server = await asyncio.start_server(reply, "127.0.0.1", 0)
+        async with server:
+            receiver = ModbusReceiver(
+                host="127.0.0.1",
+                port=server.sockets[0].getsockname()[1],
+                identity="TEST_AUTO",
+                profile=AUTO_PROFILE,
+                delay=0.5,
+            )
+            assert await receiver.poll_once()
+            assert receiver.detected_profile == "min-3000-v124"
+            assert receiver.snapshots["TEST_AUTO"].telemetry.profile == "modbus-min-3000-v124"
+            assert "pv3watt" not in receiver.snapshots["TEST_AUTO"].telemetry.values
+            assert requests == [
+                (3, 30000, 1),
+                (4, 3003, 1),
+                (4, 3000, 30),
+                (4, 3047, 32),
+            ]
+            assert await receiver.poll_once()
+            assert requests[4:] == requests[2:4]  # Detection runs once per receiver.
+            await receiver.close()
+
+    asyncio.run(scenario())
+
+
+def test_small_gateway_blocks_reassemble_without_partial_publication():
+    async def scenario():
+        values = _registers("tl3-three-phase-v139")
+        requests = []
+
+        async def reply(reader, writer):
+            request = await reader.readexactly(12)
+            count = int.from_bytes(request[10:12], "big")
+            requests.append(count)
+            if count > 16:
+                writer.write(request[:4] + b"\0\x03" + request[6:7] + b"\x84\x02")
+            else:
+                writer.write(_response(request, values))
+            await writer.drain()
+            writer.close()
+
+        server = await asyncio.start_server(reply, "127.0.0.1", 0)
+        async with server:
+            receiver = ModbusReceiver(
+                host="127.0.0.1",
+                port=server.sockets[0].getsockname()[1],
+                identity="TEST_TL3",
+                profile="tl3-three-phase-v139",
+                block_words=16,
+                delay=0.5,
+            )
+            assert await receiver.poll_once()
+            assert receiver.snapshots["TEST_TL3"].telemetry.values["pvgridvoltage3"] == 2320
+            assert requests == [16, 14, 11, 16, 16, 16, 7]
+            assert all(count <= 16 for count in requests)
+            await receiver.close()
+
+    asyncio.run(scenario())
 
 
 @pytest.mark.parametrize("profile", list(PROFILES))
@@ -159,7 +435,7 @@ def test_real_tcp_poll_decodes_core_readings_and_uses_only_input_reads(profile):
                     )
                     == 25.4
                 )
-            if profile == "min-three-string-v124":
+            if profile in {"min-three-string-v124", "tl3-three-phase-v139"}:
                 assert telemetry.values["pv3watt"] == 14760
                 assert (
                     sensor_value(
@@ -184,6 +460,20 @@ def test_real_tcp_poll_decodes_core_readings_and_uses_only_input_reads(profile):
                     == 27.4
                 )
                 assert sensors["pvfaultcode"].entity_category == "diagnostic"
+                if profile == "tl3-three-phase-v139":
+                    assert telemetry.values["pvgridvoltage2"] == 2310
+                    assert telemetry.values["pvgridapparentpower3"] == 11500
+                    assert sensors["pvgridapparentpower3"].unit == "VA"
+                    assert "pvgridpower3" not in sensors
+                    assert (
+                        sensor_value(
+                            sensors["pvgridlinevoltage_rs"],
+                            telemetry.values,
+                            datetime.now(UTC),
+                            telemetry.profile,
+                        )
+                        == 401
+                    )
             else:
                 assert "pv3watt" not in sensors
             expected_blocks = (*PROFILES[profile], *OPTIONAL_BLOCKS.get(profile, ()))
@@ -192,6 +482,12 @@ def test_real_tcp_poll_decodes_core_readings_and_uses_only_input_reads(profile):
             await receiver.close()
 
     asyncio.run(scenario())
+
+
+def test_v139_off_grid_display_state_is_a_valid_reading():
+    words = _registers("tl3-three-phase-v139")
+    words[3000] = 0x0502  # Mode 5, off-grid display state 2.
+    assert decode_input_registers("tl3-three-phase-v139", words)["pvstatus"] == 2
 
 
 def test_malformed_response_does_not_publish_partial_values_then_reconnects():
@@ -422,6 +718,45 @@ def test_raw_investigation_reads_only_selected_block_without_saving_values(
                 sensor.entity_category == "diagnostic" and sensor.unit is None for sensor in raw
             )
             assert not cache.exists()
+            await receiver.close()
+
+    asyncio.run(scenario())
+
+
+def test_raw_investigation_honours_gateway_block_limit_and_is_atomic():
+    async def scenario():
+        requests = []
+
+        async def reply(reader, writer):
+            request = await reader.readexactly(12)
+            first = int.from_bytes(request[8:10], "big")
+            count = int.from_bytes(request[10:12], "big")
+            requests.append((first, count))
+            if first == 404:
+                writer.write(request[:4] + b"\0\x03" + request[6:7] + b"\x84\x02")
+            else:
+                payload = bytes((4, count * 2)) + b"\0\x07" * count
+                writer.write(
+                    request[:4] + (len(payload) + 1).to_bytes(2, "big") + request[6:7] + payload
+                )
+            await writer.drain()
+            writer.close()
+
+        server = await asyncio.start_server(reply, "127.0.0.1", 0)
+        async with server:
+            receiver = ModbusReceiver(
+                host="127.0.0.1",
+                port=server.sockets[0].getsockname()[1],
+                identity="TEST_RAW",
+                profile="investigate-raw",
+                investigation_start=400,
+                investigation_count=9,
+                block_words=4,
+                delay=0.5,
+            )
+            assert not await receiver.poll_once()
+            assert requests == [(400, 4), (404, 4)]
+            assert receiver.snapshots == {}
             await receiver.close()
 
     asyncio.run(scenario())

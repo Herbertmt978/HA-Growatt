@@ -36,6 +36,22 @@ def investigation_range(values):
     return values
 
 
+def modbus_connection(values):
+    host = values["host"]
+    if values["transport"] == "serial":
+        serial_path = (
+            re.fullmatch(r"/dev/[A-Za-z0-9_./-]+", host) and ".." not in host.split("/")
+        ) or re.fullmatch(r"COM[1-9][0-9]*", host, re.I)
+        if not serial_path or len(host) > 253:
+            raise vol.Invalid("Enter a local /dev serial path or COM port")
+    else:
+        gateway_host(host)
+    fast = values["fast_power_interval"]
+    if fast and (fast < 5 or fast >= values["interval"]):
+        raise vol.Invalid("Fast power polling must be 5 seconds or more and below full polling")
+    return investigation_range(values)
+
+
 async def app_connection_note(hass):
     """Check for a fresh app status on HA's broker without blocking setup."""
     if not any(
@@ -114,7 +130,18 @@ def modbus_schema(values=None):
     return vol.All(
         vol.Schema(
             {
-                vol.Required("host", default=values.get("host", "")): gateway_host,
+                vol.Required("host", default=values.get("host", "")): str,
+                vol.Optional("transport", default=values.get("transport", "tcp")): vol.In(
+                    ["tcp", "udp", "serial"]
+                ),
+                vol.Optional("udp_framing", default=values.get("udp_framing", "socket")): vol.In(
+                    ["socket", "rtu"]
+                ),
+                vol.Optional("baudrate", default=values.get("baudrate", 9600)): vol.In(
+                    [2400, 4800, 9600, 19200, 38400, 57600, 115200]
+                ),
+                vol.Optional("parity", default=values.get("parity", "N")): vol.In(["N", "E", "O"]),
+                vol.Optional("stopbits", default=values.get("stopbits", 1)): vol.In([1, 2]),
                 vol.Optional("port", default=values.get("port", 502)): vol.All(
                     vol.Coerce(int), vol.Range(min=1, max=65535)
                 ),
@@ -131,6 +158,18 @@ def modbus_schema(values=None):
                     vol.Coerce(int), vol.Range(min=30, max=3600)
                 ),
                 vol.Optional(
+                    "fast_power_interval", default=values.get("fast_power_interval", 0)
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=300)),
+                vol.Optional("timeout", default=values.get("timeout", 3)): vol.All(
+                    vol.Coerce(float), vol.Range(min=0.5, max=10)
+                ),
+                vol.Optional("request_delay", default=values.get("request_delay", 1)): vol.All(
+                    vol.Coerce(float), vol.Range(min=0.5, max=10)
+                ),
+                vol.Optional("block_words", default=values.get("block_words", 32)): vol.All(
+                    vol.Coerce(int), vol.Range(min=4, max=32)
+                ),
+                vol.Optional(
                     "investigation_kind", default=values.get("investigation_kind", "input")
                 ): vol.In(["input", "holding"]),
                 vol.Optional(
@@ -141,14 +180,25 @@ def modbus_schema(values=None):
                 ): vol.All(vol.Coerce(int), vol.Range(min=1, max=32)),
             }
         ),
-        investigation_range,
+        modbus_connection,
     )
 
 
 def modbus_options_schema(values):
     return vol.Schema(
         {
-            vol.Required("host", default=values["host"]): gateway_host,
+            vol.Required("host", default=values["host"]): str,
+            vol.Optional("transport", default=values.get("transport", "tcp")): vol.In(
+                ["tcp", "udp", "serial"]
+            ),
+            vol.Optional("udp_framing", default=values.get("udp_framing", "socket")): vol.In(
+                ["socket", "rtu"]
+            ),
+            vol.Optional("baudrate", default=values.get("baudrate", 9600)): vol.In(
+                [2400, 4800, 9600, 19200, 38400, 57600, 115200]
+            ),
+            vol.Optional("parity", default=values.get("parity", "N")): vol.In(["N", "E", "O"]),
+            vol.Optional("stopbits", default=values.get("stopbits", 1)): vol.In([1, 2]),
             vol.Optional("port", default=values["port"]): vol.All(
                 vol.Coerce(int), vol.Range(min=1, max=65535)
             ),
@@ -158,6 +208,18 @@ def modbus_options_schema(values):
             vol.Optional("profile", default=values["profile"]): vol.In(PROFILE_CHOICES),
             vol.Optional("interval", default=values["interval"]): vol.All(
                 vol.Coerce(int), vol.Range(min=30, max=3600)
+            ),
+            vol.Optional(
+                "fast_power_interval", default=values.get("fast_power_interval", 0)
+            ): vol.All(vol.Coerce(int), vol.Range(min=0, max=300)),
+            vol.Optional("timeout", default=values.get("timeout", 3)): vol.All(
+                vol.Coerce(float), vol.Range(min=0.5, max=10)
+            ),
+            vol.Optional("request_delay", default=values.get("request_delay", 1)): vol.All(
+                vol.Coerce(float), vol.Range(min=0.5, max=10)
+            ),
+            vol.Optional("block_words", default=values.get("block_words", 32)): vol.All(
+                vol.Coerce(int), vol.Range(min=4, max=32)
             ),
             vol.Optional(
                 "investigation_kind", default=values.get("investigation_kind", "input")
@@ -255,7 +317,7 @@ class Options(config_entries.OptionsFlow):
             step_id="modbus_options",
             data_schema=vol.All(
                 vol.Schema({**schema(values).schema, **modbus_options_schema(values).schema}),
-                investigation_range,
+                modbus_connection,
             ),
         )
 
@@ -267,6 +329,10 @@ class Options(config_entries.OptionsFlow):
                 vol.Optional("enable_controls", default=direct.get("enable_controls", False)): bool,
                 vol.Optional(
                     "experimental_controls", default=direct.get("experimental_controls", False)
+                ): bool,
+                vol.Optional(
+                    "unknown_shine_diagnostics",
+                    default=direct.get("unknown_shine_diagnostics", False),
                 ): bool,
             }
             if user_input is not None:
