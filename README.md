@@ -245,8 +245,8 @@ check the [compatibility record](docs/compatibility.md) before retiring the old 
 
 ## Version 0.8.0
 
-The native Shine receiver was checked on the owner's MIN 2500TL-XH and MIC
-2000TL-X through a temporary transparent relay on DEV Home Assistant. Both
+The native Shine receiver shipped in 0.7.0 was checked on the owner's MIN
+2500TL-XH and MIC 2000TL-X through a temporary transparent relay on DEV. Both
 feeds kept updating during a controlled Growatt cloud outage and cloud
 forwarding reconnected afterwards. The dataloggers were not permanently
 redirected; see the [hardware test](docs/native-hardware-test-2026-09-24.md).
