@@ -29,6 +29,15 @@ where packet layout variants differ from the general register documentation.
 The XOR mask is obfuscation, not transport security. MQTT TLS is available through
 configuration; datalogger traffic should remain on the local network.
 
+On 24 September 2026, read-only probes using both installed ShineWiFi-X logger
+identities received a valid function-25 datalogger-identification request from
+Growatt's cloud after a function-22 heartbeat. The transaction, protocol, unit
+and logger prefix matched; the cloud did not echo the heartbeat. The
+[protocol analysis above](https://www.ietfng.org/nwf/misc/growatt-protocol.html)
+also records occasional server function-25 replies. Cloud recovery accepts
+either response on its disposable probe connection, then lets the datalogger
+reconnect. It does not forward or answer the identification request itself.
+
 Additional diagnostic evidence:
 
 - [Growatt Modbus V1.24, TL-X/TL-XH input table](https://www.amosplanet.org/wp-content/uploads/2023/06/Growatt-Inverter-Modbus-RTU-Protocol_II-V1_24-English.pdf)
