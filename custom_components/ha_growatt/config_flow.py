@@ -11,6 +11,8 @@ from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
 
+from ha_growatt.modbus_receiver import PROFILE_CHOICES
+
 from .const import DEFAULTS, DOMAIN
 
 _SAFE_ID = re.compile(r"[A-Za-z0-9_-]{1,64}\Z")
@@ -26,6 +28,12 @@ def gateway_host(value):
     ):
         raise vol.Invalid("Enter a gateway hostname or IP address")
     return value
+
+
+def investigation_range(values):
+    if values["investigation_start"] + values["investigation_count"] > 65536:
+        raise vol.Invalid("The raw investigation block must end by address 65535")
+    return values
 
 
 async def app_connection_note(hass):
@@ -103,25 +111,37 @@ def direct_schema(values=None):
 
 def modbus_schema(values=None):
     values = values or {}
-    return vol.Schema(
-        {
-            vol.Required("host", default=values.get("host", "")): gateway_host,
-            vol.Optional("port", default=values.get("port", 502)): vol.All(
-                vol.Coerce(int), vol.Range(min=1, max=65535)
-            ),
-            vol.Optional("unit", default=values.get("unit", 1)): vol.All(
-                vol.Coerce(int), vol.Range(min=1, max=247)
-            ),
-            vol.Required("identity", default=values.get("identity", "growatt_modbus")): vol.All(
-                str, vol.Match(_SAFE_ID)
-            ),
-            vol.Optional("profile", default=values.get("profile", "min-3000-v124")): vol.In(
-                ["min-3000-v124", "mic-0-v314", "legacy-0-v124"]
-            ),
-            vol.Optional("interval", default=values.get("interval", 60)): vol.All(
-                vol.Coerce(int), vol.Range(min=30, max=3600)
-            ),
-        }
+    return vol.All(
+        vol.Schema(
+            {
+                vol.Required("host", default=values.get("host", "")): gateway_host,
+                vol.Optional("port", default=values.get("port", 502)): vol.All(
+                    vol.Coerce(int), vol.Range(min=1, max=65535)
+                ),
+                vol.Optional("unit", default=values.get("unit", 1)): vol.All(
+                    vol.Coerce(int), vol.Range(min=1, max=247)
+                ),
+                vol.Required("identity", default=values.get("identity", "growatt_modbus")): vol.All(
+                    str, vol.Match(_SAFE_ID)
+                ),
+                vol.Optional("profile", default=values.get("profile", "min-3000-v124")): vol.In(
+                    PROFILE_CHOICES
+                ),
+                vol.Optional("interval", default=values.get("interval", 60)): vol.All(
+                    vol.Coerce(int), vol.Range(min=30, max=3600)
+                ),
+                vol.Optional(
+                    "investigation_kind", default=values.get("investigation_kind", "input")
+                ): vol.In(["input", "holding"]),
+                vol.Optional(
+                    "investigation_start", default=values.get("investigation_start", 0)
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=65535)),
+                vol.Optional(
+                    "investigation_count", default=values.get("investigation_count", 32)
+                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=32)),
+            }
+        ),
+        investigation_range,
     )
 
 
@@ -135,12 +155,19 @@ def modbus_options_schema(values):
             vol.Optional("unit", default=values["unit"]): vol.All(
                 vol.Coerce(int), vol.Range(min=1, max=247)
             ),
-            vol.Optional("profile", default=values["profile"]): vol.In(
-                ["min-3000-v124", "mic-0-v314", "legacy-0-v124"]
-            ),
+            vol.Optional("profile", default=values["profile"]): vol.In(PROFILE_CHOICES),
             vol.Optional("interval", default=values["interval"]): vol.All(
                 vol.Coerce(int), vol.Range(min=30, max=3600)
             ),
+            vol.Optional(
+                "investigation_kind", default=values.get("investigation_kind", "input")
+            ): vol.In(["input", "holding"]),
+            vol.Optional(
+                "investigation_start", default=values.get("investigation_start", 0)
+            ): vol.All(vol.Coerce(int), vol.Range(min=0, max=65535)),
+            vol.Optional(
+                "investigation_count", default=values.get("investigation_count", 32)
+            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=32)),
         }
     )
 
@@ -226,8 +253,9 @@ class Options(config_entries.OptionsFlow):
         values = dict(self.config_entry.data) | options
         return self.async_show_form(
             step_id="modbus_options",
-            data_schema=vol.Schema(
-                {**schema(values).schema, **modbus_options_schema(values).schema}
+            data_schema=vol.All(
+                vol.Schema({**schema(values).schema, **modbus_options_schema(values).schema}),
+                investigation_range,
             ),
         )
 

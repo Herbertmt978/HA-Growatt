@@ -2,6 +2,8 @@
 
 from homeassistant.util import dt as dt_util
 
+from ha_growatt.modbus_receiver import INVESTIGATION_PROFILE
+
 from .const import DOMAIN
 
 
@@ -21,7 +23,9 @@ async def async_get_config_entry_diagnostics(hass, entry):
                 "failed_measurements": receiver.failed_measurements,
             },
             "last_error": receiver.last_error,
-            "restart_recovery_available": not receiver.cache_error,
+            "restart_recovery_available": (
+                receiver.profile != INVESTIGATION_PROFILE and not receiver.cache_error
+            ),
             "active_issues": sorted({value[0] for value in service.current_issues.values()}),
             "daylight_alerts": service.options["daylight_alerts"],
         }

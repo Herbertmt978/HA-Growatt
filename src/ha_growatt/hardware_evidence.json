@@ -1,5 +1,5 @@
 {
-  "checked": "2026-09-23",
+  "checked": "2026-09-24",
   "notice": "Results apply only to the hardware, firmware, connection and software listed. The external 0xAHA results use direct Modbus RTU/TCP, not HA Growatt's Shine datalogger TCP proxy. They do not verify HA Growatt readings or controls. A successful read does not prove a control works.",
   "entries": [
     {
@@ -118,6 +118,29 @@
       "profile": "Do not select experimental HA Growatt controls from this direct Modbus result alone.",
       "limits": "0xAHA's listed range starts at 3000 W, so it does not include the owner's MIN 2500TL-XH. The family result does not establish every exact variant, firmware or Shine TCP path.",
       "sources": [
+        {
+          "label": "0xAHA supported-model matrix",
+          "url": "https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/"
+        }
+      ]
+    },
+    {
+      "id": "min-three-string-direct",
+      "model": "MIN 7000-10000TL-X/XH three-string family",
+      "firmware": "Not tested with HA Growatt on physical Modbus hardware",
+      "datalogger": "A separately accessible Modbus TCP inverter or gateway is required",
+      "connection": "Direct Modbus TCP input registers",
+      "project": "Growatt Protocol II V1.24; HA Growatt protocol tests; 0xAHA external hardware matrix",
+      "level": "Documented profile — HA Growatt hardware verification needed",
+      "telemetry": "HA Growatt's three-string V1.24 profile reads PV1–PV3 voltage, current, power and energy, basic AC output and generation totals. An optional diagnostic block adds temperature, fault, warning and derating codes when it replies. Synthetic TCP tests cover both a reply and an unavailable diagnostic block.",
+      "controls": "The direct Modbus route is read-only. No battery or grid-control qualification follows from this profile.",
+      "profile": "Choose min-three-string-v124 only when the exact inverter uses Growatt's TL-X/TL-XH V1.24 3000-series input table and has three PV strings. Check readings against the inverter before using them in Energy.",
+      "limits": "0xAHA reports hardware-tested MIN 7000–10000TL-X and MIN TL-XH families, but those tests use its own direct Modbus implementation. They do not verify HA Growatt, every rating or firmware, and do not include the owner's MIN 2500TL-XH. A ShineWiFi-X upload does not provide this direct connection by itself.",
+      "sources": [
+        {
+          "label": "Growatt Protocol II V1.24, input register tables",
+          "url": "https://www.amosplanet.org/wp-content/uploads/2023/06/Growatt-Inverter-Modbus-RTU-Protocol_II-V1_24-English.pdf"
+        },
         {
           "label": "0xAHA supported-model matrix",
           "url": "https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/"

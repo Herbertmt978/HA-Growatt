@@ -6,7 +6,12 @@ from datetime import UTC, datetime
 import pytest
 
 from ha_growatt.discovery import sensor_value, sensors_for
-from ha_growatt.modbus_receiver import PROFILES, ModbusReceiver, decode_input_registers
+from ha_growatt.modbus_receiver import (
+    OPTIONAL_BLOCKS,
+    PROFILES,
+    ModbusReceiver,
+    decode_input_registers,
+)
 
 
 def _u32(words, first, value):
@@ -14,7 +19,7 @@ def _u32(words, first, value):
 
 
 def _registers(profile, *, total=12345):
-    if profile == "min-3000-v124":
+    if profile in {"min-3000-v124", "min-three-string-v124"}:
         words = {address: 0 for address in range(3000, 3079)}
         words[3000] = 1
         _u32(words, 3001, 20450)
@@ -28,6 +33,14 @@ def _registers(profile, *, total=12345):
         _u32(words, 3053, total + 20)
         _u32(words, 3055, 72)
         _u32(words, 3057, total + 10)
+        if profile == "min-three-string-v124":
+            words.update({address: 0 for address in range(3086, 3109)})
+            words[3011], words[3012] = 3600, 41
+            _u32(words, 3013, 14760)
+            _u32(words, 3063, 31)
+            _u32(words, 3065, total + 5)
+            words[3086], words[3093], words[3094], words[3095] = 2, 256, 267, 274
+            words[3105], words[3106] = 9, 3
     elif profile == "mic-0-v314":
         words = {address: 0 for address in range(58)}
         words[0] = 1
@@ -146,7 +159,35 @@ def test_real_tcp_poll_decodes_core_readings_and_uses_only_input_reads(profile):
                     )
                     == 25.4
                 )
-            assert requests == [(4, first, count) for first, count in PROFILES[profile]]
+            if profile == "min-three-string-v124":
+                assert telemetry.values["pv3watt"] == 14760
+                assert (
+                    sensor_value(
+                        sensors["pv3watt"], telemetry.values, datetime.now(UTC), telemetry.profile
+                    )
+                    == 1476
+                )
+                assert (
+                    sensor_value(
+                        sensors["epv3total"], telemetry.values, datetime.now(UTC), telemetry.profile
+                    )
+                    == 1235
+                )
+                assert sensors["epv3total"].state_class == "total_increasing"
+                assert (
+                    sensor_value(
+                        sensors["pvboosttemperature"],
+                        telemetry.values,
+                        datetime.now(UTC),
+                        telemetry.profile,
+                    )
+                    == 27.4
+                )
+                assert sensors["pvfaultcode"].entity_category == "diagnostic"
+            else:
+                assert "pv3watt" not in sensors
+            expected_blocks = (*PROFILES[profile], *OPTIONAL_BLOCKS.get(profile, ()))
+            assert requests == [(4, first, count) for first, count in expected_blocks]
             assert all(count <= 32 for _function, _first, count in requests)
             await receiver.close()
 
@@ -183,6 +224,38 @@ def test_malformed_response_does_not_publish_partial_values_then_reconnects():
             assert await receiver.poll_once()
             assert receiver.connected and receiver.last_error is None
             assert len(seen) == 1 and requests == 4
+            await receiver.close()
+
+    asyncio.run(scenario())
+
+
+def test_unavailable_optional_min_diagnostics_do_not_lose_core_readings():
+    async def scenario():
+        values = _registers("min-three-string-v124")
+
+        async def reply(reader, writer):
+            request = await reader.readexactly(12)
+            first = int.from_bytes(request[8:10], "big")
+            if first == 3086:
+                writer.write(request[:4] + b"\0\x03" + request[6:7] + b"\x84\x02")
+            else:
+                writer.write(_response(request, values))
+            await writer.drain()
+            writer.close()
+
+        server = await asyncio.start_server(reply, "127.0.0.1", 0)
+        async with server:
+            receiver = ModbusReceiver(
+                host="127.0.0.1",
+                port=server.sockets[0].getsockname()[1],
+                identity="TEST_MIN_THREE",
+                profile="min-three-string-v124",
+            )
+            assert await receiver.poll_once()
+            telemetry = receiver.snapshots["TEST_MIN_THREE"].telemetry
+            assert telemetry.values["pv3watt"] == 14760
+            assert "pvboosttemperature" not in telemetry.values
+            assert receiver.connected and receiver.failed_measurements == 0
             await receiver.close()
 
     asyncio.run(scenario())
@@ -298,3 +371,69 @@ def test_rejects_wrong_layout_and_backward_lifetime_energy():
         ModbusReceiver(host="localhost", identity="TEST_INVERTER", profile="unsupported")
     with pytest.raises(ValueError, match="interval"):
         ModbusReceiver(host="localhost", identity="TEST_INVERTER", profile="mic-0-v314", interval=1)
+
+
+@pytest.mark.parametrize("kind,function", [("input", 4), ("holding", 3)])
+def test_raw_investigation_reads_only_selected_block_without_saving_values(
+    tmp_path, kind, function
+):
+    async def scenario():
+        requests = []
+
+        async def reply(reader, writer):
+            request = await reader.readexactly(12)
+            requests.append(request)
+            first = int.from_bytes(request[8:10], "big")
+            assert request[7] == function and first == 400 and request[10:12] == b"\0\x03"
+            payload = bytes((function, 6)) + b"\0\x07\0\0\xff\xfe"
+            writer.write(
+                request[:4] + (len(payload) + 1).to_bytes(2, "big") + request[6:7] + payload
+            )
+            await writer.drain()
+            writer.close()
+
+        server = await asyncio.start_server(reply, "127.0.0.1", 0)
+        async with server:
+            cache = tmp_path / "raw.json"
+            receiver = ModbusReceiver(
+                host="127.0.0.1",
+                port=server.sockets[0].getsockname()[1],
+                identity="TEST_RAW",
+                profile="investigate-raw",
+                investigation_kind=kind,
+                investigation_start=400,
+                investigation_count=3,
+                state_path=str(cache),
+            )
+            assert await receiver.poll_once()
+            assert len(requests) == 1 and receiver.connected
+            telemetry = receiver.snapshots["TEST_RAW"].telemetry
+            assert telemetry.values == {
+                f"raw_{kind}_400": 7,
+                f"raw_{kind}_401": 0,
+                f"raw_{kind}_402": 65534,
+            }
+            sensors = sensors_for(
+                wire_profile=telemetry.profile, sensor_metadata=telemetry.sensor_metadata
+            )
+            raw = [sensor for sensor in sensors if sensor.key.startswith("raw_")]
+            assert len(raw) == 3
+            assert all(
+                sensor.entity_category == "diagnostic" and sensor.unit is None for sensor in raw
+            )
+            assert not cache.exists()
+            await receiver.close()
+
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("start,count", [(-1, 1), (65535, 2), (0, 33)])
+def test_raw_investigation_rejects_out_of_range_blocks(start, count):
+    with pytest.raises(ValueError, match="read-only block"):
+        ModbusReceiver(
+            host="localhost",
+            identity="TEST_RAW",
+            profile="investigate-raw",
+            investigation_start=start,
+            investigation_count=count,
+        )

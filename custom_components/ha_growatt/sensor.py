@@ -95,7 +95,9 @@ class NativeSensor(SensorEntity):
         if spec.state_class:
             self._attr_state_class = SensorStateClass(spec.state_class)
         if spec.entity_category:
-            self._attr_entity_category = spec.entity_category
+            self._attr_entity_category = EntityCategory(spec.entity_category)
+        if spec.key.startswith(("raw_input_", "raw_holding_")):
+            self._attr_entity_registry_enabled_default = False
         if spec.icon:
             self._attr_icon = spec.icon
         self._attr_native_value = None

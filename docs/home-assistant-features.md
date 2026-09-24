@@ -73,9 +73,30 @@ register table matches the actual device. The names describe manufacturer
 register tables; the two owner-owned inverters have not been checked through
 this direct connection. One minute is the default poll interval.
 
-This route sends only input-register reads. A complete and plausible pair of
-blocks updates the sensors. A failed block, incorrect profile or unavailable
-inverter leaves the last valid measurements in place and turns the Connected
+The separate `min-three-string-v124` profile adds PV3 voltage, current,
+power and daily and lifetime energy for a three-string MIN TL-X/XH using the
+V1.24 3000-series input table. It attempts a separate diagnostic block for
+temperature, fault, warning and derating codes. A missing diagnostic block
+does not discard the core solar reading. The published
+[0xAHA model matrix](https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/)
+reports related hardware using its own integration; it does not verify this
+HA Growatt profile or the owner's 2500 W MIN. Check the actual readings against
+the inverter before selecting them in Energy.
+
+For an unfamiliar direct Modbus device, choose `investigate-raw` and a single
+input or holding-register block of at most 32 words. The integration creates
+one diagnostic entity per address, disabled by default. You can enable only
+the addresses you need in Home Assistant. Values are raw unsigned words with
+no unit or energy meaning. They are not saved for restart recovery or included
+in diagnostic downloads, but enabling an entity records its state in Home
+Assistant. Raw words may contain serial numbers or settings: keep their states
+and screenshots private. This option sends paced reads only and offers no
+writes. It does not inspect unknown Shine packet bytes; use
+`ha_growatt.capture_evidence` for those packets.
+
+Documented profiles send only input-register reads. A complete and plausible
+pair of core blocks updates the sensors. A failed block, incorrect profile or
+unavailable inverter leaves the last valid measurements in place and turns the Connected
 sensor off. The saved reading returns after restart without marking the
 gateway connected. It does not forward to ShinePhone, publish optional outputs
 or offer writes. If a suitable direct gateway is not present, keep the

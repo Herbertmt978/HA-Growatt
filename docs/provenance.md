@@ -70,3 +70,12 @@ between MIC and MIN layouts matters: the same register number can mean a
 different quantity on the two devices. The direct receiver has synthetic TCP
 gateway tests, but no claimed physical Modbus qualification for the owner's
 ShineWiFi-X devices.
+
+The later three-string MIN profile adds the PV3 positions and optional
+diagnostic positions documented in Protocol II V1.24. The broader
+[0xAHA hardware matrix](https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/)
+helps identify families worth testing, but its results remain labelled as
+external evidence; no 0xAHA or Fez implementation code was copied. The
+read-only raw investigation profile uses this project's Modbus reader and
+publishes private, disabled-by-default diagnostic entities without assigning
+units or saving raw values to the restart cache.

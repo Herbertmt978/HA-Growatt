@@ -26,9 +26,13 @@ _LOG = logging.getLogger(__name__)
 # deliberately absent because their availability depends on model and wiring.
 PROFILES: dict[str, tuple[tuple[int, int], ...]] = {
     "min-3000-v124": ((3000, 30), (3047, 32)),
+    "min-three-string-v124": ((3000, 30), (3047, 32)),
     "mic-0-v314": ((0, 32), (32, 26)),
     "legacy-0-v124": ((0, 11), (35, 32)),
 }
+OPTIONAL_BLOCKS = {"min-three-string-v124": ((3086, 23),)}
+INVESTIGATION_PROFILE = "investigate-raw"
+PROFILE_CHOICES = (*PROFILES, INVESTIGATION_PROFILE)
 
 _SENSOR_KEYS = frozenset(
     {
@@ -67,7 +71,68 @@ def _sensor_metadata(values: dict[str, int]) -> dict[str, dict]:
             definition.pop("key")
             definition["source"] = sensor.key
             result[sensor.key] = definition
+    for suffix, label, unit, device_class in (
+        ("voltage", "Voltage", "V", "voltage"),
+        ("current", "Current", "A", "current"),
+        ("watt", "Power", "W", "power"),
+    ):
+        key = f"pv3{suffix}"
+        if key in values:
+            result[key] = {
+                "label": f"PV3 {label}",
+                "source": key,
+                "divisor": 10,
+                "unit": unit,
+                "device_class": device_class,
+                "state_class": "measurement",
+            }
+    for key, label in (
+        ("epv3today", "Solar PV3 production"),
+        ("epv3total", "Solar PV3 production (Total)"),
+    ):
+        if key in values:
+            result[key] = {
+                "label": label,
+                "source": key,
+                "divisor": 10,
+                "unit": "kWh",
+                "device_class": "energy",
+                "state_class": "total_increasing" if key == "epv3total" else "total",
+            }
+    if "pvboosttemperature" in values:
+        result["pvboosttemperature"] = {
+            "label": "Boost temperature",
+            "source": "pvboosttemperature",
+            "divisor": 10,
+            "unit": "°C",
+            "device_class": "temperature",
+            "state_class": "measurement",
+        }
+    for key, label in (
+        ("pvfaultcode", "Fault code"),
+        ("pvwarningcode", "Warning code"),
+        ("pvderatingmode", "Derating mode code"),
+    ):
+        if key in values:
+            result[key] = {
+                "label": label,
+                "source": key,
+                "entity_category": "diagnostic",
+                "icon": "mdi:alert-circle-outline",
+            }
     return result
+
+
+def _raw_sensor_metadata(values: dict[str, int]) -> dict[str, dict]:
+    return {
+        key: {
+            "label": f"{key.split('_')[1].title()} register {key.rsplit('_', 1)[1]}",
+            "source": key,
+            "entity_category": "diagnostic",
+            "icon": "mdi:database-search",
+        }
+        for key in values
+    }
 
 
 def _u32(words: dict[int, int], high: int) -> int:
@@ -78,7 +143,7 @@ def decode_input_registers(profile: str, words: dict[int, int]) -> dict[str, int
     """Return raw integer values with the existing HA sensor scaling."""
     if profile not in PROFILES:
         raise ValueError("Unknown Modbus input profile")
-    if profile == "min-3000-v124":
+    if profile in {"min-3000-v124", "min-three-string-v124"}:
         values = {
             "pvstatus": words[3000] & 0xFF,
             "pvpowerin": _u32(words, 3001),
@@ -101,6 +166,23 @@ def decode_input_registers(profile: str, words: dict[int, int]) -> dict[str, int
             "epv2today": _u32(words, 3059),
             "epv2total": _u32(words, 3061),
         }
+        if profile == "min-three-string-v124":
+            values.update(
+                pv3voltage=words[3011],
+                pv3current=words[3012],
+                pv3watt=_u32(words, 3013),
+                epv3today=_u32(words, 3063),
+                epv3total=_u32(words, 3065),
+            )
+            if 3086 in words:
+                values.update(
+                    pvderatingmode=words[3086],
+                    pvtemperature=words[3093],
+                    pvipmtemperature=words[3094],
+                    pvboosttemperature=words[3095],
+                    pvfaultcode=words[3105],
+                    pvwarningcode=words[3106],
+                )
     elif profile == "mic-0-v314":
         values = {
             "pvstatus": words[0],
@@ -120,6 +202,8 @@ def decode_input_registers(profile: str, words: dict[int, int]) -> dict[str, int
             "epv1today": _u32(words, 48),
             "epv1total": _u32(words, 50),
             "epvtotal": _u32(words, 56),
+            "pvfaultcode": words[40],
+            "pvderatingmode": words[47],
         }
     else:
         values = {
@@ -184,9 +268,21 @@ class ModbusReceiver:
         timeout: float = 3.0,
         delay: float = 1.0,
         state_path: str = "",
+        investigation_kind: str = "input",
+        investigation_start: int = 0,
+        investigation_count: int = 32,
     ) -> None:
-        if profile not in PROFILES:
+        if profile not in PROFILE_CHOICES:
             raise ValueError("Choose a documented Modbus input profile")
+        if (
+            investigation_kind not in {"input", "holding"}
+            or type(investigation_start) is not int
+            or type(investigation_count) is not int
+            or not 0 <= investigation_start <= 65535
+            or not 1 <= investigation_count <= 32
+            or investigation_start + investigation_count > 65536
+        ):
+            raise ValueError("Choose one read-only block of 1–32 registers")
         validate_identity(identity)
         if (
             not isinstance(host, str)
@@ -199,6 +295,9 @@ class ModbusReceiver:
             raise ValueError("Poll interval must be between 30 and 3600 seconds")
         self.host, self.port, self.unit = host, port, unit
         self.identity, self.profile = identity, profile
+        self.investigation_kind = investigation_kind
+        self.investigation_start = investigation_start
+        self.investigation_count = investigation_count
         self.interval = float(interval)
         self.reader = ModbusReader(host, port, unit, delay, timeout)
         self.snapshots: dict[str, Snapshot] = {}
@@ -211,7 +310,7 @@ class ModbusReceiver:
         self._restored_ids: set[str] = set()
         self._store = (
             ReadingStore(state_path, ("modbus", host, port, unit, identity, profile))
-            if state_path
+            if state_path and profile != INVESTIGATION_PROFILE
             else None
         )
         self._poll_lock = asyncio.Lock()
@@ -245,16 +344,37 @@ class ModbusReceiver:
         """Read both bounded blocks; a failed block never publishes partial data."""
         async with self._poll_lock:
             try:
-                words: dict[int, int] = {}
-                for first, count in PROFILES[self.profile]:
-                    block = await self.reader.read("input", first, count)
-                    words.update((first + offset, value) for offset, value in enumerate(block))
-                values = decode_input_registers(self.profile, words)
-                previous = self.snapshots.get(self.identity)
-                if previous is not None:
-                    last_total = previous.telemetry.values.get("pvenergytotal")
-                    if type(last_total) is int and values["pvenergytotal"] < last_total:
-                        raise ValueError("The inverter's lifetime energy reading went backwards")
+                if self.profile == INVESTIGATION_PROFILE:
+                    block = await self.reader.read(
+                        self.investigation_kind,
+                        self.investigation_start,
+                        self.investigation_count,
+                    )
+                    values = {
+                        f"raw_{self.investigation_kind}_{self.investigation_start + offset}": value
+                        for offset, value in enumerate(block)
+                    }
+                    metadata = _raw_sensor_metadata(values)
+                else:
+                    words: dict[int, int] = {}
+                    for first, count in PROFILES[self.profile]:
+                        block = await self.reader.read("input", first, count)
+                        words.update((first + offset, value) for offset, value in enumerate(block))
+                    for first, count in OPTIONAL_BLOCKS.get(self.profile, ()):
+                        try:
+                            block = await self.reader.read("input", first, count)
+                        except ReadError:
+                            continue
+                        words.update((first + offset, value) for offset, value in enumerate(block))
+                    values = decode_input_registers(self.profile, words)
+                    previous = self.snapshots.get(self.identity)
+                    if previous is not None:
+                        last_total = previous.telemetry.values.get("pvenergytotal")
+                        if type(last_total) is int and values["pvenergytotal"] < last_total:
+                            raise ValueError(
+                                "The inverter's lifetime energy reading went backwards"
+                            )
+                    metadata = _sensor_metadata(values)
             except (ReadError, KeyError, ValueError) as error:
                 self.failed_measurements += 1
                 self.connected = False
@@ -264,7 +384,7 @@ class ModbusReceiver:
                 values=values,
                 recorded_at=None,
                 profile=f"modbus-{self.profile}",
-                sensor_metadata=_sensor_metadata(values),
+                sensor_metadata=metadata,
                 device_id=self.identity,
             )
             snapshot = Snapshot(telemetry, datetime.now(UTC))
