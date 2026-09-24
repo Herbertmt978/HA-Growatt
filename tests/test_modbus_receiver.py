@@ -99,7 +99,7 @@ def _response(request, values, *, broken=False):
     [
         (5200, False, "mic-0-v314"),
         (5200, True, "min-3000-v124"),
-        (5201, True, "min-three-string-v124"),
+        (5201, True, "min-3000-v124"),
         (5100, True, "min-3000-v124"),
     ],
 )
@@ -166,6 +166,117 @@ def test_auto_can_use_legacy_device_type_register():
     assert asyncio.run(detect_input_profile(Reader())) == "min-3000-v124"
 
 
+@pytest.mark.parametrize("profile", list(PROFILES))
+def test_fast_power_poll_only_reads_power_and_preserves_full_snapshot(profile):
+    class Reader:
+        def __init__(self, words):
+            self.words = words
+            self.calls = []
+
+        async def read(self, kind, first, count):
+            self.calls.append((kind, first, count))
+            return [self.words[first + index] for index in range(count)]
+
+    async def scenario():
+        words = _registers(profile)
+        receiver = ModbusReceiver(
+            host="127.0.0.1",
+            identity="FAST",
+            profile=profile,
+            interval=60,
+            fast_power_interval=5,
+        )
+        reader = Reader(words)
+        receiver.reader = reader
+        readings = []
+        receiver.subscribe(readings.append)
+        assert not await receiver.poll_power_once()  # No complete reading yet.
+        assert await receiver.poll_once()
+        full_snapshot = receiver.snapshots["FAST"]
+        full_energy = full_snapshot.telemetry.values["pvenergytotal"]
+        reader.calls.clear()
+        power_address = 3001 if profile.startswith(("min-", "tl3-")) else 1
+        _u32(words, power_address, 10000)
+        assert await receiver.poll_power_once()
+        assert receiver.snapshots["FAST"] is full_snapshot
+        assert receiver.snapshots["FAST"].telemetry.values["pvenergytotal"] == full_energy
+        assert receiver.measurements == 1 and receiver.fast_power_polls == 1
+        assert readings[-1].partial
+        assert "pvenergytotal" not in readings[-1].snapshot.telemetry.values
+        assert readings[-1].snapshot.telemetry.values["pvpowerin"] == 10000
+        assert all(kind == "input" for kind, _, _ in reader.calls)
+        assert not any(first >= 3047 or first in {26, 28, 53, 55} for _, first, _ in reader.calls)
+        await receiver.close()
+
+    asyncio.run(scenario())
+
+
+def test_fast_power_failure_never_replaces_full_reading():
+    class Reader:
+        def __init__(self, words):
+            self.words = words
+            self.fail = False
+
+        async def read(self, kind, first, count):
+            if self.fail:
+                raise ReadError("TimeoutError")
+            return [self.words[first + index] for index in range(count)]
+
+    async def scenario():
+        receiver = ModbusReceiver(
+            host="127.0.0.1",
+            identity="FAST",
+            profile="mic-0-v314",
+            fast_power_interval=5,
+        )
+        reader = Reader(_registers("mic-0-v314"))
+        receiver.reader = reader
+        seen = []
+        receiver.subscribe(seen.append)
+        assert await receiver.poll_once()
+        original = receiver.snapshots["FAST"]
+        reader.fail = True
+        assert not await receiver.poll_power_once()
+        assert receiver.connected
+        assert receiver.failed_fast_power_polls == 1
+        assert receiver.snapshots["FAST"] is original and len(seen) == 1
+        await receiver.close()
+
+    asyncio.run(scenario())
+
+
+def test_fast_and_full_polls_share_one_reader_lock():
+    class Reader:
+        def __init__(self):
+            self.words = _registers("mic-0-v314")
+            self.active = 0
+            self.peak = 0
+
+        async def read(self, kind, first, count):
+            self.active += 1
+            self.peak = max(self.peak, self.active)
+            await asyncio.sleep(0.001)
+            values = [self.words[first + index] for index in range(count)]
+            self.active -= 1
+            return values
+
+    async def scenario():
+        receiver = ModbusReceiver(
+            host="127.0.0.1",
+            identity="FAST",
+            profile="mic-0-v314",
+            fast_power_interval=5,
+        )
+        reader = Reader()
+        receiver.reader = reader
+        assert await receiver.poll_once()
+        assert all(await asyncio.gather(receiver.poll_once(), receiver.poll_power_once()))
+        assert reader.peak == 1
+        await receiver.close()
+
+    asyncio.run(scenario())
+
+
 def test_auto_poll_uses_read_only_dtc_and_publishes_resolved_profile():
     async def scenario():
         values = _registers("min-three-string-v124")
@@ -198,20 +309,17 @@ def test_auto_poll_uses_read_only_dtc_and_publishes_resolved_profile():
                 delay=0.5,
             )
             assert await receiver.poll_once()
-            assert receiver.detected_profile == "min-three-string-v124"
-            assert receiver.snapshots["TEST_AUTO"].telemetry.profile == (
-                "modbus-min-three-string-v124"
-            )
-            assert receiver.snapshots["TEST_AUTO"].telemetry.values["pv3watt"] == 14760
+            assert receiver.detected_profile == "min-3000-v124"
+            assert receiver.snapshots["TEST_AUTO"].telemetry.profile == "modbus-min-3000-v124"
+            assert "pv3watt" not in receiver.snapshots["TEST_AUTO"].telemetry.values
             assert requests == [
                 (3, 30000, 1),
                 (4, 3003, 1),
                 (4, 3000, 30),
                 (4, 3047, 32),
-                (4, 3086, 23),
             ]
             assert await receiver.poll_once()
-            assert requests[5:] == requests[2:5]  # Detection runs once per receiver.
+            assert requests[4:] == requests[2:4]  # Detection runs once per receiver.
             await receiver.close()
 
     asyncio.run(scenario())

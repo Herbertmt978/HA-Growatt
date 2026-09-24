@@ -1,4 +1,4 @@
-"""Read documented Growatt input registers from an explicit Modbus TCP gateway.
+"""Read documented Growatt input registers from an explicit Modbus connection.
 
 The register numbers and scales follow published V1.24, V1.39 and V3.14
 input tables. The read-only scanner supplies TCP framing and request limits.
@@ -10,11 +10,14 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 from dataclasses import asdict
 from datetime import UTC, datetime
+from pathlib import PurePosixPath
 
 from .discovery import STANDARD_SENSORS, validate_identity
 from .modbus_scan import ModbusReader, ReadError
+from .modbus_transport import SerialModbusReader, UdpModbusReader
 from .native_receiver import NativeReading
 from .recovery import ReadingStore, Snapshot
 from .telemetry import Telemetry
@@ -38,6 +41,13 @@ OPTIONAL_BLOCKS = {
 AUTO_PROFILE = "auto"
 INVESTIGATION_PROFILE = "investigate-raw"
 PROFILE_CHOICES = (AUTO_PROFILE, *PROFILES, INVESTIGATION_PROFILE)
+POWER_BLOCKS = {
+    "min-3000-v124": ((3001, 10), (3023, 2)),
+    "min-three-string-v124": ((3001, 14), (3023, 2)),
+    "tl3-three-phase-v139": ((3001, 14), (3023, 2)),
+    "mic-0-v314": ((1, 6), (11, 2)),
+    "legacy-0-v124": ((1, 10), (35, 2)),
+}
 
 _SENSOR_KEYS = frozenset(
     {
@@ -169,6 +179,24 @@ def _u32(words: dict[int, int], high: int) -> int:
     return (words[high] << 16) | words[high + 1]
 
 
+def decode_power_registers(profile: str, words: dict[int, int]) -> dict[str, int]:
+    """Decode only live power; a short poll must never refresh energy sensors."""
+    base = 3000 if profile.startswith(("min-", "tl3-")) else 0
+    output = 3023 if base else 35 if profile == "legacy-0-v124" else 11
+    values = {
+        "pvpowerin": _u32(words, base + 1),
+        "pv1watt": _u32(words, base + 5),
+        "pvpowerout": _u32(words, output),
+    }
+    if profile != "mic-0-v314":
+        values["pv2watt"] = _u32(words, base + 9)
+    if profile in {"min-three-string-v124", "tl3-three-phase-v139"}:
+        values["pv3watt"] = _u32(words, 3013)
+    if any(value > 100_000_000 for value in values.values()):
+        raise ValueError("The selected Modbus input layout produced an invalid power value")
+    return values
+
+
 async def detect_input_profile(reader: ModbusReader) -> str:
     """Identify only DTC families for which this receiver has a matching map.
 
@@ -199,7 +227,9 @@ async def detect_input_profile(reader: ModbusReader) -> str:
         return "mic-0-v314"
     if not has_3000_input:
         raise ValueError("Automatic Modbus identification found no matching input range")
-    return "min-three-string-v124" if dtc == 5201 else "min-3000-v124"
+    # A 5201 code describes a MIN family, not the number of connected strings.
+    # Keep PV3 on the explicit profile until its hardware has been checked.
+    return "min-3000-v124"
 
 
 def decode_input_registers(profile: str, words: dict[int, int]) -> dict[str, int]:
@@ -350,6 +380,12 @@ class ModbusReceiver:
         timeout: float = 3.0,
         delay: float = 1.0,
         block_words: int = 32,
+        transport: str = "tcp",
+        udp_framing: str = "socket",
+        baudrate: int = 9600,
+        parity: str = "N",
+        stopbits: int = 1,
+        fast_power_interval: float = 0,
         state_path: str = "",
         investigation_kind: str = "input",
         investigation_start: int = 0,
@@ -367,7 +403,19 @@ class ModbusReceiver:
         ):
             raise ValueError("Choose one read-only block of 1–32 registers")
         validate_identity(identity)
-        if (
+        if transport not in {"tcp", "udp", "serial"}:
+            raise ValueError("Choose Modbus TCP, UDP or serial RTU")
+        if transport == "serial":
+            linux_device = (
+                isinstance(host, str)
+                and host.startswith("/dev/")
+                and re.fullmatch(r"/dev/[A-Za-z0-9_./-]+", host) is not None
+                and ".." not in PurePosixPath(host).parts
+            )
+            windows_device = isinstance(host, str) and re.fullmatch(r"COM[1-9][0-9]*", host, re.I)
+            if not (linux_device or windows_device) or len(host) > 253:
+                raise ValueError("Enter a local /dev serial path or COM port")
+        elif (
             not isinstance(host, str)
             or not host
             or len(host) > 253
@@ -376,33 +424,52 @@ class ModbusReceiver:
             raise ValueError("Enter a gateway hostname or IP address")
         if type(interval) not in {int, float} or not 30 <= interval <= 3600:
             raise ValueError("Poll interval must be between 30 and 3600 seconds")
+        if type(fast_power_interval) not in {int, float} or (
+            fast_power_interval != 0 and not 5 <= fast_power_interval < interval
+        ):
+            raise ValueError("Fast power interval must be off or 5 seconds up to the full interval")
         if type(block_words) is not int or not 4 <= block_words <= 32:
             raise ValueError("Modbus requests must contain 4–32 words at most")
         self.host, self.port, self.unit = host, port, unit
+        self.transport, self.udp_framing = transport, udp_framing
         self.identity, self.profile = identity, profile
         self.detected_profile: str | None = None
         self.investigation_kind = investigation_kind
         self.investigation_start = investigation_start
         self.investigation_count = investigation_count
         self.interval = float(interval)
+        self.fast_power_interval = float(fast_power_interval)
         self.block_words = block_words
-        self.reader = ModbusReader(host, port, unit, delay, timeout)
+        if transport == "serial":
+            self.reader = SerialModbusReader(host, unit, delay, timeout, baudrate, parity, stopbits)
+        elif transport == "udp":
+            self.reader = UdpModbusReader(host, port, unit, delay, timeout, udp_framing)
+        else:
+            self.reader = ModbusReader(host, port, unit, delay, timeout)
         self.snapshots: dict[str, Snapshot] = {}
         self.measurements = 0
         self.failed_measurements = 0
+        self.fast_power_polls = 0
+        self.failed_fast_power_polls = 0
         self.connected = False
         self.last_error: str | None = None
         self.cache_error = False
         self._listeners: set = set()
         self._restored_ids: set[str] = set()
+        scope = ("modbus", host, port, unit, identity, profile)
+        if transport == "udp":
+            scope += (transport, udp_framing)
+        elif transport == "serial":
+            scope += (transport, baudrate, parity, stopbits)
         self._store = (
-            ReadingStore(state_path, ("modbus", host, port, unit, identity, profile))
+            ReadingStore(state_path, scope)
             if state_path and profile != INVESTIGATION_PROFILE
             else None
         )
         self._poll_lock = asyncio.Lock()
         self._stop = asyncio.Event()
         self._task: asyncio.Task | None = None
+        self._fast_task: asyncio.Task | None = None
 
     @property
     def running(self) -> bool:
@@ -426,6 +493,10 @@ class ModbusReceiver:
                 _LOG.warning("Saved Modbus readings could not be restored")
         self._stop.clear()
         self._task = asyncio.create_task(self._run(), name="ha-growatt-modbus-poll")
+        if self.fast_power_interval and self.profile != INVESTIGATION_PROFILE:
+            self._fast_task = asyncio.create_task(
+                self._run_fast(), name="ha-growatt-modbus-fast-power"
+            )
 
     async def poll_once(self) -> bool:
         """Read bounded blocks; a failed block never publishes partial data."""
@@ -506,6 +577,41 @@ class ModbusReceiver:
                     _LOG.warning("A Modbus reading listener failed")
             return True
 
+    async def poll_power_once(self) -> bool:
+        """Publish fresh power only; keep full readings and their timestamp unchanged."""
+        async with self._poll_lock:
+            previous = self.snapshots.get(self.identity)
+            if previous is None or not self.connected or self.profile == INVESTIGATION_PROFILE:
+                return False
+            active_profile = self.detected_profile if self.profile == AUTO_PROFILE else self.profile
+            if active_profile not in POWER_BLOCKS:
+                return False
+            try:
+                words: dict[int, int] = {}
+                for first, count in POWER_BLOCKS[active_profile]:
+                    words.update(await self._read_block("input", first, count))
+                values = decode_power_registers(active_profile, words)
+            except (ReadError, KeyError, ValueError):
+                self.failed_fast_power_polls += 1
+                return False
+            telemetry = Telemetry(
+                values=values,
+                recorded_at=None,
+                profile=f"modbus-{active_profile}",
+                sensor_metadata=_sensor_metadata(values),
+                device_id=self.identity,
+            )
+            reading = NativeReading(
+                self.identity, Snapshot(telemetry, datetime.now(UTC)), partial=True
+            )
+            self.fast_power_polls += 1
+            for listener in tuple(self._listeners):
+                try:
+                    listener(reading)
+                except Exception:
+                    _LOG.warning("A Modbus power reading listener failed")
+            return True
+
     async def _read_block(self, kind: str, first: int, count: int) -> dict[int, int]:
         words = {}
         for offset in range(0, count, self.block_words):
@@ -522,14 +628,25 @@ class ModbusReceiver:
             except TimeoutError:
                 pass
 
+    async def _run_fast(self) -> None:
+        while not self._stop.is_set():
+            try:
+                await asyncio.wait_for(self._stop.wait(), self.fast_power_interval)
+            except TimeoutError:
+                await self.poll_power_once()
+
     async def close(self) -> None:
         self._stop.set()
         task = self._task
+        fast_task = self._fast_task
         self._task = None
-        if task is not None:
-            task.cancel()
+        self._fast_task = None
+        for pending in (task, fast_task):
+            if pending is None:
+                continue
+            pending.cancel()
             try:
-                await task
+                await pending
             except asyncio.CancelledError:
                 pass
         self.connected = False

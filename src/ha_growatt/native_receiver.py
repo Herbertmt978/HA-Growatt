@@ -26,6 +26,7 @@ class NativeReading:
     identity: str
     snapshot: Snapshot
     restored: bool = False
+    partial: bool = False
 
 
 class NativeReceiver:

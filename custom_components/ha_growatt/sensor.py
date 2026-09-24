@@ -66,9 +66,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
                 added.append(entity)
             else:
                 entity.set_reading(reading)
-        for key, entity in entities.items():
-            if key[0] == reading.identity and key not in current:
-                entity.clear_reading()
+        if not reading.partial:
+            for key, entity in entities.items():
+                if key[0] == reading.identity and key not in current:
+                    entity.clear_reading()
         if added:
             async_add_entities(added)
 

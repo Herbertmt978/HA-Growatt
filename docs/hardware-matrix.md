@@ -224,7 +224,7 @@ An unlisted model is unverified, not necessarily unsupported. Start with
 
 **Profile guidance:** Select tl3-three-phase-v139 only after confirming that the inverter exposes the 3000-series input table and three AC phases. Compare live values with the inverter before adding energy totals to Home Assistant Energy.
 
-**Limits:** Published register definitions and synthetic TCP tests are not a physical HA Growatt result. External 0xAHA model reports do not verify this decoder, firmware or gateway. The auto selector does not choose this profile from shared MOD/MID device-type codes.
+**Limits:** Published register definitions and synthetic TCP tests are not a physical HA Growatt result. External 0xAHA model reports do not verify this decoder, firmware or gateway. The auto selector does not choose this profile from shared MOD/MID device-type codes. UDP and serial RTU transport checks are synthetic only.
 
 - [0xAHA published Growatt Protocol II V1.39 register reference](https://0xaha.github.io/Growatt_ModbusTCP/developer/protocol-v139/)
 - [0xAHA supported-model matrix (external hardware evidence)](https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/)
@@ -249,7 +249,7 @@ An unlisted model is unverified, not necessarily unsupported. Start with
 
 **Profile guidance:** Choose min-three-string-v124 only when the exact inverter uses Growatt's TL-X/TL-XH V1.24 3000-series input table and has three PV strings. Check readings against the inverter before using them in Energy.
 
-**Limits:** 0xAHA reports hardware-tested MIN 7000–10000TL-X and MIN TL-XH families, but those tests use its own direct Modbus implementation. They do not verify HA Growatt, every rating or firmware, and do not include the owner's MIN 2500TL-XH. A ShineWiFi-X upload does not provide this direct connection by itself.
+**Limits:** 0xAHA reports hardware-tested MIN 7000–10000TL-X and MIN TL-XH families, but those tests use its own direct Modbus implementation. They do not verify HA Growatt, every rating or firmware, and do not include the owner's MIN 2500TL-XH. The 5201 device code does not prove three connected strings, so Auto keeps the base MIN profile. UDP and serial RTU checks are synthetic only. A ShineWiFi-X upload does not provide this direct connection by itself.
 
 - [Growatt Protocol II V1.24, input register tables](https://www.amosplanet.org/wp-content/uploads/2023/06/Growatt-Inverter-Modbus-RTU-Protocol_II-V1_24-English.pdf)
 - [0xAHA supported-model matrix](https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/)

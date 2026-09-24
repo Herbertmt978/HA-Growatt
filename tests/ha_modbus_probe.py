@@ -23,6 +23,7 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
 
 from custom_components.ha_growatt.binary_sensor import NativeConnected
+from custom_components.ha_growatt.config_flow import modbus_schema
 from custom_components.ha_growatt.diagnostics import async_get_config_entry_diagnostics
 
 CONFIG = Path("/config")
@@ -31,6 +32,7 @@ DEVICES = (
     ("TEST_MIN", 1, "min-3000-v124"),
     ("TEST_MIC", 2, "mic-0-v314"),
 )
+POWER_OUTPUT = {}
 
 
 def put_u32(words: dict[int, int], first: int, value: int) -> None:
@@ -44,7 +46,7 @@ def readings(unit: int) -> dict[int, int]:
         put_u32(words, 3001, 20450)
         words[3003], words[3004] = 3450, 59
         put_u32(words, 3005, 20355)
-        put_u32(words, 3023, 19990)
+        put_u32(words, 3023, POWER_OUTPUT.get(unit, 19990))
         words[3025], words[3026], words[3027] = 5002, 2310, 87
         put_u32(words, 3049, 74)
         put_u32(words, 3051, 12345)
@@ -72,7 +74,7 @@ def readings(unit: int) -> dict[int, int]:
     put_u32(words, 1, 20450)
     words[3], words[4] = 3450, 59
     put_u32(words, 5, 20355)
-    put_u32(words, 11, 19990)
+    put_u32(words, 11, POWER_OUTPUT.get(unit, 19990))
     words[13], words[14], words[15] = 5002, 2310, 87
     put_u32(words, 26, 74)
     put_u32(words, 28, 12345)
@@ -171,13 +173,27 @@ def entry_entities(hass, entry):
 
 
 async def fresh_run():
+    assert modbus_schema()({"host": "/dev/ttyUSB0", "transport": "serial"})["transport"] == "serial"
+    assert (
+        modbus_schema()({"host": "127.0.0.1", "transport": "udp", "udp_framing": "rtu"})[
+            "udp_framing"
+        ]
+        == "rtu"
+    )
     server = await asyncio.start_server(gateway_reply, "127.0.0.1", 0)
     async with server:
         port = server.sockets[0].getsockname()[1]
         hass = await boot()
         try:
             entries = [
-                await create_entry(hass, identity, unit, profile, port)
+                await create_entry(
+                    hass,
+                    identity,
+                    unit,
+                    profile,
+                    port,
+                    **({"fast_power_interval": 5} if unit == 1 else {}),
+                )
                 for identity, unit, profile in DEVICES
             ]
             await until(lambda: all(entry.runtime_data.receiver.connected for entry in entries))
@@ -218,6 +234,19 @@ async def fresh_run():
                 hub.receiver.connected = True
                 hub.receiver.interval = 30
                 expected[identity] = entities
+            first_entry = entries[0]
+            first_entities = entry_entities(hass, first_entry)
+            energy_id = first_entities["ha_growatt_modbus_TEST_MIN_pvenergytotal"]
+            power_id = first_entities["ha_growatt_modbus_TEST_MIN_pvpowerout"]
+            energy_state = hass.states.get(energy_id)
+            full_snapshot = first_entry.runtime_data.receiver.snapshots["TEST_MIN"]
+            POWER_OUTPUT[1] = 15000
+            assert await first_entry.runtime_data.receiver.poll_power_once()
+            await hass.async_block_till_done()
+            assert float(hass.states.get(power_id).state) == 1500
+            assert hass.states.get(energy_id).last_updated == energy_state.last_updated
+            assert first_entry.runtime_data.receiver.snapshots["TEST_MIN"] is full_snapshot
+            POWER_OUTPUT[1] = 19990
             assert set(expected[DEVICES[0][0]]).isdisjoint(expected[DEVICES[1][0]])
             raw_entry = await create_entry(
                 hass,
@@ -277,10 +306,11 @@ async def fresh_run():
             auto_entry = await create_entry(hass, "TEST_AUTO", 5, "auto", port)
             await until(lambda: auto_entry.runtime_data.receiver.connected)
             auto_report = await async_get_config_entry_diagnostics(hass, auto_entry)
-            assert auto_report["resolved_profile"] == "min-three-string-v124"
+            assert auto_report["resolved_profile"] == "min-3000-v124"
             await until(
-                lambda: "ha_growatt_modbus_TEST_AUTO_pv3watt" in entry_entities(hass, auto_entry)
+                lambda: "ha_growatt_modbus_TEST_AUTO_pvpowerout" in entry_entities(hass, auto_entry)
             )
+            assert "ha_growatt_modbus_TEST_AUTO_pv3watt" not in entry_entities(hass, auto_entry)
             assert await hass.config_entries.async_remove(auto_entry.entry_id)
             tl3_entry = await create_entry(
                 hass, "TEST_TL3", 6, "tl3-three-phase-v139", port, block_words=16

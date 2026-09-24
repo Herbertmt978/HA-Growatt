@@ -83,12 +83,18 @@ guided web support page. Changing routes creates new entity IDs; use the
 history-adoption preview before releasing an old ID. Do not point one
 datalogger at both receivers.
 
-## Direct Modbus TCP
+## Direct Modbus
 
 This is a separate connection to an inverter or gateway, not the ShineWiFi
-upload stream. Choose **Read a direct Modbus TCP connection** during integration
-setup and enter its reachable address, Modbus unit number and a stable device
-identity. **Auto** uses read-only device type codes and an input-range probe
+upload stream. Choose **Read a direct Modbus connection** during integration
+setup and select TCP, UDP or serial RTU. TCP remains the default for existing
+entries. TCP and UDP need a reachable gateway address and port. Serial needs a
+local `/dev/...` device (or COM port on Windows), passed through to Home
+Assistant's container if applicable. Set its baud rate, parity and stop bits.
+UDP offers socket (MBAP) or RTU datagram framing; the gateway must support the
+selected framing. All routes need a Modbus unit number and stable device
+identity. Only read functions 03 and 04 are sent. **Auto** uses read-only
+device type codes and an input-range probe
 to distinguish supported MIN and MIC layouts. It recognises codes 5100, 5200
 and 5201, with a matching input range; an unavailable or ambiguous code asks
 for manual selection rather than guessing. You can also select the MIN TL-X/XH
@@ -96,7 +102,16 @@ V1.24 profile for a matching MIN, the MIC V3.14 profile for a matching MIC,
 or the legacy V1.24 profile only when that register table matches the device.
 The names describe manufacturer
 register tables; the two owner-owned inverters have not been checked through
-this direct connection. One minute is the default poll interval.
+this direct connection. One minute is the default poll interval. The 5201
+device code does not establish that a third PV string is fitted. Select the
+three-string profile manually after checking the model and wiring.
+
+Fast power polling is optional and off by default. If enabled, choose 5–300
+seconds, shorter than the complete poll interval. It updates only current PV
+input, string and output power. Energy totals, their last-read timestamp and
+restart recovery continue to use complete polls. Both poll types share the
+configured delay between requests, so a slow gateway may deliver updates less
+often than the chosen interval. Failed fast polls leave complete readings alone.
 
 The separate `min-three-string-v124` profile adds PV3 voltage, current,
 power and daily and lifetime energy for a three-string MIN TL-X/XH using the

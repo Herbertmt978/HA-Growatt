@@ -19,7 +19,7 @@
 ---
 
 HA Growatt can receive traffic from a Growatt datalogger inside Home Assistant
-or in its separate app. It can also poll a direct Modbus TCP gateway when that
+or in its separate app. It can also poll a direct Modbus connection when that
 connection is available. The Shine routes can forward to Growatt for ShinePhone;
 local fallback keeps readings flowing when the cloud stops responding.
 
@@ -28,7 +28,7 @@ Choose the route that fits your installation:
 | Component | Purpose |
 | --- | --- |
 | **Home Assistant Shine receiver** | Receives datalogger traffic inside Home Assistant. No separate app or MQTT broker is needed for readings, cloud forwarding, restart recovery, buffered events or daylight alerts. Supported controls and optional outputs can be enabled separately. |
-| **Home Assistant direct Modbus** | Polls a separately accessible Modbus TCP inverter or gateway. Supported MIN/MIC device codes can select a profile automatically; other models use an explicit register profile. It reads only; it does not change inverter settings or relay Shine traffic. |
+| **Home Assistant direct Modbus** | Polls a separately accessible TCP, UDP or wired serial RTU connection. Supported MIN/MIC device codes can select a base profile automatically; other models use an explicit register profile. It reads only; it does not change inverter settings or relay Shine traffic. |
 | **HA Growatt app and optional companion** | The app publishes MQTT sensors and offers guided setup, a web support page, CSV and Python-extension outputs. The companion adds Repairs, buffered events and history adoption without duplicating those sensors. |
 
 The service can also run in Docker or Python outside Home Assistant. Existing
@@ -79,20 +79,25 @@ different identifiers, so preview history adoption before retiring existing
 MQTT entities. See the
 [Home Assistant guide](docs/home-assistant-features.md#integration-only-installation).
 
-### Direct Modbus TCP
+### Direct Modbus
 
-Choose **HA Growatt → Read a direct Modbus TCP connection** only when your
-inverter or gateway exposes one. Enter its address, unit number and a stable
-device identity, then choose a documented register profile. **Auto** recognises
+Choose **HA Growatt → Read a direct Modbus connection** only when your inverter
+or gateway exposes Modbus TCP, UDP or wired serial RTU. Enter its address or
+local serial device, unit number and stable device identity. UDP offers socket
+(MBAP) and RTU datagram framing; choose what your gateway actually supports.
+A serial adapter must be attached to the Home Assistant host and exposed to its
+container, if used. **Auto** recognises
 only supported MIN/MIC device type codes; an unknown or ambiguous model needs
 a manual choice. The three-phase TL3 profile is manual and uses Growatt's
 published V1.39 input table. Documented profiles read small input-register
 blocks about once a minute and keep the last valid reading through a quiet
 restart. Failed or
-incomplete reads never replace valid measurements. A ShineWiFi-X upload
+incomplete reads never replace valid measurements. Optional faster power polling
+updates only current power readings; energy totals and their timestamps still
+come from complete polls. A ShineWiFi-X upload
 connection does not itself prove that Modbus TCP is available; check your
 hardware before changing a working setup. This route is read-only and creates
-separate Home Assistant entity IDs. See the [Modbus guide](docs/home-assistant-features.md#direct-modbus-tcp).
+separate Home Assistant entity IDs. See the [Modbus guide](docs/home-assistant-features.md#direct-modbus).
 
 For a documented three-string MIN TL-X/XH, select the separate V1.24 profile
 to see PV3 power and energy. Its extra fault and temperature readings appear
