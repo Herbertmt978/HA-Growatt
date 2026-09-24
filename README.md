@@ -84,12 +84,21 @@ MQTT entities. See the
 Choose **HA Growatt → Read a direct Modbus TCP connection** only when your
 inverter or gateway exposes one. Enter its address, unit number and a stable
 device identity, then choose the documented MIN, MIC or legacy register
-profile. The integration reads two small input-register blocks about once a
+profile. Documented profiles read two small input-register blocks about once a
 minute and keeps the last valid reading through a quiet restart. Failed or
 incomplete reads never replace valid measurements. A ShineWiFi-X upload
 connection does not itself prove that Modbus TCP is available; check your
 hardware before changing a working setup. This route is read-only and creates
 separate Home Assistant entity IDs. See the [Modbus guide](docs/home-assistant-features.md#direct-modbus-tcp).
+
+For a documented three-string MIN TL-X/XH, select the separate V1.24 profile
+to see PV3 power and energy. Its extra fault and temperature readings appear
+only when the inverter answers that optional block. **Investigate raw** reads
+one chosen block of up to 32 input or holding registers from an unfamiliar
+device. It creates disabled diagnostic entities with raw numbers, never energy
+sensors, and does not save those values for restart recovery. Raw registers
+may contain identifiers or settings; keep them private. Neither route has
+been physically checked on this installation.
 
 ### App and MQTT
 

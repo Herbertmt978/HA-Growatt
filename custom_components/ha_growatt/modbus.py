@@ -32,6 +32,9 @@ class ModbusHub:
             state_path=hass.config.path(
                 ".storage", f"ha_growatt_modbus_{connection['identity']}.json"
             ),
+            investigation_kind=connection.get("investigation_kind", "input"),
+            investigation_start=connection.get("investigation_start", 0),
+            investigation_count=connection.get("investigation_count", 32),
         )
         self.started = dt_util.utcnow()
         self.current_issues = {}
