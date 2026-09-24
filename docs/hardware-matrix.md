@@ -128,7 +128,7 @@ An unlisted model is unverified, not necessarily unsupported. Start with
 
 **Profile guidance:** MOD/MID TL3-XH experimental controls, only after confirming the exact model and successful reads.
 
-**Limits:** Direct Modbus results do not establish support through a Shine datalogger. HA Growatt has read-only direct TCP polling for selected profiles, but this MID model has not been tested with it. Raising the reported discharge threshold above current charge also caused charging on this firmware; do not assume it only stops discharge.
+**Limits:** Direct Modbus results do not establish support through a Shine datalogger. HA Growatt has read-only direct TCP, UDP and serial RTU polling for selected profiles, but this MID model has not been tested with it. Raising the reported discharge threshold above current charge also caused charging on this firmware; do not assume it only stops discharge.
 
 - [MID hardware measurements](https://github.com/0xAHA/Growatt_ModbusTCP/issues/362)
 

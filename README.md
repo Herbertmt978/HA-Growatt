@@ -38,7 +38,10 @@ not silently move their entities or history.
 > [!NOTE]
 > **Release status:** The badge above shows the latest published version. The
 > features under [Version 0.7.0](#version-070) need the 0.7.0 integration.
-> Existing app installations can update without changing their setup.
+> Existing app installations can update without changing their setup. The
+> serial and UDP Modbus options, faster power polling and optional Shine packet
+> summary described below are development changes until a matching integration
+> wheel is published in the next release.
 
 ## Quick start
 
@@ -48,7 +51,8 @@ not silently move their entities or history.
   or a separate machine running Docker or Python 3.12+.
 - A working MQTT broker and Home Assistant's MQTT integration if using the app route.
 - A Growatt datalogger that can send traffic to your service's LAN address for
-  the Shine routes, or a separately accessible Modbus TCP connection for polling.
+  the Shine routes, or a separately accessible Modbus TCP, UDP or serial RTU
+  connection for polling.
 - Access to the datalogger's upload-server settings for a Shine receiver, and a
   stable address for whichever service it uses.
 

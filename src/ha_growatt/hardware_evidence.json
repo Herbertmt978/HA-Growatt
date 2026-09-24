@@ -78,7 +78,7 @@
       "telemetry": "Model-specific register evidence; not a HA Growatt telemetry test.",
       "controls": "Reporter measured charging stopping at register 3048 target and discharge changing at register 3067 under Load Priority, on DN1.0. Changes took roughly two minutes. SPH registers 1071/1091 did not control this device.",
       "profile": "MOD/MID TL3-XH experimental controls, only after confirming the exact model and successful reads.",
-      "limits": "Direct Modbus results do not establish support through a Shine datalogger. HA Growatt has read-only direct TCP polling for selected profiles, but this MID model has not been tested with it. Raising the reported discharge threshold above current charge also caused charging on this firmware; do not assume it only stops discharge.",
+      "limits": "Direct Modbus results do not establish support through a Shine datalogger. HA Growatt has read-only direct TCP, UDP and serial RTU polling for selected profiles, but this MID model has not been tested with it. Raising the reported discharge threshold above current charge also caused charging on this firmware; do not assume it only stops discharge.",
       "sources": [
         {
           "label": "MID hardware measurements",
@@ -154,7 +154,7 @@
       "telemetry": "The tl3-three-phase-v139 profile reads three PV strings, three AC phase voltages and currents, three apparent-power values in VA, line voltages and generation energy. Optional fault and temperature readings appear only if their block replies. It does not report apparent power as active power or infer grid import/export without a meter.",
       "controls": "The direct Modbus route is read-only. No battery or grid-control qualification follows from this profile.",
       "profile": "Select tl3-three-phase-v139 only after confirming that the inverter exposes the 3000-series input table and three AC phases. Compare live values with the inverter before adding energy totals to Home Assistant Energy.",
-      "limits": "Published register definitions and synthetic TCP tests are not a physical HA Growatt result. External 0xAHA model reports do not verify this decoder, firmware or gateway. The auto selector does not choose this profile from shared MOD/MID device-type codes.",
+      "limits": "Published register definitions and synthetic TCP tests are not a physical HA Growatt result. External 0xAHA model reports do not verify this decoder, firmware or gateway. The auto selector does not choose this profile from shared MOD/MID device-type codes. UDP and serial RTU transport checks are synthetic only.",
       "sources": [
         {
           "label": "0xAHA published Growatt Protocol II V1.39 register reference",
@@ -177,7 +177,7 @@
       "telemetry": "HA Growatt's three-string V1.24 profile reads PV1–PV3 voltage, current, power and energy, basic AC output and generation totals. An optional diagnostic block adds temperature, fault, warning and derating codes when it replies. Synthetic TCP tests cover both a reply and an unavailable diagnostic block.",
       "controls": "The direct Modbus route is read-only. No battery or grid-control qualification follows from this profile.",
       "profile": "Choose min-three-string-v124 only when the exact inverter uses Growatt's TL-X/TL-XH V1.24 3000-series input table and has three PV strings. Check readings against the inverter before using them in Energy.",
-      "limits": "0xAHA reports hardware-tested MIN 7000–10000TL-X and MIN TL-XH families, but those tests use its own direct Modbus implementation. They do not verify HA Growatt, every rating or firmware, and do not include the owner's MIN 2500TL-XH. A ShineWiFi-X upload does not provide this direct connection by itself.",
+      "limits": "0xAHA reports hardware-tested MIN 7000–10000TL-X and MIN TL-XH families, but those tests use its own direct Modbus implementation. They do not verify HA Growatt, every rating or firmware, and do not include the owner's MIN 2500TL-XH. The 5201 device code does not prove three connected strings, so Auto keeps the base MIN profile. UDP and serial RTU checks are synthetic only. A ShineWiFi-X upload does not provide this direct connection by itself.",
       "sources": [
         {
           "label": "Growatt Protocol II V1.24, input register tables",

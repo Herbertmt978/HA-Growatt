@@ -1,9 +1,13 @@
 # Home Assistant features
 
 The integration can receive datalogger traffic itself, poll an explicitly
-configured direct Modbus TCP connection, or act as a companion to the app.
+configured direct Modbus connection, or act as a companion to the app.
 Battery controls and schedules remain experimental and disabled by default;
 see the hardware evidence below.
+
+The serial and UDP Modbus options, faster power polling and optional Shine
+packet summary are development changes. They need a matching receiver wheel
+in the next release; the published 0.7.0 wheel does not include them.
 
 ## Integration-only installation
 
@@ -137,8 +141,8 @@ Connection options permit a maximum read block of 4–32 words, a 0.5–10 secon
 pause between requests and a 0.5–10 second reply timeout. Defaults remain 32
 words, one second and three seconds. Smaller blocks and slower requests can
 help limited gateways, at the cost of a longer poll. The interval stays at one
-minute by default. The connection remains TCP and read-only; serial/UDP and
-direct Modbus control are not included. The published
+minute by default. TCP, UDP and serial RTU remain read-only; direct Modbus
+control is not included. The published
 [0xAHA gateway guidance](https://0xaha.github.io/Growatt_ModbusTCP/troubleshooting/rs485-gateways/)
 and [Growatt Modbus polling notes](https://github.com/jacobbjerregaard/homeassistant-growatt-modbus#data-updates)
 provide other projects' hardware experience, not HA Growatt verification.
