@@ -36,6 +36,7 @@ class DirectHub:
             forward_cloud=self.options.get("forward_cloud", entry.data["forward_cloud"]),
             state_path=hass.config.path(".storage", "ha_growatt_native_readings.json"),
             family=self.options.get("family", entry.data.get("family", "default")),
+            unknown_diagnostics=self.options.get("unknown_shine_diagnostics", False),
             on_telemetry=self.outputs.publish,
         )
         self.controls = DirectControls(self)

@@ -10,6 +10,7 @@ from types import MappingProxyType
 from homeassistant import bootstrap, loader
 from homeassistant.config_entries import SOURCE_USER, ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 
 
 async def main():
@@ -70,6 +71,7 @@ async def main():
             "stale_minutes": 15,
             "sunrise_grace_minutes": 30,
             "buffered_events": True,
+            "unknown_shine_diagnostics": True,
         },
         source=SOURCE_USER,
         version=1,
@@ -84,6 +86,9 @@ async def main():
     await hass.config_entries.async_add(entry)
     await hass.async_block_till_done()
     assert getattr(entry.state, "value", entry.state) == "loaded", entry.state
+    assert er.async_get(hass).async_get_entity_id(
+        "sensor", "ha_growatt", "ha_growatt_direct_receiver_unknown_shine_packets"
+    ), "Optional unknown-packet diagnostic sensor was not registered"
     cases = json.loads(
         await asyncio.to_thread(Path("/repo/tests/fixtures/telemetry_cases.json").read_text)
     )

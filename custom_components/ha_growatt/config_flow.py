@@ -268,6 +268,10 @@ class Options(config_entries.OptionsFlow):
                 vol.Optional(
                     "experimental_controls", default=direct.get("experimental_controls", False)
                 ): bool,
+                vol.Optional(
+                    "unknown_shine_diagnostics",
+                    default=direct.get("unknown_shine_diagnostics", False),
+                ): bool,
             }
             if user_input is not None:
                 if user_input["port"] != direct["port"] and not await port_available(

@@ -31,6 +31,19 @@ as the shareable report. Capture lasts at most ten minutes and 256 frames, and
 is cleared after thirty minutes or shutdown. The report contains only packet
 structure and decoding outcomes. No private replay is returned by this action.
 
+If you are investigating a model that does not decode reliably, turn on
+**Unrecognised Shine packet diagnostics** under **Configure → Readings, alerts
+and controls**. This adds one diagnostic sensor to the HA Growatt receiver. It
+counts packets that failed decoding or had incomplete fields and lists up to
+eight packet shapes by protocol, function, payload length and known profile.
+Additional shapes are counted together. The option is off by default and the
+summary starts afresh when the receiver reloads. It does not include serials,
+timestamps, packet bytes or measurement values. It does not claim that an
+unmapped byte is an inverter register or assign it a sensor unit. Use the
+shareable `capture_evidence` report for a fuller investigation; neither view
+can decode session-key encrypted traffic. The same bounded summary is included
+in the integration's diagnostic download while the option is enabled.
+
 The native Shine route offers optional raw MQTT, PVOutput, InfluxDB 1 or 2 and
 HTTP delivery. These outputs run in separate bounded queues and skip buffered
 records. Configure them under **HA Growatt → Configure → Optional output

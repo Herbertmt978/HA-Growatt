@@ -47,6 +47,11 @@ async def async_get_config_entry_diagnostics(hass, entry):
             },
             "restart_recovery_available": not receiver.cache_error,
             "packet_health": receiver.packet_health.export(),
+            **(
+                {"unknown_shine_packets": receiver.unknown_formats.export()}
+                if receiver.unknown_formats is not None
+                else {}
+            ),
             "controls_enabled": service.controls.enabled,
             "controls_available": sum(
                 len(service.controls.controls(identity)) for identity in service.controls.states
