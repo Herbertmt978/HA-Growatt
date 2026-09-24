@@ -247,6 +247,33 @@ async def fresh_run():
             assert hass.states.get(energy_id).last_updated == energy_state.last_updated
             assert first_entry.runtime_data.receiver.snapshots["TEST_MIN"] is full_snapshot
             POWER_OUTPUT[1] = 19990
+            original_options = dict(first_entry.options)
+            for different_connection in (
+                {"host": "127.0.0.2"},
+                {"unit": 2},
+                {"transport": "udp"},
+            ):
+                form = await hass.config_entries.options.async_init(first_entry.entry_id)
+                assert form["step_id"] == "modbus_options", form
+                rejected = await hass.config_entries.options.async_configure(
+                    form["flow_id"], different_connection
+                )
+                assert rejected["type"] == "form", rejected
+                assert rejected["errors"]["base"] == "new_modbus_entry_required"
+                assert first_entry.options == original_options
+                assert entry_entities(hass, first_entry) == first_entities
+
+            form = await hass.config_entries.options.async_init(first_entry.entry_id)
+            accepted = await hass.config_entries.options.async_configure(
+                form["flow_id"], {"interval": 45}
+            )
+            assert accepted["type"] == "create_entry", accepted
+            await until(lambda: first_entry.runtime_data.receiver.connected)
+            await hass.async_block_till_done()
+            assert first_entry.options["interval"] == 45
+            assert first_entry.data["identity"] == "TEST_MIN"
+            assert entry_entities(hass, first_entry) == first_entities
+            assert hass.states.get(energy_id) is not None
             assert set(expected[DEVICES[0][0]]).isdisjoint(expected[DEVICES[1][0]])
             raw_entry = await create_entry(
                 hass,

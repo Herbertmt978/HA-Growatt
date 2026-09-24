@@ -145,6 +145,9 @@ def test_shareable_unknown_layouts_group_changes_without_leaking_private_bytes()
     assert "classic-6" in layout["header_compatible_profiles"]
     assert layout["active_blocks"] == [0, 32, 64]
     assert layout["changing_blocks"] == [64]
+    assert layout["changing_words"] == [70, 72, 74, 76, 78]
+    assert layout["changing_words_omitted"] == 0
+    assert layout["candidate_profiles"] == []
     encoded = json.dumps(shared)
     for secret in ("LOGGER0001", "private@example.com", "SECRET1234567", "READING123"):
         assert secret not in encoded
@@ -166,8 +169,54 @@ def test_shareable_unknown_layout_bounds_block_offsets_and_error_text():
     assert len(row["active_blocks"]) == len(layout["active_blocks"]) == 64
     assert row["active_blocks_omitted"] == layout["active_blocks_omitted"] == 26
     assert layout["changing_blocks"] == []
+    assert layout["changing_words"] == []
     assert layout["decode_issues"] == ["other"]
     assert "SECRET" not in json.dumps(shared)
+
+
+def test_shareable_unknown_layout_bounds_two_byte_change_locations():
+    class Undecodable:
+        def decode(self, _frame):
+            raise ProtocolError("No verified profile matches this frame")
+
+    first = bytearray(266)
+    first[:10] = b"LOGGER0001"
+    second = bytearray(first)
+    for offset in range(66, len(second), 2):
+        second[offset + 1] = 1
+    capture = PrivateCapture()
+    capture.start()
+    capture.record(Frame(1, 6, 2, 4, bytes(first)))
+    capture.record(Frame(2, 6, 2, 4, bytes(second)))
+
+    layout = capture.export_shareable(Undecodable())["undecoded_layouts"][0]
+    assert layout["changing_words"] == list(range(66, 194, 2))
+    assert layout["changing_words_omitted"] == 36
+
+
+def test_shareable_unknown_layout_suggests_only_builtin_profiles_after_two_frames():
+    class SelectedDecoder:
+        def decode(self, _frame):
+            raise ProtocolError("Frame does not match the selected telemetry profile")
+
+    cases = json.loads((Path(__file__).parent / "fixtures/telemetry_cases.json").read_text())
+    original = Frame.from_bytes(
+        bytes.fromhex(next(item["wire"] for item in cases if item["profile"] == "classic-6"))
+    )
+    capture = PrivateCapture()
+    capture.start()
+    capture.record(original)
+    first = capture.export_shareable(SelectedDecoder())["undecoded_layouts"][0]
+    assert first["candidate_profiles"] == []
+    capture.record(original)
+
+    report = capture.export_shareable(SelectedDecoder())
+    layout = report["undecoded_layouts"][0]
+    assert "classic-6" in layout["candidate_profiles"]
+    assert len(layout["candidate_profiles"]) <= 3
+    assert "wire" not in json.dumps(report)
+    assert original.payload[:10].decode() not in json.dumps(report)
+    assert original.to_bytes().hex() not in json.dumps(report)
 
 
 @pytest.mark.parametrize(

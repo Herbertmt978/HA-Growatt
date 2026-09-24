@@ -1,3 +1,12 @@
+# 0.9.0
+
+The shareable packet report now points to changing two-byte positions in
+unfamiliar Shine uploads and suggests built-in profiles only when several
+samples decode plausibly. It shares no packet values and does not create
+unknown sensors. The Home Assistant integration also protects existing
+direct-Modbus history: changing its connection or unit requires a new entry.
+Read-only tuning and profile changes remain available on the original entry.
+
 # 0.8.0
 
 The optional Home Assistant integration adds read-only serial RTU and UDP

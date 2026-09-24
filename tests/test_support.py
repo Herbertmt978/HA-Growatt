@@ -348,12 +348,17 @@ def test_private_capture_requires_consent_and_never_enters_redacted_downloads():
         await service.dispatch(
             "POST", "/api/private-capture/start", headers, b'{"acknowledge_private_data":true}'
         )
-        service.pipeline.private_capture.record(Frame(1, 6, 2, 4, b"SECRET0001" + bytes(100)))
+        first = b"SECRET0001" + bytes(100)
+        second = bytearray(first)
+        second[70] = 1
+        service.pipeline.private_capture.record(Frame(1, 6, 2, 4, first))
+        service.pipeline.private_capture.record(Frame(2, 6, 2, 4, bytes(second)))
         private = json.loads((await service.dispatch("GET", "/api/private-capture", {}, b""))[2])
-        assert len(private["frames"]) == 1
+        assert len(private["frames"]) == 2
         shared = json.loads((await service.dispatch("GET", "/api/shareable-capture", {}, b""))[2])
         assert shared["format"] == "ha-growatt-shareable-1"
-        assert len(shared["records"]) == 1
+        assert len(shared["records"]) == 2
+        assert shared["undecoded_layouts"][0]["changing_words"] == [70]
         redacted = json.loads(
             (await service.dispatch("GET", "/api/serial-redacted-capture", {}, b""))[2]
         )
