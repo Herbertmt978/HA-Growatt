@@ -8,7 +8,8 @@ from ha_growatt.relay import Relay, RelaySettings
 
 
 @pytest.mark.parametrize("protocol", [2, 5, 6])
-def test_recovery_requires_heartbeat_then_reconnects_without_duplicate_ack(protocol):
+@pytest.mark.parametrize("cloud_reply", ["echo", "identification"])
+def test_recovery_requires_heartbeat_then_reconnects_without_duplicate_ack(protocol, cloud_reply):
     async def scenario():
         async with cloud() as (port, clients):
             settings = RelaySettings(
@@ -33,7 +34,17 @@ def test_recovery_requires_heartbeat_then_reconnects_without_duplicate_ack(proto
                 # A listening endpoint alone has not ended local collection.
                 writer.write(report(protocol, sequence=8).to_bytes())
                 assert await receive(reader) == Frame(8, protocol, 1, 4, b"\0")
-                probe_writer.write(ping.to_bytes())
+                reply = ping
+                if cloud_reply == "identification":
+                    prefix_size = 30 if protocol == 6 else 10
+                    reply = Frame(
+                        ping.transaction,
+                        ping.protocol,
+                        ping.unit,
+                        25,
+                        ping.payload[:prefix_size] + b"\0\x04\0\x15",
+                    )
+                probe_writer.write(reply.to_bytes())
                 await probe_writer.drain()
                 assert await asyncio.wait_for(reader.read(), 2) == b""
                 assert relay.stats.recovery_reconnects == 1
@@ -52,7 +63,17 @@ def test_recovery_requires_heartbeat_then_reconnects_without_duplicate_ack(proto
     asyncio.run(scenario())
 
 
-@pytest.mark.parametrize("reply", ["silent", "wrong", "command"])
+@pytest.mark.parametrize(
+    "reply",
+    [
+        "silent",
+        "wrong",
+        "command",
+        "foreign_identification",
+        "old_identification",
+        "short_identification",
+    ],
+)
 def test_unhealthy_probe_keeps_local_collection(reply):
     async def scenario():
         async with cloud() as (port, clients):
@@ -73,15 +94,34 @@ def test_unhealthy_probe_keeps_local_collection(reply):
                 probe_reader, probe_writer = await asyncio.wait_for(clients.get(), 2)
                 ping = await receive(probe_reader)
                 if reply != "silent":
-                    probe_writer.write(
-                        Frame(
+                    if reply in {
+                        "foreign_identification",
+                        "old_identification",
+                        "short_identification",
+                    }:
+                        response = Frame(
+                            ping.transaction + 1
+                            if reply == "old_identification"
+                            else ping.transaction,
+                            ping.protocol,
+                            ping.unit,
+                            25,
+                            (
+                                b"OTHER00001".ljust(30, b"\0")
+                                if reply == "foreign_identification"
+                                else ping.payload[:30]
+                            )
+                            + (b"" if reply == "short_identification" else b"\0\x04\0\x15"),
+                        )
+                    else:
+                        response = Frame(
                             99 if reply == "wrong" else ping.transaction,
                             6,
                             1,
                             22 if reply == "wrong" else 6,
                             ping.payload,
-                        ).to_bytes()
-                    )
+                        )
+                    probe_writer.write(response.to_bytes())
                 await asyncio.sleep(0.03)
                 writer.write(report(sequence=8).to_bytes())
                 assert await receive(reader) == Frame(8, 6, 1, 4, b"\0")

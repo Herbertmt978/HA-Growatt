@@ -400,7 +400,24 @@ class Relay:
             async with asyncio.timeout(self.settings.write_seconds):
                 await writer.drain()
             wire = await read_frame(reader, self.settings.cloud_response_seconds)
-            return wire is not None and Frame.from_bytes(wire) == ping
+            if wire is None:
+                return False
+            reply = Frame.from_bytes(wire)
+            if reply == ping:
+                return True
+            # Growatt can answer a heartbeat with a datalogger-identification
+            # request instead of an echo. Keep the reply on this disposable
+            # connection; a matching logger and transaction prove the cloud is
+            # speaking the expected protocol before the logger is reconnected.
+            prefix = logger_prefix(session.logger, session.protocol)
+            return (
+                reply.protocol == ping.protocol
+                and reply.transaction == ping.transaction
+                and reply.unit == ping.unit
+                and reply.function == 25
+                and len(reply.payload) >= len(prefix) + 4
+                and reply.payload.startswith(prefix)
+            )
         except (OSError, TimeoutError, ProtocolError):
             return False
         finally:
