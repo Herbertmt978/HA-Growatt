@@ -37,11 +37,9 @@ not silently move their entities or history.
 
 > [!NOTE]
 > **Release status:** The badge above shows the latest published version. The
-> features under [Version 0.7.0](#version-070) need the 0.7.0 integration.
-> Existing app installations can update without changing their setup. The
 > serial and UDP Modbus options, faster power polling and optional Shine packet
-> summary described below are development changes until a matching integration
-> wheel is published in the next release.
+> summary need the matching 0.8.0 integration and receiver wheel. Existing app
+> installations can update without changing their setup.
 
 ## Quick start
 
@@ -244,6 +242,21 @@ does not establish a successful migration.
 
 Follow the [installation and migration instructions](docs/installation.md) and
 check the [compatibility record](docs/compatibility.md) before retiring the old service.
+
+## Version 0.8.0
+
+The native Shine receiver was checked on the owner's MIN 2500TL-XH and MIC
+2000TL-X through a temporary transparent relay on DEV Home Assistant. Both
+feeds kept updating during a controlled Growatt cloud outage and cloud
+forwarding reconnected afterwards. The dataloggers were not permanently
+redirected; see the [hardware test](docs/native-hardware-test-2026-09-24.md).
+
+Direct Modbus now offers read-only TCP, UDP and serial RTU connections,
+conservative MIN/MIC auto-selection, additional documented profiles and an
+optional faster power reading. The new transport and model checks use test
+gateways; this installation has no confirmed direct Modbus endpoint. An
+opt-in Shine diagnostic counts unfamiliar packet shapes without exposing
+unknown bytes or values. See the [0.8.0 notes](docs/releases/0.8.0.md).
 
 ## Version 0.7.0
 

@@ -6,8 +6,7 @@ Battery controls and schedules remain experimental and disabled by default;
 see the hardware evidence below.
 
 The serial and UDP Modbus options, faster power polling and optional Shine
-packet summary are development changes. They need a matching receiver wheel
-in the next release; the published 0.7.0 wheel does not include them.
+packet summary need version 0.8.0 of both the integration and receiver wheel.
 
 ## Integration-only installation
 
