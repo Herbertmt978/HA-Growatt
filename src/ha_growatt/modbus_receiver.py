@@ -1,9 +1,9 @@
 """Read documented Growatt input registers from an explicit Modbus TCP gateway.
 
-The register numbers and scales below follow Growatt's Protocol II V1.24 and
-PV Inverter Protocol V3.14 input-register tables. Modbus TCP framing and
-limits reuse this project's read-only scanner. No register writes or model
-auto-detection are performed; the selected layout must match the inverter.
+The register numbers and scales follow published V1.24, V1.39 and V3.14
+input tables. The read-only scanner supplies TCP framing and request limits.
+Automatic selection accepts only supported device-type codes; other devices
+need an explicit profile.
 """
 
 from __future__ import annotations
@@ -21,18 +21,23 @@ from .telemetry import Telemetry
 
 _LOG = logging.getLogger(__name__)
 
-# These blocks contain the documented basic PV, grid and generation readings.
-# Each request is at most 32 words. Optional battery and meter registers are
-# deliberately absent because their availability depends on model and wiring.
+# These blocks contain documented PV, grid and generation readings. Each
+# request is at most 32 words. Battery and meter readings depend on model and
+# wiring, so they are not inferred from a matching base register range.
 PROFILES: dict[str, tuple[tuple[int, int], ...]] = {
     "min-3000-v124": ((3000, 30), (3047, 32)),
     "min-three-string-v124": ((3000, 30), (3047, 32)),
+    "tl3-three-phase-v139": ((3000, 30), (3030, 11), (3047, 32)),
     "mic-0-v314": ((0, 32), (32, 26)),
     "legacy-0-v124": ((0, 11), (35, 32)),
 }
-OPTIONAL_BLOCKS = {"min-three-string-v124": ((3086, 23),)}
+OPTIONAL_BLOCKS = {
+    "min-three-string-v124": ((3086, 23),),
+    "tl3-three-phase-v139": ((3086, 23),),
+}
+AUTO_PROFILE = "auto"
 INVESTIGATION_PROFILE = "investigate-raw"
-PROFILE_CHOICES = (*PROFILES, INVESTIGATION_PROFILE)
+PROFILE_CHOICES = (AUTO_PROFILE, *PROFILES, INVESTIGATION_PROFILE)
 
 _SENSOR_KEYS = frozenset(
     {
@@ -48,6 +53,10 @@ _SENSOR_KEYS = frozenset(
         "pvfrequentie",
         "pvgridvoltage",
         "pvgridcurrent",
+        "pvgridvoltage2",
+        "pvgridcurrent2",
+        "pvgridvoltage3",
+        "pvgridcurrent3",
         "pvenergytoday",
         "pvenergytotal",
         "epvtotal",
@@ -120,6 +129,27 @@ def _sensor_metadata(values: dict[str, int]) -> dict[str, dict]:
                 "entity_category": "diagnostic",
                 "icon": "mdi:alert-circle-outline",
             }
+    for index in (1, 2, 3):
+        key = "pvgridapparentpower" + (str(index) if index > 1 else "")
+        if key in values:
+            result[key] = {
+                "label": f"Phase {index} apparent power",
+                "source": key,
+                "divisor": 10,
+                "unit": "VA",
+                "state_class": "measurement",
+            }
+    for pair in ("rs", "st", "tr"):
+        key = f"pvgridlinevoltage_{pair}"
+        if key in values:
+            result[key] = {
+                "label": f"Line voltage {pair.upper()}",
+                "source": key,
+                "divisor": 10,
+                "unit": "V",
+                "device_class": "voltage",
+                "state_class": "measurement",
+            }
     return result
 
 
@@ -139,11 +169,44 @@ def _u32(words: dict[int, int], high: int) -> int:
     return (words[high] << 16) | words[high + 1]
 
 
+async def detect_input_profile(reader: ModbusReader) -> str:
+    """Identify only DTC families for which this receiver has a matching map.
+
+    Both DTC locations and the input probe are read-only. A register replying
+    with zero still counts as present; sleeping inverters may report zeros.
+    Shared or unfamiliar DTCs are left for explicit profile selection.
+    """
+    dtc = None
+    for address in (30000, 43):
+        try:
+            dtc = (await reader.read("holding", address, 1))[0]
+        except ReadError as error:
+            if error.splittable:
+                continue  # This address is absent; try the legacy DTC address.
+            raise
+        if dtc:
+            break
+    if dtc not in {5100, 5200, 5201}:
+        raise ValueError("Automatic Modbus identification needs a supported device type code")
+    try:
+        await reader.read("input", 3003, 1)
+        has_3000_input = True
+    except ReadError as error:
+        if not error.splittable:
+            raise  # A timeout must not be mistaken for a different inverter.
+        has_3000_input = False
+    if dtc == 5200 and not has_3000_input:
+        return "mic-0-v314"
+    if not has_3000_input:
+        raise ValueError("Automatic Modbus identification found no matching input range")
+    return "min-three-string-v124" if dtc == 5201 else "min-3000-v124"
+
+
 def decode_input_registers(profile: str, words: dict[int, int]) -> dict[str, int]:
     """Return raw integer values with the existing HA sensor scaling."""
     if profile not in PROFILES:
         raise ValueError("Unknown Modbus input profile")
-    if profile in {"min-3000-v124", "min-three-string-v124"}:
+    if profile in {"min-3000-v124", "min-three-string-v124", "tl3-three-phase-v139"}:
         values = {
             "pvstatus": words[3000] & 0xFF,
             "pvpowerin": _u32(words, 3001),
@@ -166,7 +229,7 @@ def decode_input_registers(profile: str, words: dict[int, int]) -> dict[str, int
             "epv2today": _u32(words, 3059),
             "epv2total": _u32(words, 3061),
         }
-        if profile == "min-three-string-v124":
+        if profile in {"min-three-string-v124", "tl3-three-phase-v139"}:
             values.update(
                 pv3voltage=words[3011],
                 pv3current=words[3012],
@@ -174,6 +237,19 @@ def decode_input_registers(profile: str, words: dict[int, int]) -> dict[str, int
                 epv3today=_u32(words, 3063),
                 epv3total=_u32(words, 3065),
             )
+            if profile == "tl3-three-phase-v139":
+                values.update(
+                    pvgridapparentpower=_u32(words, 3028),
+                    pvgridvoltage2=words[3030],
+                    pvgridcurrent2=words[3031],
+                    pvgridapparentpower2=_u32(words, 3032),
+                    pvgridvoltage3=words[3034],
+                    pvgridcurrent3=words[3035],
+                    pvgridapparentpower3=_u32(words, 3036),
+                    pvgridlinevoltage_rs=words[3038],
+                    pvgridlinevoltage_st=words[3039],
+                    pvgridlinevoltage_tr=words[3040],
+                )
             if 3086 in words:
                 values.update(
                     pvderatingmode=words[3086],
@@ -227,7 +303,11 @@ def decode_input_registers(profile: str, words: dict[int, int]) -> dict[str, int
             "epv2today": _u32(words, 63),
             "epv2total": _u32(words, 65),
         }
-    if values["pvstatus"] not in {0, 1, 3, 4}:
+    # Protocol II V1.39 also uses display state 2 for off-grid operation.
+    valid_status = {0, 1, 3, 4}
+    if profile != "mic-0-v314":
+        valid_status.add(2)
+    if values["pvstatus"] not in valid_status:
         raise ValueError("The selected Modbus input layout does not match the reply")
     if values["pvpowerin"] > 100_000_000 or values["pvpowerout"] > 100_000_000:
         raise ValueError("The selected Modbus input layout produced an invalid power value")
@@ -250,6 +330,8 @@ def _safe_error(error: ReadError | KeyError | ValueError) -> str:
         return "The selected Modbus profile did not match the reply"
     if "lifetime energy" in str(error):
         return "The inverter's lifetime energy reading went backwards"
+    if "Automatic Modbus identification" in str(error):
+        return "Automatic identification was inconclusive; choose a documented profile"
     return "The selected Modbus profile did not match the reply"
 
 
@@ -267,6 +349,7 @@ class ModbusReceiver:
         interval: float = 60.0,
         timeout: float = 3.0,
         delay: float = 1.0,
+        block_words: int = 32,
         state_path: str = "",
         investigation_kind: str = "input",
         investigation_start: int = 0,
@@ -293,12 +376,16 @@ class ModbusReceiver:
             raise ValueError("Enter a gateway hostname or IP address")
         if type(interval) not in {int, float} or not 30 <= interval <= 3600:
             raise ValueError("Poll interval must be between 30 and 3600 seconds")
+        if type(block_words) is not int or not 4 <= block_words <= 32:
+            raise ValueError("Modbus requests must contain 4–32 words at most")
         self.host, self.port, self.unit = host, port, unit
         self.identity, self.profile = identity, profile
+        self.detected_profile: str | None = None
         self.investigation_kind = investigation_kind
         self.investigation_start = investigation_start
         self.investigation_count = investigation_count
         self.interval = float(interval)
+        self.block_words = block_words
         self.reader = ModbusReader(host, port, unit, delay, timeout)
         self.snapshots: dict[str, Snapshot] = {}
         self.measurements = 0
@@ -341,40 +428,49 @@ class ModbusReceiver:
         self._task = asyncio.create_task(self._run(), name="ha-growatt-modbus-poll")
 
     async def poll_once(self) -> bool:
-        """Read both bounded blocks; a failed block never publishes partial data."""
+        """Read bounded blocks; a failed block never publishes partial data."""
         async with self._poll_lock:
             try:
+                active_profile = self.profile
                 if self.profile == INVESTIGATION_PROFILE:
-                    block = await self.reader.read(
+                    words = await self._read_block(
                         self.investigation_kind,
                         self.investigation_start,
                         self.investigation_count,
                     )
                     values = {
-                        f"raw_{self.investigation_kind}_{self.investigation_start + offset}": value
-                        for offset, value in enumerate(block)
+                        f"raw_{self.investigation_kind}_{address}": value
+                        for address, value in words.items()
                     }
                     metadata = _raw_sensor_metadata(values)
                 else:
+                    if active_profile == AUTO_PROFILE:
+                        active_profile = self.detected_profile or await detect_input_profile(
+                            self.reader
+                        )
                     words: dict[int, int] = {}
-                    for first, count in PROFILES[self.profile]:
-                        block = await self.reader.read("input", first, count)
-                        words.update((first + offset, value) for offset, value in enumerate(block))
-                    for first, count in OPTIONAL_BLOCKS.get(self.profile, ()):
+                    for first, count in PROFILES[active_profile]:
+                        words.update(await self._read_block("input", first, count))
+                    for first, count in OPTIONAL_BLOCKS.get(active_profile, ()):
                         try:
-                            block = await self.reader.read("input", first, count)
+                            optional_words = await self._read_block("input", first, count)
                         except ReadError:
                             continue
-                        words.update((first + offset, value) for offset, value in enumerate(block))
-                    values = decode_input_registers(self.profile, words)
+                        words.update(optional_words)
+                    values = decode_input_registers(active_profile, words)
                     previous = self.snapshots.get(self.identity)
-                    if previous is not None:
+                    if (
+                        previous is not None
+                        and previous.telemetry.profile == f"modbus-{active_profile}"
+                    ):
                         last_total = previous.telemetry.values.get("pvenergytotal")
                         if type(last_total) is int and values["pvenergytotal"] < last_total:
                             raise ValueError(
                                 "The inverter's lifetime energy reading went backwards"
                             )
                     metadata = _sensor_metadata(values)
+                    if self.profile == AUTO_PROFILE:
+                        self.detected_profile = active_profile
             except (ReadError, KeyError, ValueError) as error:
                 self.failed_measurements += 1
                 self.connected = False
@@ -383,7 +479,7 @@ class ModbusReceiver:
             telemetry = Telemetry(
                 values=values,
                 recorded_at=None,
-                profile=f"modbus-{self.profile}",
+                profile=f"modbus-{active_profile}",
                 sensor_metadata=metadata,
                 device_id=self.identity,
             )
@@ -409,6 +505,14 @@ class ModbusReceiver:
                 except Exception:
                     _LOG.warning("A Modbus reading listener failed")
             return True
+
+    async def _read_block(self, kind: str, first: int, count: int) -> dict[int, int]:
+        words = {}
+        for offset in range(0, count, self.block_words):
+            size = min(self.block_words, count - offset)
+            values = await self.reader.read(kind, first + offset, size)
+            words.update((first + offset + index, value) for index, value in enumerate(values))
+        return words
 
     async def _run(self) -> None:
         while not self._stop.is_set():

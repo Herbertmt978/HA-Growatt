@@ -29,6 +29,9 @@ class ModbusHub:
             identity=connection["identity"],
             profile=connection["profile"],
             interval=connection["interval"],
+            timeout=connection.get("timeout", 3),
+            delay=connection.get("request_delay", 1),
+            block_words=connection.get("block_words", 32),
             state_path=hass.config.path(
                 ".storage", f"ha_growatt_modbus_{connection['identity']}.json"
             ),

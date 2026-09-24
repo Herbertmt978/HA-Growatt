@@ -38,7 +38,7 @@ def put_u32(words: dict[int, int], first: int, value: int) -> None:
 
 
 def readings(unit: int) -> dict[int, int]:
-    if unit in {1, 4}:
+    if unit in {1, 4, 5, 6}:
         words = {address: 0 for address in range(3000, 3079)}
         words[3000] = 1
         put_u32(words, 3001, 20450)
@@ -51,7 +51,7 @@ def readings(unit: int) -> dict[int, int]:
         put_u32(words, 3053, 12365)
         put_u32(words, 3055, 72)
         put_u32(words, 3057, 12355)
-        if unit == 4:
+        if unit in {4, 5, 6}:
             words.update({address: 0 for address in range(3086, 3109)})
             words[3011], words[3012] = 3600, 41
             put_u32(words, 3013, 14760)
@@ -59,6 +59,13 @@ def readings(unit: int) -> dict[int, int]:
             put_u32(words, 3065, 12350)
             words[3093], words[3094], words[3095] = 256, 267, 274
             words[3105], words[3106] = 9, 3
+            if unit == 6:
+                put_u32(words, 3028, 12100)
+                words[3030], words[3031] = 2310, 51
+                put_u32(words, 3032, 11800)
+                words[3034], words[3035] = 2320, 49
+                put_u32(words, 3036, 11500)
+                words[3038], words[3039], words[3040] = 4010, 4020, 4030
         return words
     words = {address: 0 for address in range(58)}
     words[0] = 1
@@ -81,13 +88,16 @@ async def gateway_reply(reader, writer):
         request = await reader.readexactly(12)
         assert request[7] in {3, 4}, "The receiver sent a Modbus write"
         unit = request[6]
-        assert unit in {1, 2, 3, 4}
+        assert unit in {1, 2, 3, 4, 5, 6}
         first = int.from_bytes(request[8:10], "big")
         count = int.from_bytes(request[10:12], "big")
         assert 1 <= count <= 32
         if unit == 3:
             assert request[7] == 3 and first == 400 and count == 3
             words = {400: 7, 401: 0, 402: 65534}
+        elif unit == 5 and request[7] == 3:
+            assert first == 30000 and count == 1
+            words = {30000: 5201}
         else:
             assert request[7] == 4
             words = readings(unit)
@@ -264,6 +274,35 @@ async def fresh_run():
             )
             assert "ha_growatt_modbus_TEST_MIN3_pvfaultcode" in three_string_entities
             assert await hass.config_entries.async_remove(three_string_entry.entry_id)
+            auto_entry = await create_entry(hass, "TEST_AUTO", 5, "auto", port)
+            await until(lambda: auto_entry.runtime_data.receiver.connected)
+            auto_report = await async_get_config_entry_diagnostics(hass, auto_entry)
+            assert auto_report["resolved_profile"] == "min-three-string-v124"
+            await until(
+                lambda: "ha_growatt_modbus_TEST_AUTO_pv3watt" in entry_entities(hass, auto_entry)
+            )
+            assert await hass.config_entries.async_remove(auto_entry.entry_id)
+            tl3_entry = await create_entry(
+                hass, "TEST_TL3", 6, "tl3-three-phase-v139", port, block_words=16
+            )
+            await until(lambda: tl3_entry.runtime_data.receiver.connected)
+            await until(
+                lambda: (
+                    "ha_growatt_modbus_TEST_TL3_pvgridapparentpower3"
+                    in entry_entities(hass, tl3_entry)
+                )
+            )
+            tl3_entities = entry_entities(hass, tl3_entry)
+            assert (
+                float(
+                    hass.states.get(
+                        tl3_entities["ha_growatt_modbus_TEST_TL3_pvgridapparentpower3"]
+                    ).state
+                )
+                == 1150
+            )
+            assert "ha_growatt_modbus_TEST_TL3_pvgridpower3" not in tl3_entities
+            assert await hass.config_entries.async_remove(tl3_entry.entry_id)
             offline = await asyncio.start_server(
                 lambda reader, writer: writer.close(), "127.0.0.1", 0
             )
@@ -314,7 +353,7 @@ async def fresh_run():
                 hub.evaluate(now)
                 assert not any(key.endswith("_unavailable") for key in hub.current_issues)
             SAVED.write_text(json.dumps(expected, sort_keys=True), encoding="utf-8")
-            print("Modbus UI flow, MIN/MIC, three-string and raw diagnostics passed")
+            print("Modbus UI flow, MIN/MIC, auto, TL3 and raw diagnostics passed")
         finally:
             await hass.async_stop()
 

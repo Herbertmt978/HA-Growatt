@@ -23,6 +23,7 @@ An unlisted model is unverified, not necessarily unsupported. Start with
 | [MIN TL-XH](#min-tl-xh) | Documented — hardware verification needed | Growatt protocol documentation; HA Growatt protocol tests |
 | [MIC 600-3300TL-X family](#0xaha-mic-tl-x) | External hardware test — direct Modbus | 0xAHA/Growatt_ModbusTCP published model matrix |
 | [MIN TL-XH 3000-10000 family](#0xaha-min-tl-xh) | External hardware test — direct Modbus | 0xAHA/Growatt_ModbusTCP published model matrix |
+| [TL3 three-phase 3000-range family (direct Modbus candidate)](#tl3-three-phase-direct) | Documented profile — HA Growatt hardware verification needed | Growatt Protocol II V1.39 register table; HA Growatt synthetic TCP tests |
 | [MIN 7000-10000TL-X/XH three-string family](#min-three-string-direct) | Documented profile — HA Growatt hardware verification needed | Growatt Protocol II V1.24; HA Growatt protocol tests; 0xAHA external hardware matrix |
 | [SPH 8000TL3 BH-UP](#0xaha-sph-8000tl3-bh-up) | External hardware test — direct Modbus | 0xAHA/Growatt_ModbusTCP published model matrix |
 | [MOD 6000-15000TL3-XH family](#0xaha-mod-tl3-xh) | External hardware test — direct Modbus | 0xAHA/Growatt_ModbusTCP published model matrix |
@@ -177,6 +178,31 @@ An unlisted model is unverified, not necessarily unsupported. Start with
 **Limits:** 0xAHA's listed range starts at 3000 W, so it does not include the owner's MIN 2500TL-XH. The family result does not establish every exact variant, firmware or Shine TCP path.
 
 - [0xAHA supported-model matrix](https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/)
+
+<a id="tl3-three-phase-direct"></a>
+
+## TL3 three-phase 3000-range family (direct Modbus candidate)
+
+**Evidence:** Documented profile — HA Growatt hardware verification needed
+
+**Software or source project:** Growatt Protocol II V1.39 register table; HA Growatt synthetic TCP tests
+
+**Firmware:** Not tested with HA Growatt on physical Modbus hardware
+
+**Datalogger:** A separately accessible Modbus TCP inverter or gateway is required
+
+**Connection:** Direct Modbus TCP input registers
+
+**Readings:** The tl3-three-phase-v139 profile reads three PV strings, three AC phase voltages and currents, three apparent-power values in VA, line voltages and generation energy. Optional fault and temperature readings appear only if their block replies. It does not report apparent power as active power or infer grid import/export without a meter.
+
+**Controls:** The direct Modbus route is read-only. No battery or grid-control qualification follows from this profile.
+
+**Profile guidance:** Select tl3-three-phase-v139 only after confirming that the inverter exposes the 3000-series input table and three AC phases. Compare live values with the inverter before adding energy totals to Home Assistant Energy.
+
+**Limits:** Published register definitions and synthetic TCP tests are not a physical HA Growatt result. External 0xAHA model reports do not verify this decoder, firmware or gateway. The auto selector does not choose this profile from shared MOD/MID device-type codes.
+
+- [0xAHA published Growatt Protocol II V1.39 register reference](https://0xaha.github.io/Growatt_ModbusTCP/developer/protocol-v139/)
+- [0xAHA supported-model matrix (external hardware evidence)](https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/)
 
 <a id="min-three-string-direct"></a>
 

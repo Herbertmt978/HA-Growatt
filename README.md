@@ -28,7 +28,7 @@ Choose the route that fits your installation:
 | Component | Purpose |
 | --- | --- |
 | **Home Assistant Shine receiver** | Receives datalogger traffic inside Home Assistant. No separate app or MQTT broker is needed for readings, cloud forwarding, restart recovery, buffered events or daylight alerts. Supported controls and optional outputs can be enabled separately. |
-| **Home Assistant direct Modbus** | Polls a separately accessible Modbus TCP inverter or gateway, using an explicitly selected register profile. It reads only; it does not change inverter settings or relay Shine traffic. |
+| **Home Assistant direct Modbus** | Polls a separately accessible Modbus TCP inverter or gateway. Supported MIN/MIC device codes can select a profile automatically; other models use an explicit register profile. It reads only; it does not change inverter settings or relay Shine traffic. |
 | **HA Growatt app and optional companion** | The app publishes MQTT sensors and offers guided setup, a web support page, CSV and Python-extension outputs. The companion adds Repairs, buffered events and history adoption without duplicating those sensors. |
 
 The service can also run in Docker or Python outside Home Assistant. Existing
@@ -83,9 +83,12 @@ MQTT entities. See the
 
 Choose **HA Growatt → Read a direct Modbus TCP connection** only when your
 inverter or gateway exposes one. Enter its address, unit number and a stable
-device identity, then choose the documented MIN, MIC or legacy register
-profile. Documented profiles read two small input-register blocks about once a
-minute and keeps the last valid reading through a quiet restart. Failed or
+device identity, then choose a documented register profile. **Auto** recognises
+only supported MIN/MIC device type codes; an unknown or ambiguous model needs
+a manual choice. The three-phase TL3 profile is manual and uses Growatt's
+published V1.39 input table. Documented profiles read small input-register
+blocks about once a minute and keep the last valid reading through a quiet
+restart. Failed or
 incomplete reads never replace valid measurements. A ShineWiFi-X upload
 connection does not itself prove that Modbus TCP is available; check your
 hardware before changing a working setup. This route is read-only and creates
@@ -99,6 +102,11 @@ device. It creates disabled diagnostic entities with raw numbers, never energy
 sensors, and does not save those values for restart recovery. Raw registers
 may contain identifiers or settings; keep them private. Neither route has
 been physically checked on this installation.
+
+For a gateway that cannot answer 32-word reads, reduce the maximum block size
+in the integration's connection options. Request delay and timeout can also be
+adjusted there. Existing installations keep the same defaults. These settings
+do not establish that a ShineWiFi-X exposes a direct Modbus connection.
 
 ### App and MQTT
 

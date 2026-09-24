@@ -130,6 +130,15 @@ def modbus_schema(values=None):
                 vol.Optional("interval", default=values.get("interval", 60)): vol.All(
                     vol.Coerce(int), vol.Range(min=30, max=3600)
                 ),
+                vol.Optional("timeout", default=values.get("timeout", 3)): vol.All(
+                    vol.Coerce(float), vol.Range(min=0.5, max=10)
+                ),
+                vol.Optional("request_delay", default=values.get("request_delay", 1)): vol.All(
+                    vol.Coerce(float), vol.Range(min=0.5, max=10)
+                ),
+                vol.Optional("block_words", default=values.get("block_words", 32)): vol.All(
+                    vol.Coerce(int), vol.Range(min=4, max=32)
+                ),
                 vol.Optional(
                     "investigation_kind", default=values.get("investigation_kind", "input")
                 ): vol.In(["input", "holding"]),
@@ -158,6 +167,15 @@ def modbus_options_schema(values):
             vol.Optional("profile", default=values["profile"]): vol.In(PROFILE_CHOICES),
             vol.Optional("interval", default=values["interval"]): vol.All(
                 vol.Coerce(int), vol.Range(min=30, max=3600)
+            ),
+            vol.Optional("timeout", default=values.get("timeout", 3)): vol.All(
+                vol.Coerce(float), vol.Range(min=0.5, max=10)
+            ),
+            vol.Optional("request_delay", default=values.get("request_delay", 1)): vol.All(
+                vol.Coerce(float), vol.Range(min=0.5, max=10)
+            ),
+            vol.Optional("block_words", default=values.get("block_words", 32)): vol.All(
+                vol.Coerce(int), vol.Range(min=4, max=32)
             ),
             vol.Optional(
                 "investigation_kind", default=values.get("investigation_kind", "input")

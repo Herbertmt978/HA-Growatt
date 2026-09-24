@@ -125,6 +125,29 @@
       ]
     },
     {
+      "id": "tl3-three-phase-direct",
+      "model": "TL3 three-phase 3000-range family (direct Modbus candidate)",
+      "firmware": "Not tested with HA Growatt on physical Modbus hardware",
+      "datalogger": "A separately accessible Modbus TCP inverter or gateway is required",
+      "connection": "Direct Modbus TCP input registers",
+      "project": "Growatt Protocol II V1.39 register table; HA Growatt synthetic TCP tests",
+      "level": "Documented profile — HA Growatt hardware verification needed",
+      "telemetry": "The tl3-three-phase-v139 profile reads three PV strings, three AC phase voltages and currents, three apparent-power values in VA, line voltages and generation energy. Optional fault and temperature readings appear only if their block replies. It does not report apparent power as active power or infer grid import/export without a meter.",
+      "controls": "The direct Modbus route is read-only. No battery or grid-control qualification follows from this profile.",
+      "profile": "Select tl3-three-phase-v139 only after confirming that the inverter exposes the 3000-series input table and three AC phases. Compare live values with the inverter before adding energy totals to Home Assistant Energy.",
+      "limits": "Published register definitions and synthetic TCP tests are not a physical HA Growatt result. External 0xAHA model reports do not verify this decoder, firmware or gateway. The auto selector does not choose this profile from shared MOD/MID device-type codes.",
+      "sources": [
+        {
+          "label": "0xAHA published Growatt Protocol II V1.39 register reference",
+          "url": "https://0xaha.github.io/Growatt_ModbusTCP/developer/protocol-v139/"
+        },
+        {
+          "label": "0xAHA supported-model matrix (external hardware evidence)",
+          "url": "https://0xaha.github.io/Growatt_ModbusTCP/hardware/models/"
+        }
+      ]
+    },
+    {
       "id": "min-three-string-direct",
       "model": "MIN 7000-10000TL-X/XH three-string family",
       "firmware": "Not tested with HA Growatt on physical Modbus hardware",

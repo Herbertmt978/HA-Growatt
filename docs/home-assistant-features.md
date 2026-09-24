@@ -80,9 +80,13 @@ datalogger at both receivers.
 This is a separate connection to an inverter or gateway, not the ShineWiFi
 upload stream. Choose **Read a direct Modbus TCP connection** during integration
 setup and enter its reachable address, Modbus unit number and a stable device
-identity. Select the MIN TL-X/XH V1.24 profile for a matching MIN, the MIC
-V3.14 profile for a matching MIC, or the legacy V1.24 profile only when that
-register table matches the actual device. The names describe manufacturer
+identity. **Auto** uses read-only device type codes and an input-range probe
+to distinguish supported MIN and MIC layouts. It recognises codes 5100, 5200
+and 5201, with a matching input range; an unavailable or ambiguous code asks
+for manual selection rather than guessing. You can also select the MIN TL-X/XH
+V1.24 profile for a matching MIN, the MIC V3.14 profile for a matching MIC,
+or the legacy V1.24 profile only when that register table matches the device.
+The names describe manufacturer
 register tables; the two owner-owned inverters have not been checked through
 this direct connection. One minute is the default poll interval.
 
@@ -96,6 +100,26 @@ reports related hardware using its own integration; it does not verify this
 HA Growatt profile or the owner's 2500 W MIN. Check the actual readings against
 the inverter before selecting them in Energy.
 
+The separately selected `tl3-three-phase-v139` profile follows the published
+Protocol II V1.39 input table for devices with three PV strings and three AC
+phases. It adds phase 2 and 3 voltage and current, phase apparent power in VA,
+and line voltages. Apparent power is not active power, so this profile does not
+create phase watt or grid-import/export sensors from those registers. It also
+uses the optional fault and temperature block. Shared MOD/MID device type codes
+do not select this profile automatically. Compare live values against the
+inverter before using its energy totals; no HA Growatt physical Modbus result
+is claimed by the published [0xAHA V1.39 register table](https://0xaha.github.io/Growatt_ModbusTCP/developer/protocol-v139/).
+
+Connection options permit a maximum read block of 4–32 words, a 0.5–10 second
+pause between requests and a 0.5–10 second reply timeout. Defaults remain 32
+words, one second and three seconds. Smaller blocks and slower requests can
+help limited gateways, at the cost of a longer poll. The interval stays at one
+minute by default. The connection remains TCP and read-only; serial/UDP and
+direct Modbus control are not included. The published
+[0xAHA gateway guidance](https://0xaha.github.io/Growatt_ModbusTCP/troubleshooting/rs485-gateways/)
+and [Growatt Modbus polling notes](https://github.com/jacobbjerregaard/homeassistant-growatt-modbus#data-updates)
+provide other projects' hardware experience, not HA Growatt verification.
+
 For an unfamiliar direct Modbus device, choose `investigate-raw` and a single
 input or holding-register block of at most 32 words. The integration creates
 one diagnostic entity per address, disabled by default. You can enable only
@@ -107,8 +131,9 @@ and screenshots private. This option sends paced reads only and offers no
 writes. It does not inspect unknown Shine packet bytes; use
 `ha_growatt.capture_evidence` for those packets.
 
-Documented profiles send only input-register reads. A complete and plausible
-pair of core blocks updates the sensors. A failed block, incorrect profile or
+Documented profiles send only input-register reads after Auto's read-only
+identification probes, if selected. A complete and plausible set of core
+blocks updates the sensors. A failed block, incorrect profile or
 unavailable inverter leaves the last valid measurements in place and turns the Connected
 sensor off. The saved reading returns after restart without marking the
 gateway connected. It does not forward to ShinePhone, publish optional outputs
