@@ -248,6 +248,8 @@ def test_native_receiver_can_share_unknown_frame_evidence_without_packet_content
         report = receiver.private_capture.export_shareable(receiver.decoder)
         assert report["records"][0]["result"] == "decode_failed"
         assert report["undecoded_layouts"][0]["frames"] == 1
+        assert report["undecoded_layouts"][0]["candidate_profiles"] == []
+        assert report["undecoded_layouts"][0]["changing_words"] == []
         encoded = json.dumps(report)
         assert "bad/topic!" not in encoded
         assert source.payload[:10].decode() not in encoded

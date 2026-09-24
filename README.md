@@ -37,9 +37,9 @@ not silently move their entities or history.
 
 > [!NOTE]
 > **Release status:** The badge above shows the latest published version. The
-> serial and UDP Modbus options, faster power polling and optional Shine packet
-> summary need the matching 0.8.0 integration and receiver wheel. Existing app
-> installations can update without changing their setup.
+> reviewed Shine capture evidence and the direct-Modbus identity safeguard need
+> the matching 0.9.0 integration and receiver wheel. Existing app installations
+> can update without changing their setup.
 
 ## Quick start
 
@@ -242,6 +242,19 @@ does not establish a successful migration.
 
 Follow the [installation and migration instructions](docs/installation.md) and
 check the [compatibility record](docs/compatibility.md) before retiring the old service.
+
+## Version 0.9.0
+
+The private capture's shareable report now highlights changing two-byte
+positions in unfamiliar Shine uploads and suggests a built-in profile only
+when several samples decode plausibly. It contains no packet bytes or readings
+and never creates unknown sensors or a new profile. A new layout still needs
+review against varied readings and a synthetic replay fixture.
+
+Direct Modbus entries keep their connection and unit identity. To move to a
+different gateway, unit or transport, add a new entry and review its readings
+before retiring the old one; tuning and profile choices remain editable. The
+existing Shine and MQTT routes are unchanged. See the [0.9.0 notes](docs/releases/0.9.0.md).
 
 ## Version 0.8.0
 

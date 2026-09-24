@@ -11,6 +11,7 @@ from homeassistant.core import callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
 
+from ha_growatt.modbus_identity import modbus_connection_changed
 from ha_growatt.modbus_receiver import PROFILE_CHOICES
 
 from .const import DEFAULTS, DOMAIN
@@ -310,15 +311,22 @@ class Options(config_entries.OptionsFlow):
 
     async def async_step_modbus_options(self, user_input=None):
         options = dict(self.config_entry.options)
-        if user_input is not None:
-            return self.async_create_entry(data=options | user_input)
         values = dict(self.config_entry.data) | options
+        data_schema = vol.All(
+            vol.Schema({**schema(values).schema, **modbus_options_schema(values).schema}),
+            modbus_connection,
+        )
+        if user_input is not None:
+            if modbus_connection_changed(values, values | user_input):
+                return self.async_show_form(
+                    step_id="modbus_options",
+                    data_schema=data_schema,
+                    errors={"base": "new_modbus_entry_required"},
+                )
+            return self.async_create_entry(data=options | user_input)
         return self.async_show_form(
             step_id="modbus_options",
-            data_schema=vol.All(
-                vol.Schema({**schema(values).schema, **modbus_options_schema(values).schema}),
-                modbus_connection,
-            ),
+            data_schema=data_schema,
         )
 
     async def async_step_receiver(self, user_input=None):

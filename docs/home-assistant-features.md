@@ -5,8 +5,8 @@ configured direct Modbus connection, or act as a companion to the app.
 Battery controls and schedules remain experimental and disabled by default;
 see the hardware evidence below.
 
-The serial and UDP Modbus options, faster power polling and optional Shine
-packet summary need version 0.8.0 of both the integration and receiver wheel.
+The reviewed Shine capture evidence and direct-Modbus identity safeguard need
+version 0.9.0 of both the integration and receiver wheel.
 
 ## Integration-only installation
 
@@ -46,6 +46,16 @@ unmapped byte is an inverter register or assign it a sensor unit. Use the
 shareable `capture_evidence` report for a fuller investigation; neither view
 can decode session-key encrypted traffic. The same bounded summary is included
 in the integration's diagnostic download while the option is enabled.
+
+For a closer look, start `ha_growatt.capture_evidence`, let several live
+daylight uploads arrive, then request its shareable report. The app's support
+page provides the same report from **Private packet capture for offline
+replay**. For undecoded measurements, it marks which two-byte payload positions
+changed after the expected identity and timestamp area and lists up to three
+built-in profiles that decoded every captured sample plausibly. These are
+investigation leads, not identified registers. A single sample cannot produce
+profile suggestions; a packet with a different header may need private review.
+Neither report changes the selected profile or creates sensors.
 
 The current MIC and MIN Shine layouts decode measurements from fixed byte
 offsets; they do not establish an address for every unassigned byte. Those
@@ -145,6 +155,16 @@ control is not included. The published
 [0xAHA gateway guidance](https://0xaha.github.io/Growatt_ModbusTCP/troubleshooting/rs485-gateways/)
 and [Growatt Modbus polling notes](https://github.com/jacobbjerregaard/homeassistant-growatt-modbus#data-updates)
 provide other projects' hardware experience, not HA Growatt verification.
+
+An existing Modbus entry keeps the same transport, gateway or serial port,
+framing and unit number. The options form rejects a change to any of these
+details because the integration cannot confirm an inverter serial reliably
+across the supported register tables. Add a new entry for a different
+connection, check its live values and Energy use, then retire the old entry if
+appropriate. This gives the new device its own entity history. Poll intervals,
+read limits and profile selection can still be changed on the original entry.
+If hardware is replaced behind the same address and unit, the integration
+cannot detect that change; create a new entry with a new identity in that case.
 
 For an unfamiliar direct Modbus device, choose `investigate-raw` and a single
 input or holding-register block of at most 32 words. The integration creates
@@ -531,11 +551,22 @@ grouped by feed, protocol, function and packet length. It shows how often each
 shape appeared, which 32-byte blocks changed between samples, a fixed reason
 category, the selected profile when built in or automatic, and built-in
 profiles with compatible headers. A compatible header does not mean that the
-profile can decode the packet. Long block lists are limited to 64 entries with
-an omitted count. The file contains no payload bytes, serial numbers, exact
-times or measurement values.
+profile can decode the packet. For live measurement packets, it also lists up
+to 64 changing two-byte positions after the expected header, with an omitted
+count, and up to three plausible built-in profile candidates after at least two
+samples. Candidate names are ranked using decoded values privately but the
+values and scores are not exported. A candidate is not proof that the layout or
+units are correct, especially with overnight zero readings. Long block lists
+are also limited to 64 entries. The file contains no payload bytes, serial
+numbers, exact times or measurement values.
 This is the file to attach to a public issue. Check it before posting, especially
 if you have added custom layouts or support tooling of your own.
+
+Use the report to narrow the investigation, then compare the candidate positions
+with a manufacturer register table or a private capture on a trusted computer.
+Name and scale fields only when that evidence agrees with varied real readings.
+Build a synthetic replay fixture and check the new layout before enabling it for
+other owners. The report does not generate a loadable layout automatically.
 
 For a decoder investigation that needs actual measurement values, download the
 **serial-redacted replay**. This preserves the supported frame shape and known

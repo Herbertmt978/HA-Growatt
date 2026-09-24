@@ -71,7 +71,9 @@ async def service(mode):
             async with asyncio.timeout(15):
                 while not healthy(health):
                     if process.returncode is not None:
-                        raise AssertionError("Service exited before it became healthy")
+                        out, error = await process.communicate()
+                        detail = (out + error).decode(errors="replace").strip()
+                        raise AssertionError(f"Service exited before it became healthy: {detail}")
                     await asyncio.sleep(0.05)
             reader, writer = await asyncio.open_connection("127.0.0.1", listener_port)
             try:

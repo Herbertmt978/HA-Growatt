@@ -7,9 +7,13 @@ from collections import OrderedDict
 
 from .profiles import wire_profiles
 from .protocol import Frame, ProtocolError
+from .selection import plausibility
+from .telemetry import Decoder
 
 _BLOCK_BYTES = 32
 _MAX_REPORTED_BLOCKS = 64
+_MAX_REPORTED_WORDS = 64
+_PROFILE_SCORE_THRESHOLD = 20
 _DECODE_ISSUES = {
     "Frame does not match the selected telemetry profile": "selected_profile_mismatch",
     "Truncated telemetry identity or timestamp": "short_measurement",
@@ -24,6 +28,32 @@ _DECODE_ISSUES = {
 def _reported_blocks(offsets):
     blocks = sorted(offsets)
     return blocks[:_MAX_REPORTED_BLOCKS], max(0, len(blocks) - _MAX_REPORTED_BLOCKS)
+
+
+def _profile_candidates(frames, profiles):
+    """Rank built-in layouts internally; expose names, never decoded values."""
+    if len(frames) < 2 or frames[0].function != 4:
+        return []
+    ranked = []
+    for name, schema in profiles.items():
+        if schema["protocol"] != frames[0].protocol:
+            continue
+        if 4 not in schema.get("functions", [3, 4, 80]):
+            continue
+        decoder = Decoder(name)
+        scores = []
+        for frame in frames:
+            try:
+                telemetry = decoder.decode(frame)
+            except (ProtocolError, ValueError, UnicodeError):
+                break
+            if telemetry.decode_errors:
+                break
+            scores.append(plausibility(telemetry))
+        if len(scores) == len(frames) and min(scores) >= _PROFILE_SCORE_THRESHOLD:
+            ranked.append((min(scores), sum(scores), name))
+    ranked.sort(reverse=True)
+    return [name for _, _, name in ranked[:3]]
 
 
 class PacketHealth:
@@ -189,10 +219,13 @@ class PrivateCapture:
                         ],
                         "active_blocks": set(),
                         "changing_blocks": set(),
+                        "changing_words": set(),
                         "reference": frame.payload,
+                        "samples": [],
                     }
                     unknown_layouts[shape] = layout
                 layout["frames"] += 1
+                layout["samples"].append(frame)
                 layout["decode_issues"].add(_DECODE_ISSUES.get(str(error), "other"))
                 layout["active_blocks"].update(active_blocks)
                 reference = layout["reference"]
@@ -202,6 +235,15 @@ class PrivateCapture:
                     if frame.payload[offset : offset + _BLOCK_BYTES]
                     != reference[offset : offset + _BLOCK_BYTES]
                 )
+                if frame.function == 4:
+                    # Skip the expected identities and timestamp. These are
+                    # possible positions for a reviewed layout, not readings.
+                    data_start = 66 if frame.protocol == 6 else 26
+                    layout["changing_words"].update(
+                        offset
+                        for offset in range(data_start, len(frame.payload) - 1, 2)
+                        if frame.payload[offset : offset + 2] != reference[offset : offset + 2]
+                    )
             else:
                 row.update(
                     result="decoded",
@@ -221,6 +263,7 @@ class PrivateCapture:
         for layout in unknown_layouts.values():
             active, active_omitted = _reported_blocks(layout["active_blocks"])
             changing, changing_omitted = _reported_blocks(layout["changing_blocks"])
+            word_offsets = sorted(layout["changing_words"])
             unknown.append(
                 {
                     "layout": f"Undecoded layout {len(unknown) + 1}",
@@ -237,6 +280,9 @@ class PrivateCapture:
                     "active_blocks_omitted": active_omitted,
                     "changing_blocks": changing,
                     "changing_blocks_omitted": changing_omitted,
+                    "changing_words": word_offsets[:_MAX_REPORTED_WORDS],
+                    "changing_words_omitted": max(0, len(word_offsets) - _MAX_REPORTED_WORDS),
+                    "candidate_profiles": _profile_candidates(layout["samples"], profiles),
                 }
             )
         return {
@@ -245,8 +291,10 @@ class PrivateCapture:
             "limit": 256,
             "notice": (
                 "Contains packet structure and decode outcomes only. Block offsets show "
-                "activity and changes, not values. No packet bytes, serial numbers, "
-                "exact times or measurement values are included."
+                "activity and changes, not values. Changing two-byte locations "
+                "and candidate profile names are leads for review, not decoded "
+                "registers. No packet bytes, serial numbers, exact times or "
+                "measurement values are included."
             ),
             "records": records,
             "undecoded_layouts": unknown,
