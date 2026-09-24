@@ -26,6 +26,25 @@
       ]
     },
     {
+      "id": "verified-native-shine-20260924",
+      "model": "MIN 2500TL-XH and MIC 2000TL-X",
+      "firmware": "MIN 2500TL-XH: AL1.0; MIC 2000TL-X: GH1.0, from the existing installation readback",
+      "datalogger": "One owner-confirmed ShineWiFi-X per inverter; datalogger firmware unconfirmed",
+      "connection": "Shine datalogger TCP received inside DEV Home Assistant through a temporary transparent TCP relay",
+      "project": "HA Growatt 0.7.0 native receiver",
+      "level": "Verified installation",
+      "telemetry": "Both physical datalogger streams created inverter devices and fresh Home Assistant entities. Both remained connected and updated while Growatt cloud access was blocked. After the block was removed, each session reconnected to the cloud and received cloud replies.",
+      "controls": "No inverter write was exercised; no battery control was physically qualified.",
+      "profile": "The default Shine reading profile decoded both feeds without failed measurements.",
+      "limits": "Tested on 24 September 2026. The loggers still pointed at the production HA address; a temporary TCP relay passed their traffic to the DEV native receiver. This verifies the native receiver, fallback and cloud recovery with real traffic, but not the final logger-to-HA installation step or direct Modbus. The logger firmware remains unconfirmed.",
+      "sources": [
+        {
+          "label": "Native hardware test record",
+          "url": "https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/native-hardware-test-2026-09-24.md"
+        }
+      ]
+    },
+    {
       "id": "spa3000tl-bl",
       "model": "SPA3000TL BL",
       "firmware": "Not qualified here",
@@ -59,7 +78,7 @@
       "telemetry": "Model-specific register evidence; not a HA Growatt telemetry test.",
       "controls": "Reporter measured charging stopping at register 3048 target and discharge changing at register 3067 under Load Priority, on DN1.0. Changes took roughly two minutes. SPH registers 1071/1091 did not control this device.",
       "profile": "MOD/MID TL3-XH experimental controls, only after confirming the exact model and successful reads.",
-      "limits": "Direct Modbus results do not establish support through a Shine datalogger. HA Growatt's direct Modbus scanner is diagnostic only; its telemetry service uses Shine traffic. Raising the reported discharge threshold above current charge also caused charging on this firmware; do not assume it only stops discharge.",
+      "limits": "Direct Modbus results do not establish support through a Shine datalogger. HA Growatt has read-only direct TCP polling for selected profiles, but this MID model has not been tested with it. Raising the reported discharge threshold above current charge also caused charging on this firmware; do not assume it only stops discharge.",
       "sources": [
         {
           "label": "MID hardware measurements",

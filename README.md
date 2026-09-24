@@ -203,6 +203,14 @@ The installation used for physical telemetry checks has a **Growatt MIN
 Their saved inverter firmware readings are AL1.0 and GH1.0 respectively; logger
 firmware is unconfirmed. Both working feeds decode through the MOD layout.
 
+On 24 September 2026, both physical logger streams also produced live devices
+and readings in the native Home Assistant receiver. They kept updating during
+a controlled Growatt cloud outage and reconnected after cloud access returned.
+The loggers were routed to DEV through a temporary transparent TCP relay, so
+their final destination settings were not changed. See the
+[native hardware test](docs/native-hardware-test-2026-09-24.md) for the results
+and limits.
+
 The [hardware matrix](docs/hardware-matrix.md) distinguishes our physical
 checks, manufacturer documentation and results reported by other projects.
 Other model families have protocol coverage, but that is not a claim that we

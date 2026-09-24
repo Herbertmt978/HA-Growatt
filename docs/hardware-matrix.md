@@ -18,6 +18,7 @@ An unlisted model is unverified, not necessarily unsupported. Start with
 | Hardware | Evidence | Software or source project |
 | --- | --- | --- |
 | [MIN 2500TL-XH and MIC 2000TL-X](#verified-installation) | Verified installation | HA Growatt 0.3.2 |
+| [MIN 2500TL-XH and MIC 2000TL-X](#verified-native-shine-20260924) | Verified installation | HA Growatt 0.7.0 native receiver |
 | [SPA3000TL BL](#spa3000tl-bl) | Community report — mixed results | FezVrasta/growatt-datalogger, reports through 0.10.0 |
 | [MID 25KTL3-XH](#mid25ktl3-xh) | Community report — different connection | 0xAHA/Growatt_ModbusTCP, field reports on 1.3.0 through 1.5.1 |
 | [MIN TL-XH](#min-tl-xh) | Documented — hardware verification needed | Growatt protocol documentation; HA Growatt protocol tests |
@@ -57,6 +58,30 @@ An unlisted model is unverified, not necessarily unsupported. Start with
 
 - [HA Growatt compatibility checks](https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/compatibility.md)
 - [Verified 0.3.2 release](https://github.com/Herbertmt978/HA-Growatt/releases/tag/v0.3.2)
+
+<a id="verified-native-shine-20260924"></a>
+
+## MIN 2500TL-XH and MIC 2000TL-X
+
+**Evidence:** Verified installation
+
+**Software or source project:** HA Growatt 0.7.0 native receiver
+
+**Firmware:** MIN 2500TL-XH: AL1.0; MIC 2000TL-X: GH1.0, from the existing installation readback
+
+**Datalogger:** One owner-confirmed ShineWiFi-X per inverter; datalogger firmware unconfirmed
+
+**Connection:** Shine datalogger TCP received inside DEV Home Assistant through a temporary transparent TCP relay
+
+**Readings:** Both physical datalogger streams created inverter devices and fresh Home Assistant entities. Both remained connected and updated while Growatt cloud access was blocked. After the block was removed, each session reconnected to the cloud and received cloud replies.
+
+**Controls:** No inverter write was exercised; no battery control was physically qualified.
+
+**Profile guidance:** The default Shine reading profile decoded both feeds without failed measurements.
+
+**Limits:** Tested on 24 September 2026. The loggers still pointed at the production HA address; a temporary TCP relay passed their traffic to the DEV native receiver. This verifies the native receiver, fallback and cloud recovery with real traffic, but not the final logger-to-HA installation step or direct Modbus. The logger firmware remains unconfirmed.
+
+- [Native hardware test record](https://github.com/Herbertmt978/HA-Growatt/blob/main/docs/native-hardware-test-2026-09-24.md)
 
 <a id="spa3000tl-bl"></a>
 
@@ -103,7 +128,7 @@ An unlisted model is unverified, not necessarily unsupported. Start with
 
 **Profile guidance:** MOD/MID TL3-XH experimental controls, only after confirming the exact model and successful reads.
 
-**Limits:** Direct Modbus results do not establish support through a Shine datalogger. HA Growatt's direct Modbus scanner is diagnostic only; its telemetry service uses Shine traffic. Raising the reported discharge threshold above current charge also caused charging on this firmware; do not assume it only stops discharge.
+**Limits:** Direct Modbus results do not establish support through a Shine datalogger. HA Growatt has read-only direct TCP polling for selected profiles, but this MID model has not been tested with it. Raising the reported discharge threshold above current charge also caused charging on this firmware; do not assume it only stops discharge.
 
 - [MID hardware measurements](https://github.com/0xAHA/Growatt_ModbusTCP/issues/362)
 
