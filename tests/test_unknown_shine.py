@@ -2,10 +2,15 @@
 
 import asyncio
 import json
+from pathlib import Path
+
+import pytest
 
 from ha_growatt.native_receiver import NativeReceiver
-from ha_growatt.protocol import Frame
-from ha_growatt.telemetry import Telemetry
+from ha_growatt.protocol import Frame, ProtocolError
+from ha_growatt.registers import parse_register_report
+from ha_growatt.selection import FamilyDecoder, SelectionSettings
+from ha_growatt.telemetry import Decoder, Telemetry
 from ha_growatt.unknown_shine import MAX_FORMATS, UnknownShineFormats
 
 
@@ -53,8 +58,6 @@ def test_unknown_formats_are_bounded_even_with_many_shapes():
 
 
 def test_native_receiver_records_unknown_shapes_only_when_enabled():
-    from pathlib import Path
-
     fixture = json.loads((Path(__file__).parent / "fixtures/telemetry_cases.json").read_text())
     source = Frame.from_bytes(
         bytes.fromhex(
@@ -92,5 +95,39 @@ def test_native_receiver_records_unknown_shapes_only_when_enabled():
         assert receiver.failed_measurements == 1
         assert "bad/topic!" not in json.dumps(report)
         assert "INVERT0001" not in json.dumps(report)
+
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("profile", ["classic-6", "mod-6", "min-6"])
+def test_scalar_shine_fixtures_do_not_declare_unknown_register_addresses(profile):
+    cases = json.loads((Path(__file__).parent / "fixtures/telemetry_cases.json").read_text())
+    case = next(item for item in cases if item["profile"] == profile and not item["include_all"])
+    frame = Frame.from_bytes(bytes.fromhex(case["wire"]))
+    assert Decoder(profile).decode(frame).profile == profile
+    with pytest.raises(ProtocolError, match="no ranges"):
+        parse_register_report(frame)
+
+
+def test_unassigned_scalar_bytes_can_hold_private_text_in_an_otherwise_valid_reading():
+    cases = json.loads((Path(__file__).parent / "fixtures/telemetry_cases.json").read_text())
+    case = next(
+        item for item in cases if item["profile"] == "classic-6" and not item["include_all"]
+    )
+    source = Frame.from_bytes(bytes.fromhex(case["wire"]))
+    payload = bytearray(source.payload)
+    # These twelve bytes are outside every classic-6 numeric field. Their
+    # contents cannot be treated as an anonymous numerical measurement.
+    payload[159:171] = b"PRIVATEPASS1"
+    frame = Frame(source.transaction, source.protocol, source.unit, source.function, bytes(payload))
+    decoded = FamilyDecoder(SelectionSettings()).decode(frame)
+    assert decoded.profile == "classic-6" and decoded.decode_errors == 0
+
+    async def scenario():
+        receiver = NativeReceiver(unknown_diagnostics=True)
+        await receiver.observe("device", frame)
+        assert receiver.measurements == 1
+        assert receiver.unknown_formats.export()["total_frames"] == 0
+        assert "PRIVATEPASS1" not in json.dumps(receiver.unknown_formats.export())
 
     asyncio.run(scenario())

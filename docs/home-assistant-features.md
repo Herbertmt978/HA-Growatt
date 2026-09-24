@@ -44,6 +44,14 @@ shareable `capture_evidence` report for a fuller investigation; neither view
 can decode session-key encrypted traffic. The same bounded summary is included
 in the integration's diagnostic download while the option is enabled.
 
+The current MIC and MIN Shine layouts decode measurements from fixed byte
+offsets; they do not establish an address for every unassigned byte. Those
+bytes can contain text or other private data even when the known fields decode
+correctly. For this reason the integration does not expose an unassigned byte
+as an unnamed numerical sensor. The structured register parser applies only
+when a packet actually declares valid register ranges. A new model needs
+reviewed protocol evidence before additional readings can be named and shown.
+
 The native Shine route offers optional raw MQTT, PVOutput, InfluxDB 1 or 2 and
 HTTP delivery. These outputs run in separate bounded queues and skip buffered
 records. Configure them under **HA Growatt → Configure → Optional output
