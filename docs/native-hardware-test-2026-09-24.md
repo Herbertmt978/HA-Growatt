@@ -32,4 +32,6 @@ the outage.
 Production's HA Growatt app was restarted, and its support page again showed
 both dataloggers on cloud connections with recent uploads. The relay was
 stopped and its original destination restored. This was a receiver and
-forwarding qualification, not a direct Modbus or battery-control test.
+forwarding qualification, not a direct Modbus or battery-control test. Neither
+logger accepted a TCP connection on the usual Modbus port 502, so
+this installation still has no confirmed direct Modbus endpoint.
