@@ -367,6 +367,25 @@ uv run --locked pytest -q
 uv run --locked python -m build --no-isolation
 ~~~
 
+### Dependency updates
+
+Dependabot opens monthly update pull requests for Ruff and pytest only. An
+individual stable patch or minor update to either package can be queued for
+automatic merging only when the pull request changes `pyproject.toml` and
+`uv.lock` without other files.
+The workflow only queues the merge; it does not approve reviews or bypass
+protection. Before queueing, an active change-requesting review keeps the pull
+request manual until that reviewer approves or dismisses it. The workflow does
+not monitor reviews submitted after auto-merge is queued; GitHub still waits
+for every required test, HACS and Home Assistant check, and required review
+conversations to be resolved. Major and prerelease updates, groups, packaging
+and build tools (including setuptools), Jinja templates, runtime dependencies,
+and all other changes stay manual.
+
+Merging a dependency update does not create a release, publish an artefact,
+deploy the app or integration, or change an installed Home Assistant system.
+Those steps remain separate and manual.
+
 Run the Python checks on 3.12, 3.13 and 3.14. Packaging changes also require
 container checks on amd64, arm64, arm/v7 and 386. A release requires native
 Home Assistant migration and restart checks, then fresh readings from both
