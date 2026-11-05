@@ -126,7 +126,9 @@ class RelaySession:
     cloud_sequences: set[int] = field(default_factory=set)
     translations: dict[int, int] = field(default_factory=dict)
     next_sequence: int = 65535
-    last_command: float = 0
+    # No command sent yet. The loop clock can read below 30 seconds soon after
+    # the host starts, so zero would hold off cloud recovery.
+    last_command: float = -math.inf
     clock_needed: bool = False
     heartbeat: Frame | None = None
     audit: WriteAudit = field(default_factory=WriteAudit)
