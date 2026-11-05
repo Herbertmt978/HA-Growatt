@@ -28,7 +28,7 @@ dev = [
     "jinja2==3.1.6",
     "pytest==9.2.0",
     "ruff==0.17.3",
-    "setuptools==83.0.0",
+    "setuptools==84.2.1",
 ]
 
 [project.scripts]
