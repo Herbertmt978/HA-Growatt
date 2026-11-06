@@ -7,9 +7,26 @@ from ha_growatt.protocol import Frame, read_frame
 from ha_growatt.relay import Relay, RelaySettings
 
 
+def loop_soon_after_host_start():
+    # Read the clock as if the host started a second ago. The loop clock is
+    # monotonic time, which counts from host start on Linux.
+    loop = asyncio.new_event_loop()
+    clock = loop.time
+    offset = clock() - 1
+    loop.time = lambda: clock() - offset
+    return loop
+
+
+@pytest.mark.parametrize(
+    "loop_factory",
+    [asyncio.new_event_loop, loop_soon_after_host_start],
+    ids=["host-running", "host-just-started"],
+)
 @pytest.mark.parametrize("protocol", [2, 5, 6])
 @pytest.mark.parametrize("cloud_reply", ["echo", "identification"])
-def test_recovery_requires_heartbeat_then_reconnects_without_duplicate_ack(protocol, cloud_reply):
+def test_recovery_requires_heartbeat_then_reconnects_without_duplicate_ack(
+    protocol, cloud_reply, loop_factory
+):
     async def scenario():
         async with cloud() as (port, clients):
             settings = RelaySettings(
@@ -60,7 +77,7 @@ def test_recovery_requires_heartbeat_then_reconnects_without_duplicate_ack(proto
                 writer.close()
                 await writer.wait_closed()
 
-    asyncio.run(scenario())
+    asyncio.run(scenario(), loop_factory=loop_factory)
 
 
 @pytest.mark.parametrize(
